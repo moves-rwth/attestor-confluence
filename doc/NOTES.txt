@@ -17,7 +17,40 @@
 - Work on table of contents:
 
 
+# General Information:
+
+
 # Table of Contents:
+- Abstract
 
+- Introduction
+  - context free HRGs
+    - terminating grammars
+  - double pushout approach (neccessary to explain?)
+  - convolution
+    - critical pairs
 
+- Related Work
+  - Term Rewrite Systems
+  - Double Pushout Grammars
+    - Undecidability in general case
+      - Proof cannot be applied to our case
+    - Coverable systems
+
+- Decide Confluence for HRGs
+  - General Idea
+  - Correctness Proof
+  - Implementation
+  - Evaluation
+    - How fast is the algorithm
+
+- Completion algorithm for HRGs
+  - General Idea
+     - Different approaches: Keep language the same / extend language
+  - Implementation
+  - Evaluation
+    - How many grammars can the algorithm make confluent
+    - How fast is the algorithm
+
+- Conclusion
 
