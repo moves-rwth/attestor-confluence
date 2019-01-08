@@ -1,0 +1,23 @@
+
+# TODO:
+
+## THEORETICAL RESEARCH:
+
+- Rewrite definitions of confluence paper to better fit our HRGs
+
+- Find out if proof of undecidability can be applied for our HRGs
+- Find out if counterexample (why simple joinability of critical pairs is not enough) can be modified to fit our HRGs
+
+## PROGRAMMING:
+
+- Implement critical pair generation algorithm
+
+## THESIS WRITING:
+
+- Work on table of contents:
+
+
+# Table of Contents:
+
+
+
