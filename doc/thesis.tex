@@ -1,0 +1,57 @@
+\title{Completion of Backwards Confluence in Context-Free Hyperedge Replacement Grammars}
+\author{Johannes Schulte}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+%TODO
+In general hypergraph transformation systems confluence and backwards confluence is not decidable. This thesis explores if it is possible to decide backwards confluence for context free hyperedge replacement grammars (HRG).
+Additionally it shows heuristics to complete HRGs by adding additional rules that lead to a backwards confluent HRG.
+\end{abstract}
+
+\section{Definitions reformulated for context free HRGs}
+\begin{definition}[Track morphism]
+%TODO
+\end{definition}
+
+\begin{definition}[Independence]
+Two direct abstractions $H \Rightarrow_{e, X \rightarrow K} G \Leftarrow_{e', X' \rightarrow K'} H' $ are independent if the two embeddings $emb$ and $emb'$ corresponding to these abstractions fulfill the following condition:
+$$emb_V(K) \cap emb'_V(K') = \emptyset$$
+This means the internal nodes of K and K' embedded into G are disjoint.
+
+In this case both abstractions can be applied one after another and still lead to the same hypergraph regardless of the order in which the abstractions are applied.
+\end{definition}
+
+\begin{definition}[Backward Confluence of $G \in HRG_{\Sigma_N}$]
+A HRG $G$ is backward confluent (locally backward confluent) if for all $G, G_1, G_2 \in HG_\Sigma$, $G_1 \Rightarrow^* G \Leftarrow^* G_2$ ($G_1 \Rightarrow G \Leftarrow G_2$) implies that there are $H_1, H_2 \in HG_\Sigma$ such that $G_1 \Leftarrow^*H_1 \cong H_2 \Rightarrow^* G_2$.
+\end{definition}
+
+\begin{definition}[Critical Pair]
+
+\end{definition}
+
+\section{Important theorems}
+
+\begin{theorem}[Church-Rosser Theorem]
+%TODO
+\end{theorem}
+
+\begin{lemma}[Newman's Lemma]
+A terminating rewriting system is confluent if it is locally confluent.
+\end{lemma}
+
+
+\end{document}
