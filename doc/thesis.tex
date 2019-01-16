@@ -1,38 +1,40 @@
-\title{Completion of Backwards Confluence in Context-Free Hyperedge Replacement Grammars}
+\title{Backwards Confluence of Context-Free Hyperedge Replacement Grammars}
 \author{Johannes Schulte}
 \date{\today}
 
 \documentclass[12pt]{article}
 
 \usepackage{amsthm}
+\usepackage{todonotes}
 
-\newtheorem{theorem}{Theorem}
-
+\setlength{\marginparwidth}{3.5cm}
 \theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
-
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-%TODO
-In general hypergraph transformation systems confluence and backwards confluence is not decidable. This thesis explores if it is possible to decide backwards confluence for context free hyperedge replacement grammars (HRG).
+In general hypergraph transformation systems confluence and backwards confluence is not decidable. This thesis explores if it is possible to decide backwards confluence for \emph{context-free} hyperedge replacement grammars (HRGs).
 Additionally it shows heuristics to complete HRGs by adding additional rules that lead to a backwards confluent HRG.
 \end{abstract}
 
-\section{Definitions reformulated for context free HRGs}
-\begin{definition}[Track morphism]
-%TODO
-\end{definition}
+\section{Current TODO List}
+\begin{itemize}
+\item Find out why strong joinability implies local confluence (Plu05)
+\item Find out if counterexample (why simple joinability of critical pairs is not enough) can be modified to fit our HRGs
+\item Implement critical pair generation algorithm
+\end{itemize}
 
+\section{Definitions reformulated for context free HRGs}
 \begin{definition}[Independence]
 Two direct abstractions $H \Rightarrow_{e, X \rightarrow K} G \Leftarrow_{e', X' \rightarrow K'} H' $ are independent if the two embeddings $emb$ and $emb'$ corresponding to these abstractions fulfill the following condition:
 $$emb_V(K) \cap emb'_V(K') = \emptyset$$
 This means the internal nodes of K and K' embedded into G are disjoint.
 
-In this case both abstractions can be applied one after another and still lead to the same hypergraph regardless of the order in which the abstractions are applied.
+In this case both abstractions can be applied one after another and still lead to the same hypergraph regardless of the order in which the abstractions are applied. \todo{Note that all our rules are injective.}
 \end{definition}
 
 \begin{definition}[Backward Confluence of $G \in HRG_{\Sigma_N}$]
@@ -40,13 +42,23 @@ A HRG $G$ is backward confluent (locally backward confluent) if for all $G, G_1,
 \end{definition}
 
 \begin{definition}[Critical Pair]
+Two direct abstractions $U \Rightarrow_{e, X \rightarrow K} S \Leftarrow_{e', X' \rightarrow K'} U'$ is a critical pair if given the embeddings $emb$ and $emb'$ of the abstractions the following holds:
+\begin{itemize}
+\item $V_S = emb_V(V_K) \cup emb'_V(V_{K'})$
+\item The steps are not independent.
+\end{itemize}
+\end{definition}
 
+\begin{definition}[Joinability]
+A critical pair $\Gamma: U \Rightarrow S \Leftarrow U'$ is joinable if there are abstractions $U \Leftarrow^* X$ and $U' \Leftarrow^* X'$ such that $X \cong X'$.
+$\Gamma$ is \emph{strongly joinable} if there is 
 \end{definition}
 
 \section{Important theorems}
 
 \begin{theorem}[Church-Rosser Theorem]
-%TODO
+\todo{Not sure if this is really what this theorem is about}
+Typed variants of the lambda calculus are confluent.
 \end{theorem}
 
 \begin{lemma}[Newman's Lemma]

@@ -1,24 +1,3 @@
-
-# TODO:
-
-## THEORETICAL RESEARCH:
-
-- Rewrite definitions of confluence paper to better fit our HRGs
-
-- Find out if proof of undecidability can be applied for our HRGs
-  - Idea: Use a large set of non terminals (powerset of PCP Alphabet with bounded length)
-
-- Find out if counterexample (why simple joinability of critical pairs is not enough) can be modified to fit our HRGs
-
-## PROGRAMMING:
-
-- Implement critical pair generation algorithm
-
-## THESIS WRITING:
-
-- Work on table of contents:
-
-
 # General Information / Results:
 
 - Can we modify the undecidability proof for HRGs?
