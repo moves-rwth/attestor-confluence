@@ -84,6 +84,9 @@ public class CriticalPairs {
             l2Nodes.add(l2TNodes.get(i));
         }
 
+        Set<Set<Pair<Integer, Integer>>> alreadyChecked
+
+
         // Iterate over all possible sets of nodes that are shared between the right hand sides of the rules
         // Note: The
         for (Set<Integer> sharedNodes: Sets.powerSet(l2Nodes)) { // TODO: Optimization by not considering all supersets of non joinable node sets
