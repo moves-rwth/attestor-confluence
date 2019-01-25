@@ -5,6 +5,12 @@ import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
+import de.rwth.i2.attestor.graph.heap.matching.EmbeddingChecker;
+import de.rwth.i2.attestor.graph.morphism.Morphism;
+import de.rwth.i2.attestor.phases.counterexamples.counterexampleGeneration.heapConfigurationPair.HeapConfigurationPairBuilder;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
@@ -80,18 +86,18 @@ public class CriticalPairs {
 
         // Iterate over all possible sets of nodes that are shared between the right hand sides of the rules
         // Note: The
-        for (Set<Integer> sharedNodes: Sets.powerSet(l2Nodes)) {
+        for (Set<Integer> sharedNodes: Sets.powerSet(l2Nodes)) { // TODO: Optimization by not considering all supersets of non joinable node sets
             // The right hand sides must share at least one node -> Ignore empty set
             if (!sharedNodes.isEmpty()) {
                 // Create induced subgraph l2[sharedNodes]
-                HeapConfigurationBuilder s = new HeapConfigurationBuilder();
-                for (Integer node : sharedNodes) {
-                    // TODO: Add nodes / edges
-                }
+                SubgraphHeapConfiguration intersectionHC = new SubgraphHeapConfiguration(l2, sharedNodes);
 
+                AbstractMatchingChecker embeddings  = new EmbeddingChecker(intersectionHC, l1);
+                embeddings.
                 // TODO: Get all possible embeddings of shared l2 subgraph into l1
                 for () {
                     // TODO: For each embedding create graph s
+                    EmbeddingChecker
                 }
             }
         }
