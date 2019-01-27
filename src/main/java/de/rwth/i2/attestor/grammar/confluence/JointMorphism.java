@@ -9,6 +9,7 @@ import java.util.*;
 
 public class JointMorphism {
     private final Set<Pair<Integer, Integer>> nodeEquivalence;
+    // TODO: This class can be further optimized by removing hc1RemainingNodes, which is not necessary
     private final TreeSet<Integer> hc1RemainingNodes, hc2RemainingNodes;
     private final Pair<Integer, Integer> lastAddedNodeEquivalence;
     private final Map<Integer, Integer> mapHc1toHc2Node, mapHc2toHc1Node;
