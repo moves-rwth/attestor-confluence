@@ -73,38 +73,32 @@ public class CriticalPairs {
      * @param r2 The second rule
      */
     private void addCriticalPairsForRule(Pair<Nonterminal, HeapConfiguration> r1,
-                                      Pair<Nonterminal, HeapConfiguration> r2) {
-        HeapConfiguration l1 = r1.second();
-        HeapConfiguration l2 = r2.second();
+                                         Pair<Nonterminal, HeapConfiguration> r2) {
+        HeapConfiguration hc1 = r1.second();
+        HeapConfiguration hc2 = r2.second();
 
-        // Convert list of nodes of l2 from TIntArrayList to Set<Integer> to make power set calculation easier.
-        TIntArrayList l2TNodes = l2.nodes();
-        Set<Integer> l2Nodes = new HashSet<>();
-        for (int i = 0; i < l2TNodes.size(); i++) {
-            l2Nodes.add(l2TNodes.get(i));
-        }
+        Queue<JointMorphism> remainingJointMorphisms = new ArrayDeque<>();
+        // Initialize with all joint morphisms that share exactly one node between hc1 and hc2
+        remainingJointMorphisms.addAll(new JointMorphism(hc1, hc2).getFollowingJointMorphisms());
+        while (!remainingJointMorphisms.isEmpty()) {
+            JointMorphism currentJointMorphism = remainingJointMorphisms.remove();
+            if (isJointMorphismCompatibile(hc1, hc2, currentJointMorphism)) {
 
-        Set<Set<Pair<Integer, Integer>>> alreadyChecked
-
-
-        // Iterate over all possible sets of nodes that are shared between the right hand sides of the rules
-        // Note: The
-        for (Set<Integer> sharedNodes: Sets.powerSet(l2Nodes)) { // TODO: Optimization by not considering all supersets of non joinable node sets
-            // The right hand sides must share at least one node -> Ignore empty set
-            if (!sharedNodes.isEmpty()) {
-                // Create induced subgraph l2[sharedNodes]
-                SubgraphHeapConfiguration intersectionHC = new SubgraphHeapConfiguration(l2, sharedNodes);
-
-                AbstractMatchingChecker embeddings  = new EmbeddingChecker(intersectionHC, l1);
-                embeddings.
-                // TODO: Get all possible embeddings of shared l2 subgraph into l1
-                for () {
-                    // TODO: For each embedding create graph s
-                    EmbeddingChecker
-                }
             }
         }
 
+    }
+    enum JointMorphismCompatibility {
+        COMPATIBLE, INCOMPATIBLE, NOT_COMPATIBLE_YET;
+    }
+    private static  isJointMorphismCompatibile(HeapConfiguration hc1, HeapConfiguration hc2,
+                                                      JointMorphism jMorph) {
+        // TODO
+
+        // 1. Check that node types are compatible
+
+        // 2. Check that
+        return false;
     }
 
 }

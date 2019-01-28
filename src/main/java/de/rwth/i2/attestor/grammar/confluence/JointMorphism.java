@@ -7,6 +7,12 @@ import org.omg.CORBA.INTERNAL;
 
 import java.util.*;
 
+/**
+ * A joint-morphism is a morphism from two HCs hc1 and hc2 to an image hc H.
+ * It can be directly classified by the nodes of hc1 and hc2 which map to the same node in H. These nodes can be
+ * understood as node equivalences. Every joint-morphism therefore corresponds to a specific subset of the product of
+ * the node sets of hc1 and hc2.
+ */
 public class JointMorphism {
     private final Set<Pair<Integer, Integer>> nodeEquivalence;
     // TODO: This class can be further optimized by removing hc1RemainingNodes, which is not necessary
@@ -84,7 +90,9 @@ public class JointMorphism {
     }
 
     /**
-     * Returns the joint morphisms that contains only a single node equivalence more and who are
+     * Returns the joint morphisms that contains only a single node equivalence more.
+     * Furthermore the added node equivalence has to come after the 'lastAddedNodeEquivalence' from this object
+     * according to the canonical ordering of node equivalences.
      */
     public Collection<JointMorphism> getFollowingJointMorphisms() {
         Pair<Integer, Integer> nextNodeEquivalence;
