@@ -82,23 +82,20 @@ public class CriticalPairs {
         remainingJointMorphisms.addAll(new JointMorphism(hc1, hc2).getFollowingJointMorphisms());
         while (!remainingJointMorphisms.isEmpty()) {
             JointMorphism currentJointMorphism = remainingJointMorphisms.remove();
-            if (isJointMorphismCompatibile(hc1, hc2, currentJointMorphism)) {
-
+            switch (currentJointMorphism.isJointMorphismCompatibile(hc1, hc2)) {
+                case COMPATIBLE:
+                    criticalPairs.add(new CriticalPair(r1.first(), hc1,
+                            r2.first(), hc2, currentJointMorphism));
+                case NOT_COMPATIBLE_YET:  // Note: Also applies to case "COMPATIBLE" NO BREAK!!!
+                    // Add following joint morphisms
+                    remainingJointMorphisms.addAll(currentJointMorphism.getFollowingJointMorphisms());
+                    break;
+                case INCOMPATIBLE:
+                    // Do nothing
+                    break;
             }
         }
 
-    }
-    enum JointMorphismCompatibility {
-        COMPATIBLE, INCOMPATIBLE, NOT_COMPATIBLE_YET;
-    }
-    private static  isJointMorphismCompatibile(HeapConfiguration hc1, HeapConfiguration hc2,
-                                                      JointMorphism jMorph) {
-        // TODO
-
-        // 1. Check that node types are compatible
-
-        // 2. Check that
-        return false;
     }
 
 }

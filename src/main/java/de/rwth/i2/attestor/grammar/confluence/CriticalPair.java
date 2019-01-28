@@ -3,13 +3,21 @@ package de.rwth.i2.attestor.grammar.confluence;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.Morphism;
+import org.jboss.util.Heap;
 
 public class CriticalPair {
-    HeapConfiguration commonRhs;
-    HeapConfiguration abstraction1;
-    HeapConfiguration abstraction2;
-    Morphism morphism1;
-    Morphism morphism2;
-    // TODO: Should we also explicitly store which two rules the critical pair is based on?
+    final Nonterminal nt1;
+    final HeapConfiguration hc1;
+    final Nonterminal nt2;
+    final HeapConfiguration hc2;
+    final JointMorphism jointMorphism;
 
+    public CriticalPair(Nonterminal nt1, HeapConfiguration hc1, Nonterminal nt2, HeapConfiguration hc2,
+                        JointMorphism morph) {
+        this.nt1 = nt1;
+        this.nt2 = nt2;
+        this.hc1 = hc1;
+        this.hc2 = hc2;
+        this.jointMorphism = morph;
+    }
 }

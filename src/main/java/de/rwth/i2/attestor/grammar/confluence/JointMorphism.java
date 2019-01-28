@@ -1,6 +1,9 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
+import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.types.Type;
+import de.rwth.i2.attestor.types.Types;
 import de.rwth.i2.attestor.util.Pair;
 import org.jboss.util.Heap;
 import org.omg.CORBA.INTERNAL;
@@ -14,17 +17,17 @@ import java.util.*;
  * the node sets of hc1 and hc2.
  */
 public class JointMorphism {
-    private final Set<Pair<Integer, Integer>> nodeEquivalence;
     // TODO: This class can be further optimized by removing hc1RemainingNodes, which is not necessary
     private final TreeSet<Integer> hc1RemainingNodes, hc2RemainingNodes;
     private final Pair<Integer, Integer> lastAddedNodeEquivalence;
     private final Map<Integer, Integer> mapHc1toHc2Node, mapHc2toHc1Node;
+    // The following variables might be needed in order to check if
+    private final Set<Integer> criticalNonTerminalEdgesHc1, criticalNonTerminalEdgesHc2;
 
     /**
      * Initializes JointMorphism where all nodes are disjoint
      */
     public JointMorphism(HeapConfiguration hc1, HeapConfiguration hc2) {
-        nodeEquivalence = new HashSet<>();
         hc1RemainingNodes = new TreeSet<>();
         hc1.nodes().forEach(node -> {
             hc1RemainingNodes.add(node);
@@ -41,7 +44,6 @@ public class JointMorphism {
     }
 
     private JointMorphism(JointMorphism oldJointMorphism) {
-        nodeEquivalence = new HashSet<>(oldJointMorphism.nodeEquivalence);
         hc1RemainingNodes = new TreeSet<>(oldJointMorphism.hc1RemainingNodes);
         hc2RemainingNodes = new TreeSet<>(oldJointMorphism.hc2RemainingNodes);
         lastAddedNodeEquivalence = oldJointMorphism.lastAddedNodeEquivalence;
@@ -50,13 +52,11 @@ public class JointMorphism {
     }
 
     private JointMorphism(JointMorphism oldJointMorphism, Pair<Integer, Integer> newNodeEquivalence) {
-        nodeEquivalence = new HashSet<>(oldJointMorphism.nodeEquivalence);
         hc1RemainingNodes = new TreeSet<>(oldJointMorphism.hc1RemainingNodes);
         hc1RemainingNodes.remove(newNodeEquivalence.first());
         hc2RemainingNodes = new TreeSet<>(oldJointMorphism.hc2RemainingNodes);
         hc2RemainingNodes.remove(newNodeEquivalence.second());
         lastAddedNodeEquivalence = newNodeEquivalence;
-        nodeEquivalence.add(lastAddedNodeEquivalence);
         mapHc1toHc2Node =  new HashMap<>(oldJointMorphism.mapHc1toHc2Node);
         mapHc1toHc2Node.put(newNodeEquivalence.first(), newNodeEquivalence.second());
         mapHc2toHc1Node =  new HashMap<>(oldJointMorphism.mapHc2toHc1Node);
@@ -110,5 +110,42 @@ public class JointMorphism {
             nextNodeEquivalence = getNextEquivalence(nextNodeEquivalence);
         }
         return result;
+    }
+
+    public JointMorphismCompatibility isJointMorphismCompatibile(HeapConfiguration hc1, HeapConfiguration hc2) {
+        final int lastAddedNode1  = lastAddedNodeEquivalence.first();
+        final int lastAddedNode2  = lastAddedNodeEquivalence.second();
+
+        // 1. Check that node types are compatible
+        Type typeNode1 = hc1.nodeTypeOf(lastAddedNode1);
+        Type typeNode2 = hc2.nodeTypeOf(lastAddedNode2);
+        if (!typeNode1.matches(typeNode2)) {
+            // TODO: Check if the usage of "matches" is correct here or if we should use "equals"
+            // The nodes types do not match --> Incompatible morphism
+            return JointMorphismCompatibility.INCOMPATIBLE;
+        }
+
+        // TODO 2. Check that attached non terminal edges are compatible
+        hc1.attachedNonterminalEdgesOf(lastAddedNode1);
+        hc2.attachedNonterminalEdgesOf(lastAddedNode2);
+
+        // TODO 3. Check that variables edges are compatible
+        hc1.attachedVariablesOf(lastAddedNode1);
+        hc2.attachedVariablesOf(lastAddedNode2);
+
+        // TODO 4. Check that selector edges are compatible
+        hc1.selectorLabelsOf(lastAddedNode1).forEach(sel1 -> {
+
+            return true;
+        });
+
+        hc2.selectorLabelsOf(lastAddedNode2);
+
+        return JointMorphismCompatibility.INCOMPATIBLE;
+    }
+
+    enum JointMorphismCompatibility {
+        COMPATIBLE, INCOMPATIBLE, NOT_COMPATIBLE_YET;
+
     }
 }
