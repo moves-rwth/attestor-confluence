@@ -28,13 +28,13 @@ Additionally it shows heuristics to complete HRGs by adding additional rules tha
 \item Implement critical pair generation algorithm
 \end{itemize}
 
-\section{Definitions reformulated for context free HRGs}
+\section{Definitions reformulated for HRGs}
 \begin{definition}[Independence]
 Two direct abstractions $H \Rightarrow_{e, X \rightarrow K} G \Leftarrow_{e', X' \rightarrow K'} H' $ are independent if the two embeddings $emb$ and $emb'$ corresponding to these abstractions fulfill the following condition:
 $$(emb_V(K) \cap emb'_V(K')) \setminus (ext \cap ext') = \emptyset$$
 This means the internal nodes of K and K' embedded into G are disjoint.
 
-In this case both abstractions can be applied one after another and still lead to the same hypergraph regardless of the order in which the abstractions are applied. \todo{Note that all our rules are injective.}
+In this case both abstractions can be applied one after another and still lead to the same hypergraph regardless of the order in which the abstractions are applied. \todo{Is this even correct for non injective rules? (External nodes mapping to same node)}
 \end{definition}
 
 \begin{definition}[Backward Confluence of $G \in HRG_{\Sigma_N}$]
@@ -51,7 +51,7 @@ Two direct abstractions $U \Rightarrow_{e, X \rightarrow K} S \Leftarrow_{e', X'
 
 \begin{definition}[Joinability]
 A critical pair $\Gamma: U \Rightarrow S \Leftarrow U'$ is \emph{joinable} if there are abstractions $U \Leftarrow^* X$ and $U' \Leftarrow^* X'$ such that $X \cong X'$. \\
-$\Gamma$ is \emph{strongly joinable} if such abstractions still exist if we declare the persistent vertices as external in S. The persistent vertices are $(ext \cup ext') \setminus ((int \cap ext') \cup (int' \cap ext))$.
+$\Gamma$ is \emph{strongly joinable} if such abstractions still exist if we declare the persistent vertices as external in S. The persistent vertices are $(ext \setminus int') \cup (ext' \setminus int)$.
 \end{definition}
 
 \section{Important theorems}

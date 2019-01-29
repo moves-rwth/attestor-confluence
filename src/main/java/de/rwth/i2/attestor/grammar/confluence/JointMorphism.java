@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.types.Types;
 import de.rwth.i2.attestor.util.Pair;
+import gnu.trove.list.array.TIntArrayList;
 import org.jboss.util.Heap;
 import org.omg.CORBA.INTERNAL;
 
@@ -112,7 +113,7 @@ public class JointMorphism {
         return result;
     }
 
-    public JointMorphismCompatibility isJointMorphismCompatibile(HeapConfiguration hc1, HeapConfiguration hc2) {
+    public JointMorphismCompatibility isJointMorphismCompatible(HeapConfiguration hc1, HeapConfiguration hc2) {
         final int lastAddedNode1  = lastAddedNodeEquivalence.first();
         final int lastAddedNode2  = lastAddedNodeEquivalence.second();
 
@@ -126,22 +127,29 @@ public class JointMorphism {
         }
 
         // TODO 2. Check that attached non terminal edges are compatible
-        hc1.attachedNonterminalEdgesOf(lastAddedNode1);
-        hc2.attachedNonterminalEdgesOf(lastAddedNode2);
-
-        // TODO 3. Check that variables edges are compatible
-        hc1.attachedVariablesOf(lastAddedNode1);
-        hc2.attachedVariablesOf(lastAddedNode2);
+        hc1.attachedNonterminalEdgesOf(lastAddedNode1).forEach(edge -> {
+            // Check if attached nodes match
+            hc1.
+        });
 
         // TODO 4. Check that selector edges are compatible
         hc1.selectorLabelsOf(lastAddedNode1).forEach(sel1 -> {
 
-            return true;
+
         });
 
         hc2.selectorLabelsOf(lastAddedNode2);
 
         return JointMorphismCompatibility.INCOMPATIBLE;
+    }
+
+    public JointMorphismCompatibility isHc1EdgeCompatible(HeapConfiguration hc1, HeapConfiguration hc2, int hc1Edge) {
+        TIntArrayList hc1Attached = hc1.attachedNodesOf(hc1Edge);
+        hc2.
+    }
+
+    public JointMorphismCompatibility isHc2EdgeCompatible(HeapConfiguration hc1, HeapConfiguration hc2, int edge) {
+        Type typeNode1
     }
 
     enum JointMorphismCompatibility {

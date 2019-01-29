@@ -1,19 +1,9 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import com.google.common.collect.Sets;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
-import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
-import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
-import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
-import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
-import de.rwth.i2.attestor.graph.heap.matching.EmbeddingChecker;
-import de.rwth.i2.attestor.graph.morphism.Morphism;
-import de.rwth.i2.attestor.phases.counterexamples.counterexampleGeneration.heapConfigurationPair.HeapConfigurationPairBuilder;
 import de.rwth.i2.attestor.util.Pair;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.*;
 
@@ -82,7 +72,7 @@ public class CriticalPairs {
         remainingJointMorphisms.addAll(new JointMorphism(hc1, hc2).getFollowingJointMorphisms());
         while (!remainingJointMorphisms.isEmpty()) {
             JointMorphism currentJointMorphism = remainingJointMorphisms.remove();
-            switch (currentJointMorphism.isJointMorphismCompatibile(hc1, hc2)) {
+            switch (currentJointMorphism.isJointMorphismCompatible(hc1, hc2)) {
                 case COMPATIBLE:
                     criticalPairs.add(new CriticalPair(r1.first(), hc1,
                             r2.first(), hc2, currentJointMorphism));
