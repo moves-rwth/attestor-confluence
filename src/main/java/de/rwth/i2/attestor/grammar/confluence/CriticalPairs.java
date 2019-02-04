@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
+import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.confluence.JointMorphism.JointMorphism;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
@@ -35,9 +37,9 @@ public class CriticalPairs {
         // Add critical pairs for all combinations of rules
 
         // 1. Create a list with all *individual* grammar rules
-        List<Pair<Nonterminal, HeapConfiguration>> individualGrammarRules = new ArrayList<>();
+        List<Pair<Nonterminal, CollapsedHeapConfiguration>> individualGrammarRules = new ArrayList<>();
         for (Nonterminal nonterminal : this.underlyingGrammar.getAllLeftHandSides()) {
-            for (HeapConfiguration heapConfiguration : this.underlyingGrammar.getRightHandSidesFor(nonterminal)) {
+            for (CollapsedHeapConfiguration heapConfiguration : this.underlyingGrammar.getCollapsedRightHandSidesFor(nonterminal)) {
                 individualGrammarRules.add(new Pair<>(nonterminal, heapConfiguration));
             }
         }
@@ -45,9 +47,9 @@ public class CriticalPairs {
         // 2. Iterate over all pairs of individual grammar rules and add the critical pairs for each pair
         for (int i = 0; i < individualGrammarRules.size(); i++) {
             for (int j = i; j < individualGrammarRules.size(); j++) {
-                Pair<Nonterminal, HeapConfiguration> r1 = individualGrammarRules.get(i);
-                Pair<Nonterminal, HeapConfiguration> r2 = individualGrammarRules.get(j);
-                addCriticalPairsForRule(r1, r2);
+                Pair<Nonterminal, CollapsedHeapConfiguration> r1 = individualGrammarRules.get(i);
+                Pair<Nonterminal, CollapsedHeapConfiguration> r2 = individualGrammarRules.get(j);
+                addCriticalPairsForCollapsedRule(r1, r2);
             }
         }
     }
@@ -62,29 +64,12 @@ public class CriticalPairs {
      * @param r1 The first rule
      * @param r2 The second rule
      */
-    private void addCriticalPairsForRule(Pair<Nonterminal, HeapConfiguration> r1,
-                                         Pair<Nonterminal, HeapConfiguration> r2) {
-        HeapConfiguration hc1 = r1.second();
-        HeapConfiguration hc2 = r2.second();
+    private void addCriticalPairsForCollapsedRule(Pair<Nonterminal, CollapsedHeapConfiguration> r1,
+                                         Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
+        HeapConfiguration hc1 = r1.second().getCollapsed();
+        HeapConfiguration hc2 = r2.second().getCollapsed();
+        // TODO
 
-        Queue<JointMorphism> remainingJointMorphisms = new ArrayDeque<>();
-        // Initialize with all joint morphisms that share exactly one node between hc1 and hc2
-        remainingJointMorphisms.addAll(new JointMorphism(hc1, hc2).getFollowingJointMorphisms());
-        while (!remainingJointMorphisms.isEmpty()) {
-            JointMorphism currentJointMorphism = remainingJointMorphisms.remove();
-            switch (currentJointMorphism.isJointMorphismCompatible(hc1, hc2)) {
-                case COMPATIBLE:
-                    criticalPairs.add(new CriticalPair(r1.first(), hc1,
-                            r2.first(), hc2, currentJointMorphism));
-                case NOT_COMPATIBLE_YET:  // Note: Also applies to case "COMPATIBLE" NO BREAK!!!
-                    // Add following joint morphisms
-                    remainingJointMorphisms.addAll(currentJointMorphism.getFollowingJointMorphisms());
-                    break;
-                case INCOMPATIBLE:
-                    // Do nothing
-                    break;
-            }
-        }
 
     }
 
