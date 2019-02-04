@@ -2,9 +2,11 @@ package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.confluence.JointMorphism.JointMorphism;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointMorphism;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
+import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
@@ -68,7 +70,15 @@ public class CriticalPairs {
                                          Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
         HeapConfiguration hc1 = r1.second().getCollapsed();
         HeapConfiguration hc2 = r2.second().getCollapsed();
+        if (!(hc1 instanceof Graph) || !(hc2 instanceof  Graph)) {
+            throw new IllegalArgumentException("Right side of rule is not of type 'Graph'");
+        }
         // TODO
+        Graph hc1Graph = (Graph) hc1;
+        InternalHeapConfiguration temp;
+        temp.toString();
+
+        for (JointMorphism edgeMorphism : hc1Graph.)
 
 
     }

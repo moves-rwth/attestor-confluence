@@ -1,6 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import de.rwth.i2.attestor.grammar.confluence.JointMorphism.JointMorphism;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointMorphism;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 

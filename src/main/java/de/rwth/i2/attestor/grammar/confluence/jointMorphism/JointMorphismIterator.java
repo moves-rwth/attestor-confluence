@@ -1,4 +1,4 @@
-package de.rwth.i2.attestor.grammar.confluence.JointMorphism;
+package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
@@ -21,7 +21,7 @@ public class JointMorphismIterator implements Iterator<JointMorphism> {
     public boolean hasNext() {
         while (compatibleJointMorphisms.isEmpty()) {
             if (notYetCompatibleJointMorphisms.isEmpty()) {
-                // There is no JointMorphism in notYetCompatibleJointMorphisms and also not in compatibleJointMorphisms
+                // There is no jointMorphism in notYetCompatibleJointMorphisms and also not in compatibleJointMorphisms
                 return false;
             }
             JointMorphism baseJm = notYetCompatibleJointMorphisms.remove();

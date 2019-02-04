@@ -13,7 +13,7 @@ import java.util.List;
 public interface Graph {
 
     /**
-     * @return The total number of nodes if this Graph.
+     * @return The total number of nodes in this Graph.
      */
     int size();
 

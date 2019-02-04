@@ -1,4 +1,4 @@
-package de.rwth.i2.attestor.grammar.confluence.JointMorphism;
+package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.util.Pair;
 

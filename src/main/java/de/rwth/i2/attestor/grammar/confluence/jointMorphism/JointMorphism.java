@@ -1,4 +1,4 @@
-package de.rwth.i2.attestor.grammar.confluence.JointMorphism;
+package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
@@ -18,7 +18,7 @@ public class JointMorphism {
     private final Map<Integer, Integer> mapL1toL2, mapL2toL1;
 
     /**
-     * Initializes JointMorphism where all nodes are disjoint
+     * Initializes jointMorphism where all nodes are disjoint
      */
     public JointMorphism(TIntArrayList l1, TIntArrayList l2) {
         l1Remaining = new TreeSet<>();
