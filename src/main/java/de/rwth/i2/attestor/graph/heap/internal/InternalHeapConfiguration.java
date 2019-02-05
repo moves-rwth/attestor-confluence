@@ -122,9 +122,13 @@ public class InternalHeapConfiguration implements HeapConfiguration, Graph {
      */
     int countVariableEdges;
     /**
-     * The current number of elements in graph that correspond to variable edges.
+     * The current number of elements in graph that correspond to nonterminal edges.
      */
     int countNonterminalEdges;
+    /**
+     * The current number of elements in graph that correspond to bipartite selector edges
+     */
+    int countBipartiteSelectorEdges;  // TODO
 
     TIntSet markedNodes;
 

@@ -222,6 +222,33 @@ public class InternalHeapConfigurationBuilder implements HeapConfigurationBuilde
         return heapConf.graph.removeNodeAt(privateId);
     }
 
+    /**
+     * Adds a selector to the graph but keeps the graph bipartite by adding the edge similar to nonterminal edges
+     *
+     * @param from Private id of the source of the selector edge
+     * @param label The label of the selector
+     * @param to Private id of the tar
+     * @return
+     */
+    public HeapConfigurationBuilder addSelectorBipartite(int from, SelectorLabel label, int to) {
+        // TODO: Check that public & private Ids are used correctly
+        if (label == null) {
+            throw new NullPointerException();
+        }
+
+        int publicId = addPrivatePublicIdPair();
+        int privateId = heapConf.getPrivateId(publicId);
+
+        heapConf.graph.addNode(label, 2, 0);
+        if (!heapConf.isNode(from) || !heapConf.isNode(to)) {
+            throw new IllegalArgumentException("ID of one attached node does not actually correspond to a node.");
+        }
+        heapConf.graph.addEdge(privateId, 0, from);
+        heapConf.graph.addEdge(privateId, 1, to);
+
+        return this;
+    }
+
     @Override
     public HeapConfigurationBuilder addSelector(int from, SelectorLabel sel, int to) {
 

@@ -1,12 +1,14 @@
 package de.rwth.i2.attestor.graph;
 
 
+import de.rwth.i2.attestor.graph.digraph.NodeLabel;
+
 /**
  * General Interface for labels of selector edges.
  *
  * @author Christoph
  */
-public interface SelectorLabel extends Comparable<SelectorLabel> {
+public interface SelectorLabel extends Comparable<SelectorLabel>, NodeLabel {
 
     /**
      * @param label The label that should be checked.
@@ -18,4 +20,5 @@ public interface SelectorLabel extends Comparable<SelectorLabel> {
      * @return The label as a String corresponding to this SelectorLabel.
      */
     String getLabel();
+
 }

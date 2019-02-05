@@ -3,10 +3,18 @@ package de.rwth.i2.attestor.grammar.confluence;
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
+import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.graph.SelectorLabelAsNonterminal;
+import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.morphism.Graph;
+import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
+import gnu.trove.list.array.TIntArrayList;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
 
@@ -68,15 +76,61 @@ public class CriticalPairs {
                                          Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
         HeapConfiguration hc1 = r1.second().getCollapsed();
         HeapConfiguration hc2 = r2.second().getCollapsed();
-        if (!(hc1 instanceof Graph) || !(hc2 instanceof  Graph)) {
-            throw new IllegalArgumentException("Right side of rule is not of type 'Graph'");
+        if (!(hc1 instanceof InternalHeapConfiguration) || !(hc2 instanceof  InternalHeapConfiguration)) {
+            throw new IllegalArgumentException("Right side of rule is not of type 'InternalHeapConfiguration'");
         }
-        Graph hc1Graph = (Graph) hc1;
-        Graph hc2Graph = (Graph) hc2;
+        Graph hc1Graph = createBipartiteGraph((InternalHeapConfiguration) hc1);
+        Graph hc2Graph = createBipartiteGraph((InternalHeapConfiguration) hc2);
 
-        // TODO
+        TIntArrayList nodesHc1 = new TIntArrayList(hc1.countNodes());
+        TIntArrayList edgesHc1 = new TIntArrayList(hc1Graph.size() - hc1.countNodes());
+        TIntArrayList nodesHc2 = new TIntArrayList(hc2.countNodes());
+        TIntArrayList edgesHc2 = new TIntArrayList(hc2Graph.size() - hc2.countNodes());
+
+    }
 
 
+    /**
+     * Calculates the private ids of edges and nodes.
+     * @param hc The input heap configuration
+     * @return A pair of two TIntArrayList objects. The first contains the private ids of the nodes and the second
+     * element contains the private ids of the edges
+     */
+    private Pair<TIntArrayList, TIntArrayList> getNodesAndEdges(InternalHeapConfiguration hc) {
+        TIntArrayList nodes = new TIntArrayList(hc.countNodes());
+        TIntArrayList edges = new TIntArrayList(hc.size() - hc.countNodes());
+        for (int node = 0; node > hc.size(); node++) {
+            NodeLabel label = hc.getNodeLabel(node);
+            if (label instanceof Type) {
+                nodes.add(node);
+            } else if (label instanceof Nonterminal || label instanceof SelectorLabel) {
+                // We don't include variable edges here, because they should not appear in RHS
+                edges.add(node);
+            } else {
+                throw new InvalidParameterException("InternalHeapConfiguration contains unrecognized label");
+            }
+        }
+        return new Pair<>(nodes, edges);
+    }
+
+    /**
+     * Creates a copy of an InternalHeapConfiguration where all selector edges are replaced by nonterminal edges of rank
+     * 2. These edges can be distinguished from the original nonterminal edges because the label of these selectors
+     * edges is SelectorLabelAsNonterminal. The type of the original nonterminals stays BasicNonterminal.
+     */
+    private Graph createBipartiteGraph(InternalHeapConfiguration hc) {
+        InternalHeapConfigurationBuilder builder = (InternalHeapConfigurationBuilder) hc.clone().builder();
+        hc.nodes().forEach(node -> {
+            for (SelectorLabel label : hc.selectorLabelsOf(node)) {
+                // 1. Remove the current selector
+                builder.removeSelector(node, label);
+                // 2. Reinsert as a bipartite selector edge
+                int target = hc.selectorTargetOf(node, label);
+                builder.addSelectorBipartite(node, label, target);
+            }
+            return true;
+        });
+        return (Graph) builder.build();
     }
 
 }
