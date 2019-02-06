@@ -4,9 +4,9 @@ import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
-import de.rwth.i2.attestor.graph.SelectorLabelAsNonterminal;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.morphism.Graph;
@@ -76,11 +76,11 @@ public class CriticalPairs {
                                          Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
         HeapConfiguration hc1 = r1.second().getCollapsed();
         HeapConfiguration hc2 = r2.second().getCollapsed();
-        if (!(hc1 instanceof InternalHeapConfiguration) || !(hc2 instanceof  InternalHeapConfiguration)) {
-            throw new IllegalArgumentException("Right side of rule is not of type 'InternalHeapConfiguration'");
+        if (!(hc1 instanceof Graph) || !(hc2 instanceof  Graph)) {
+            throw new IllegalArgumentException("Right side of rule is not of type 'Graph'");
         }
-        Graph hc1Graph = createBipartiteGraph((InternalHeapConfiguration) hc1);
-        Graph hc2Graph = createBipartiteGraph((InternalHeapConfiguration) hc2);
+        Graph hc1Graph = createBipartiteGraph(hc1);
+        Graph hc2Graph = createBipartiteGraph(hc2);
 
         TIntArrayList nodesHc1 = new TIntArrayList(hc1.countNodes());
         TIntArrayList edgesHc1 = new TIntArrayList(hc1Graph.size() - hc1.countNodes());
@@ -118,8 +118,8 @@ public class CriticalPairs {
      * 2. These edges can be distinguished from the original nonterminal edges because the label of these selectors
      * edges is SelectorLabelAsNonterminal. The type of the original nonterminals stays BasicNonterminal.
      */
-    private Graph createBipartiteGraph(InternalHeapConfiguration hc) {
-        InternalHeapConfigurationBuilder builder = (InternalHeapConfigurationBuilder) hc.clone().builder();
+    private Graph createBipartiteGraph(HeapConfiguration hc) {
+        HeapConfigurationBuilder builder = hc.clone().builder();
         hc.nodes().forEach(node -> {
             for (SelectorLabel label : hc.selectorLabelsOf(node)) {
                 // 1. Remove the current selector

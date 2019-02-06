@@ -125,10 +125,6 @@ public class InternalHeapConfiguration implements HeapConfiguration, Graph {
      * The current number of elements in graph that correspond to nonterminal edges.
      */
     int countNonterminalEdges;
-    /**
-     * The current number of elements in graph that correspond to bipartite selector edges
-     */
-    int countBipartiteSelectorEdges;  // TODO
 
     TIntSet markedNodes;
 
@@ -295,21 +291,21 @@ public class InternalHeapConfiguration implements HeapConfiguration, Graph {
 
     @Override
     public TIntArrayList successorNodesOf(int node) {
-
+        // TODO: Does not support bipartite selector edges (adapt this method or create new method for those cases)
         int privateId = checkNodeAndGetPrivateId(node);
         return filterAttachedElements(graph.successorsOf(privateId), this::isNode);
     }
 
     @Override
     public TIntArrayList predecessorNodesOf(int node) {
-
+        // TODO: Does not support bipartite selector edges (adapt this method or create new method for those cases)
         int privateId = checkNodeAndGetPrivateId(node);
         return filterAttachedElements(graph.predecessorsOf(privateId), this::isNode);
     }
 
     @Override
     public List<SelectorLabel> selectorLabelsOf(int node) {
-
+        // TODO: Does not support bipartite selector edges (adapt this method or create new method for those cases)
         int privateId = checkNodeAndGetPrivateId(node);
         List<SelectorLabel> result = new ArrayList<>();
         List<Object> edgeLabels = graph.outgoingEdgeLabelsOf(privateId);
@@ -345,7 +341,7 @@ public class InternalHeapConfiguration implements HeapConfiguration, Graph {
 
     @Override
     public int selectorTargetOf(int node, SelectorLabel sel) {
-
+        // TODO: Does not support bipartite selector edges (adapt this method or create new method for those cases)
         int privateId = checkNodeAndGetPrivateId(node);
         TIntArrayList succ = graph.successorsOf(privateId);
 

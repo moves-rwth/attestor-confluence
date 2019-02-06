@@ -10,7 +10,8 @@ public class JointMorphismIterator implements Iterator<JointMorphism> {
     private final Queue<JointMorphism> notYetCompatibleJointMorphisms;
     private final JointMorphismCompatibilityChecker jmChecker;
 
-    JointMorphismIterator(TIntArrayList l1, TIntArrayList l2, JointMorphismCompatibilityChecker jmChecker) {
+    JointMorphismIterator(Collection<GraphElement> l1, Collection<GraphElement> l2,
+                          JointMorphismCompatibilityChecker jmChecker) {
         this.jmChecker = jmChecker;
         compatibleJointMorphisms = new ArrayDeque<>();
         notYetCompatibleJointMorphisms = new ArrayDeque<>();
@@ -39,7 +40,7 @@ public class JointMorphismIterator implements Iterator<JointMorphism> {
 
     private void addFollowingJointMorphisms(JointMorphism jm) {
         Collection<JointMorphism> result = new ArrayList<>();
-        for (Pair<Integer, Integer> nextPair : jm.getAllNextEquivalences()) {
+        for (Pair<GraphElement, GraphElement> nextPair : jm.getAllNextEquivalences()) {
             switch (jmChecker.newPairCompatibility(jm, nextPair)) {
                 case COMPATIBLE:
                     compatibleJointMorphisms.add(new JointMorphism(jm, nextPair));

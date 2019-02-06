@@ -12,6 +12,6 @@ public interface JointMorphismCompatibilityChecker {
      * @param newPair
      * @return
      */
-    JointMorphismCompatibility newPairCompatibility(JointMorphism m, Pair<Integer, Integer> newPair);
+    JointMorphismCompatibility newPairCompatibility(JointMorphism m, Pair<GraphElement, GraphElement> newPair);
 
 }

@@ -153,7 +153,7 @@ public class InternalHeapConfigurationBuilder implements HeapConfigurationBuilde
 
     @Override
     public HeapConfigurationBuilder removeNode(int node) {
-
+        // TODO: Does not work if there are bipartite selector edges (adapt this method)
         int privateId = heapConf.getPrivateId(node);
 
         if (!heapConf.isNode(privateId)) {
@@ -222,23 +222,17 @@ public class InternalHeapConfigurationBuilder implements HeapConfigurationBuilde
         return heapConf.graph.removeNodeAt(privateId);
     }
 
-    /**
-     * Adds a selector to the graph but keeps the graph bipartite by adding the edge similar to nonterminal edges
-     *
-     * @param from Private id of the source of the selector edge
-     * @param label The label of the selector
-     * @param to Private id of the tar
-     * @return
-     */
+    @Override
     public HeapConfigurationBuilder addSelectorBipartite(int from, SelectorLabel label, int to) {
         // TODO: Check that public & private Ids are used correctly
         if (label == null) {
             throw new NullPointerException();
         }
 
-        int publicId = addPrivatePublicIdPair();
-        int privateId = heapConf.getPrivateId(publicId);
+        int publicId = addPrivatePublicIdPair();   //NOTE: This method is private!
+        int privateId = heapConf.getPrivateId(publicId);  //NOTE: Method is protected!
 
+        // NOTE: graph attribute is protected
         heapConf.graph.addNode(label, 2, 0);
         if (!heapConf.isNode(from) || !heapConf.isNode(to)) {
             throw new IllegalArgumentException("ID of one attached node does not actually correspond to a node.");
@@ -279,7 +273,7 @@ public class InternalHeapConfigurationBuilder implements HeapConfigurationBuilde
 
     @Override
     public HeapConfigurationBuilder removeSelector(int node, SelectorLabel sel) {
-
+        // TODO: Does not support bipartite selector edges (adapt this method or create new method for those cases)
         int privateId = heapConf.getPrivateId(node);
 
         if (!heapConf.isNode(privateId)) {
@@ -297,7 +291,7 @@ public class InternalHeapConfigurationBuilder implements HeapConfigurationBuilde
 
     @Override
     public HeapConfigurationBuilder replaceSelector(int node, SelectorLabel oldSel, SelectorLabel newSel) {
-
+        // TODO: Does not support bipartite selector edges (adapt this method or create new method for those cases)
         int privateId = heapConf.getPrivateId(node);
 
         if (!heapConf.isNode(privateId)) {

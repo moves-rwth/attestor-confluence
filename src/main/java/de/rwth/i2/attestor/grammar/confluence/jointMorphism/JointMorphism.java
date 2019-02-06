@@ -13,24 +13,22 @@ import java.util.*;
  */
 public class JointMorphism {
     // TODO: This class can be further optimized by removing l1Remaining, which is not necessary
-    private final TreeSet<Integer> l1Remaining, l2Remaining;
-    private final Pair<Integer, Integer> lastAddedEquivalence;
-    private final Map<Integer, Integer> mapL1toL2, mapL2toL1;
+    private final TreeSet<GraphElement> l1Remaining, l2Remaining;
+    private final Pair<GraphElement, GraphElement> lastAddedEquivalence;
+    private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
 
     /**
      * Initializes jointMorphism where all nodes are disjoint
      */
-    public JointMorphism(TIntArrayList l1, TIntArrayList l2) {
+    public JointMorphism(Collection<GraphElement> l1, Collection<GraphElement> l2) {
         l1Remaining = new TreeSet<>();
-        l1.forEach(i -> {
-            l1Remaining.add(i);
-            return true;
-        });
+        for (GraphElement elem : l1) {
+            l1Remaining.add(elem);
+        }
         l2Remaining = new TreeSet<>();
-        l2.forEach(i -> {
-            l2Remaining.add(i);
-            return true;
-        });
+        for (GraphElement elem : l2) {
+            l2Remaining.add(elem);
+        }
         lastAddedEquivalence = null;
         mapL1toL2 =  new HashMap<>();
         mapL2toL1 =  new HashMap<>();
@@ -44,7 +42,7 @@ public class JointMorphism {
         mapL2toL1 =  new HashMap<>(oldJointMorphism.mapL2toL1);
     }
 
-    protected JointMorphism(JointMorphism oldJointMorphism, Pair<Integer, Integer> newEquivalence) {
+    protected JointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) {
         l1Remaining = new TreeSet<>(oldJointMorphism.l1Remaining);
         l1Remaining.remove(newEquivalence.first());
         l2Remaining = new TreeSet<>(oldJointMorphism.l2Remaining);
@@ -60,8 +58,8 @@ public class JointMorphism {
      * Returns the next possible successor for a node equivalence.
      * If there is no successor returns null
      */
-    private Pair<Integer, Integer> getNextEquivalence(Pair<Integer, Integer> oldPair) {
-        Integer l1New, l2New;
+    private Pair<GraphElement, GraphElement> getNextEquivalence(Pair<GraphElement, GraphElement> oldPair) {
+        GraphElement l1New, l2New;
         l2New = l2Remaining.higher(oldPair.second());
         if (l2New == null) {
             // If there is no higher node in hc2 the next equivalence we look for a higher node in hc1
@@ -87,8 +85,8 @@ public class JointMorphism {
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
      * according to the canonical ordering of node equivalences.
      */
-    protected Collection<Pair<Integer, Integer>> getAllNextEquivalences() {
-        Pair<Integer, Integer> nextNodeEquivalence;
+    protected Collection<Pair<GraphElement, GraphElement>> getAllNextEquivalences() {
+        Pair<GraphElement, GraphElement> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
             if (l1Remaining.isEmpty() || l2Remaining.isEmpty()) {
                 throw new RuntimeException("First joint-morphism cannot be obtained.");
@@ -97,7 +95,7 @@ public class JointMorphism {
         } else {
             nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
         }
-        Collection<Pair<Integer, Integer>> result = new ArrayList<>();
+        Collection<Pair<GraphElement, GraphElement>> result = new ArrayList<>();
         while (nextNodeEquivalence != null) {
             result.add(nextNodeEquivalence);
             nextNodeEquivalence = getNextEquivalence(nextNodeEquivalence);
