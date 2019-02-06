@@ -57,23 +57,9 @@ public interface HeapConfigurationBuilder {
      */
     HeapConfigurationBuilder removeNode(int node);
 
-    /**
-     * Adds a selector to the graph but keeps the graph bipartite by adding the selector as an additional node similar
-     * to the way nonterminal edges (and variables) are added.
-     * Note that this kind of selector edge cannot be removed or altered using the 'removeSelector' and
-     * 'replaceSelector' methods.
-     * //TODO: Either modify those methods or add additional method to remove bipartite selectors
-     *
-     * @param from Private id of the source of the selector edge
-     * @param label The label of the selector
-     * @param to Private id of the target of the selector edge
-     * @return the builder
-     */
-    HeapConfigurationBuilder addSelectorBipartite(int from, SelectorLabel label, int to);
 
     /**
-     * Adds a new selector edge that is labeled with 'sel' and points from node 'from' to node 'to'. Using this method
-     * leads to an underlying graph that is no longer bipartite.
+     * Adds a new selector edge that is labeled with 'sel' and points from node 'from' to node 'to'.
      *
      * @param from source of the selector edge
      * @param sel  label of the selector edge
