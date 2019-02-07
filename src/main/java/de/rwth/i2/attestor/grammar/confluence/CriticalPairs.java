@@ -2,7 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.GraphElement;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
@@ -10,9 +10,7 @@ import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
-import gnu.trove.list.array.TIntArrayList;
 
-import java.security.InvalidParameterException;
 import java.util.*;
 
 
@@ -23,7 +21,7 @@ import java.util.*;
  *
  * The implemented algorithm to find the critical pairs is based on the work in: "Efficient Detection of Conflicts in
  * Graph-based Model Transformation" by Leen Lambers, Hartmut Ehrig & Fernando Orejas
- * TODO: How to correctly cite resources in javadoc
+ * TODO: How to correctly cite in javadoc
  *
  * @author Johannes Schulte
  */
@@ -78,33 +76,86 @@ public class CriticalPairs {
             throw new IllegalArgumentException("Right side of rule is not of type 'Graph'");
         }
         Collection<GraphElement> nodesHc1, nodesHc2, edgesHc1, edgesHc2;
-        //TODO: Continue implementing
+        nodesHc1 = getNodes(hc1);
+        edgesHc1 = getEdges(hc1);
+        nodesHc2 = getNodes(hc2);
+        edgesHc2 = getEdges(hc2);
 
+        for (JointMorphism edgeMorphism : new JointMorphisms(edgesHc1, edgesHc2, new EdgeCompatibilityChecker())) {
+            JointMorphismCompatibilityChecker nodeCompatibilityChecker = new NodeCompatibilityChecker();
+            for (JointMorphism nodeMorphism : new JointMorphisms(nodesHc1, nodesHc2, nodeCompatibilityChecker)) {
+                // Found a compatible joint morphism
+                // 1. Compute the joint graph
+                // TODO
+
+                // 2. Compute fully abstracted heap configuration (apply r1 first)
+                // TODO
+
+                // 3. Compute fully abstracted heap configuration (apply r2 first)
+                // TODO
+            }
+        }
     }
 
 
     /**
-     * Calculates the private ids of edges and nodes.
-     * @param hc The input heap configuration
-     * @return A pair of two TIntArrayList objects. The first contains the private ids of the nodes and the second
-     * element contains the private ids of the edges
+     * Converts the nodes of a {@link HeapConfiguration} into a collection of {@link GraphElement}.
+     *
+     * @param hc The input heap configuration (must be of type {@link Graph})
+     * @return A collection containing all nodes of hc
      */
-    private Pair<TIntArrayList, TIntArrayList> getNodesAndEdges(HeapConfiguration hc) {
-        // TODO: Rewrite this to support GraphElement type
-        TIntArrayList nodes = new TIntArrayList(hc.countNodes());
-        TIntArrayList edges = new TIntArrayList(((Graph) hc).size() - hc.countNodes());
-        for (int node = 0; node > ((Graph)hc).size(); node++) {
-            NodeLabel label = ((Graph) hc).getNodeLabel(node);
+    private Collection<GraphElement> getNodes(HeapConfiguration hc) {
+        if (!(hc instanceof Graph)) {
+            throw new IllegalArgumentException("HeapConfiguration not of type Graph");
+        }
+        Collection<GraphElement> result = new ArrayList<>();
+        Graph graph = (Graph) hc;
+        for (int privateId = 0; privateId < graph.size(); privateId++) {
+            NodeLabel label = graph.getNodeLabel(privateId);
             if (label instanceof Type) {
-                nodes.add(node);
-            } else if (label instanceof Nonterminal || label instanceof SelectorLabel) {
-                // We don't include variable edges here, because they should not appear in RHS
-                edges.add(node);
-            } else {
-                throw new InvalidParameterException("HeapConfiguration contains unrecognized label");
+                // The current privateId corresponds to a node in hc
+                result.add(new GraphElement(privateId, null));
             }
         }
-        return new Pair<>(nodes, edges);
+        return result;
     }
+
+    /**
+     * Converts the nonterminal edges and selectors of a {@link HeapConfiguration} into a collection of
+     * {@link GraphElement}.
+     *
+     * @param hc The input heap configuration (must be of type {@link Graph})
+     * @return A collection containing all nonterminal edges and selectors of hc
+     */
+    private Collection<GraphElement> getEdges(HeapConfiguration hc) {
+        if (!(hc instanceof Graph)) {
+            throw new IllegalArgumentException("HeapConfiguration not of type Graph");
+        }
+        Collection<GraphElement> result = new ArrayList<>();
+        Graph graph = (Graph) hc;
+        for (int privateId = 0; privateId < graph.size(); privateId++) {
+            NodeLabel label = graph.getNodeLabel(privateId);
+            if (label instanceof Nonterminal) {
+                // The current privateId corresponds to a nonterminal edge
+                result.add(new GraphElement(privateId, null));
+            } else if (label instanceof Type) {
+                // The current privateId is a node. Check if there are any outgoing selectors
+                final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
+                graph.getSuccessorsOf(privateId).forEach(successor -> {
+                   for (Object edgeLabel : graph.getEdgeLabel(finalPrivateId, successor)) {
+                       if (edgeLabel instanceof SelectorLabel) {
+                           // There is a selector from privateId to successor
+                           String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
+                           result.add(new GraphElement(finalPrivateId, selectorLabel));
+                       }
+                   }
+                   return true;
+                });
+            }
+        }
+        return result;
+    }
+
+
 
 }
