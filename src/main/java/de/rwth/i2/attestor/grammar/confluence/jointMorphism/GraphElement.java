@@ -17,6 +17,14 @@ public class GraphElement implements Comparable<GraphElement> {
      */
     private final int privateId;
 
+    public int getPrivateId() {
+        return privateId;
+    }
+
+    public String getSelectorLabel() {
+        return selectorLabel;
+    }
+
     /**
      * In case of a selector edge this contains the label of the selector. Otherwise this is null.
      */

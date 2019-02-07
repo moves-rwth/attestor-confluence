@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -12,7 +13,6 @@ import java.util.*;
  * the node sets of hc1 and hc2.
  */
 public class JointMorphism {
-    // TODO: This class can be further optimized by removing l1Remaining, which is not necessary
     private final TreeSet<GraphElement> l1Remaining, l2Remaining;
     private final Pair<GraphElement, GraphElement> lastAddedEquivalence;
     private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;

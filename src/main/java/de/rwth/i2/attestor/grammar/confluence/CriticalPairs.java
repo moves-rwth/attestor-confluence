@@ -81,8 +81,8 @@ public class CriticalPairs {
         nodesHc2 = getNodes(hc2);
         edgesHc2 = getEdges(hc2);
 
-        for (JointMorphism edgeMorphism : new JointMorphisms(edgesHc1, edgesHc2, new EdgeCompatibilityChecker())) {
-            JointMorphismCompatibilityChecker nodeCompatibilityChecker = new NodeCompatibilityChecker();
+        for (JointMorphism edgeMorphism : new JointMorphisms(edgesHc1, edgesHc2, new EdgeCompatibilityChecker(hc1, hc2))) {
+            JointMorphismCompatibilityChecker nodeCompatibilityChecker = new NodeCompatibilityChecker(edgeMorphism, hc1, hc2);
             for (JointMorphism nodeMorphism : new JointMorphisms(nodesHc1, nodesHc2, nodeCompatibilityChecker)) {
                 // Found a compatible joint morphism
                 // 1. Compute the joint graph
@@ -92,6 +92,9 @@ public class CriticalPairs {
                 // TODO
 
                 // 3. Compute fully abstracted heap configuration (apply r2 first)
+                // TODO
+
+                // 4. Check if both fully abstracted heap configurations are isomorphic
                 // TODO
             }
         }
