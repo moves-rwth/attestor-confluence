@@ -28,7 +28,7 @@ public class EdgeCompatibilityChecker implements JointMorphismCompatibilityCheck
     }
 
     @Override
-    public JointMorphismCompatibility newPairCompatibility(JointMorphism m, Pair<GraphElement, GraphElement> newPair) {
+    public boolean isNewPairCompatibile(JointMorphism m, Pair<GraphElement, GraphElement> newPair) {
         // TODO: We could further prune edges by already detecting node equivalences here and detect impossible states
         int id1 = newPair.first().getPrivateId();
         int id2 = newPair.second().getPrivateId();
@@ -40,22 +40,22 @@ public class EdgeCompatibilityChecker implements JointMorphismCompatibilityCheck
             NodeLabel nodeLabel1 = graph1.getNodeLabel(id1);
             NodeLabel nodeLabel2 = graph2.getNodeLabel(id2);
             if (nodeLabel1.matches(nodeLabel2)) {
-                return JointMorphismCompatibility.COMPATIBLE;
+                return true;
             } else {
-                return JointMorphismCompatibility.INCOMPATIBLE;
+                return false;
             }
         } else if (label1 != null && label2 != null) {
             // Two selector edges
             if (label1.equals(label2)) {
                 // The selector edges are the same
-                return JointMorphismCompatibility.COMPATIBLE;
+                return true;
             } else {
                 // The selector edges are not the same
-                return JointMorphismCompatibility.INCOMPATIBLE;
+                return false;
             }
         } else {
             // Two incompatible edges
-            return JointMorphismCompatibility.INCOMPATIBLE;
+            return false;
         }
     }
 

@@ -10,8 +10,8 @@ public interface JointMorphismCompatibilityChecker {
      *
      * @param m
      * @param newPair
-     * @return
+     * @return true if the joint morphism is compatible
      */
-    JointMorphismCompatibility newPairCompatibility(JointMorphism m, Pair<GraphElement, GraphElement> newPair);
+    boolean isNewPairCompatibile(JointMorphism m, Pair<GraphElement, GraphElement> newPair);
 
 }

@@ -32,7 +32,7 @@ public class NodeCompatibilityChecker implements JointMorphismCompatibilityCheck
 
 
     @Override
-    public JointMorphismCompatibility newPairCompatibility(JointMorphism m, Pair<GraphElement, GraphElement> newPair) {
+    public boolean isNewPairCompatibile(JointMorphism m, Pair<GraphElement, GraphElement> newPair) {
         int id1 = newPair.first().getPrivateId();
         int id2 = newPair.second().getPrivateId();
 
@@ -40,15 +40,11 @@ public class NodeCompatibilityChecker implements JointMorphismCompatibilityCheck
         Type t2 = (Type) graph2.getNodeLabel(id2);
 
         if (!t1.matches(t2)) {
-            return JointMorphismCompatibility.INCOMPATIBLE;
+            return false;
         }
 
+        // TODO: Check if
 
     }
 
-    public JointMorphismCompatibility getNodeEdgeVio(Graph graph1, Graph graph2, int id1, int id2) {
-        graph1.getPredecessorsOf(id1).forEach(predecessors -> {
-            return true;
-        });
-    }
 }
