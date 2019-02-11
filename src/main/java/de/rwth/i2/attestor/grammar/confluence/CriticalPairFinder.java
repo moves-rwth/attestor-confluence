@@ -25,12 +25,12 @@ import java.util.*;
  *
  * @author Johannes Schulte
  */
-public class CriticalPairs {
+public class CriticalPairFinder {
 
     final Grammar underlyingGrammar;
     final Set<CriticalPair> criticalPairs;
 
-    public CriticalPairs(Grammar grammar) {
+    public CriticalPairFinder(Grammar grammar) {
         this.underlyingGrammar = grammar;
         this.criticalPairs = new HashSet<>();
         computeAllCriticalPairs();
@@ -72,18 +72,11 @@ public class CriticalPairs {
                                                   Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
         HeapConfiguration hc1 = r1.second().getCollapsed();
         HeapConfiguration hc2 = r2.second().getCollapsed();
-        if (!(hc1 instanceof Graph) || !(hc2 instanceof  Graph)) {
-            throw new IllegalArgumentException("Right side of rule is not of type 'Graph'");
-        }
-        Collection<GraphElement> nodesHc1, nodesHc2, edgesHc1, edgesHc2;
-        nodesHc1 = getNodes(hc1);
-        edgesHc1 = getEdges(hc1);
-        nodesHc2 = getNodes(hc2);
-        edgesHc2 = getEdges(hc2);
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
-        for (JointMorphism edgeMorphism : new JointMorphisms(edgesHc1, edgesHc2, new EdgeCompatibilityChecker(hc1, hc2))) {
-            JointMorphismCompatibilityChecker nodeCompatibilityChecker = new NodeCompatibilityChecker(edgeMorphism, hc1, hc2);
-            for (JointMorphism nodeMorphism : new JointMorphisms(nodesHc1, nodesHc2, nodeCompatibilityChecker)) {
+
+        for (JointMorphism edgeMorphism : new EdgeJointMorphism(context) {
+            for (JointMorphism nodeMorphism : new NodeJointMorphism(context, edgeMorphism)) {
                 // Found a compatible joint morphism
                 // 1. Compute the joint graph
                 // TODO

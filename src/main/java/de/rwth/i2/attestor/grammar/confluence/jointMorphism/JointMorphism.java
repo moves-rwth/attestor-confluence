@@ -12,7 +12,7 @@ import java.util.*;
  * understood as node equivalences. Every joint-morphism therefore corresponds to a specific subset of the product of
  * the node sets of hc1 and hc2.
  */
-public class JointMorphism {
+public abstract class JointMorphism implements Iterable<JointMorphism> {
     private final TreeSet<GraphElement> l1Remaining, l2Remaining;
     private final Pair<GraphElement, GraphElement> lastAddedEquivalence;
     private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
@@ -34,7 +34,7 @@ public class JointMorphism {
         mapL2toL1 =  new HashMap<>();
     }
 
-    private JointMorphism(JointMorphism oldJointMorphism) {
+    protected JointMorphism(JointMorphism oldJointMorphism) {  // TODO: Check if we need this method
         l1Remaining = new TreeSet<>(oldJointMorphism.l1Remaining);
         l2Remaining = new TreeSet<>(oldJointMorphism.l2Remaining);
         lastAddedEquivalence = oldJointMorphism.lastAddedEquivalence;
@@ -42,7 +42,7 @@ public class JointMorphism {
         mapL2toL1 =  new HashMap<>(oldJointMorphism.mapL2toL1);
     }
 
-    protected JointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) {
+    protected JointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) { // TODO: Check if we need this method
         l1Remaining = new TreeSet<>(oldJointMorphism.l1Remaining);
         l1Remaining.remove(newEquivalence.first());
         l2Remaining = new TreeSet<>(oldJointMorphism.l2Remaining);
@@ -84,8 +84,9 @@ public class JointMorphism {
      * Returns the joint morphisms that contains only a single equivalence more.
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
      * according to the canonical ordering of node equivalences.
+     * The isNextPairCompatible method is used to only include compatible nodes
      */
-    protected Collection<Pair<GraphElement, GraphElement>> getAllNextEquivalences() {
+    protected Collection<JointMorphism> getAllNextEquivalences() {
         Pair<GraphElement, GraphElement> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
             if (l1Remaining.isEmpty() || l2Remaining.isEmpty()) {
@@ -95,12 +96,34 @@ public class JointMorphism {
         } else {
             nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
         }
-        Collection<Pair<GraphElement, GraphElement>> result = new ArrayList<>();
+        Collection<JointMorphism> result = new ArrayList<>();
         while (nextNodeEquivalence != null) {
-            result.add(nextNodeEquivalence);
+            if (this.isNextPairCompatible(nextNodeEquivalence)) {
+                result.add(getJointMorphism(nextNodeEquivalence));
+            }
             nextNodeEquivalence = getNextEquivalence(nextNodeEquivalence);
         }
         return result;
     }
+
+    @Override
+    public Iterator<JointMorphism> iterator() {
+        return new JointMorphismIterator(this);
+    }
+
+    /**
+     *
+     *
+     * @param newPair  A pair of node equivalences
+     * @return true if 'newPair' can be added to this JointMorphism
+     */
+    abstract boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair);
+
+    /**
+     * Returns the
+     * @param newPair
+     * @return
+     */
+    abstract JointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair);
 
 }
