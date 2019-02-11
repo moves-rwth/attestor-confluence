@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.graph.Nonterminal;
+import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -13,36 +14,53 @@ import java.util.*;
  * the node sets of hc1 and hc2.
  */
 public abstract class JointMorphism implements Iterable<JointMorphism> {
+    /**
+     * TODO:
+     * The attributes l1Remaining, l2Remaining might better use a different datastructures.
+     * Instead of a TreeSet l2Remaining might better use two hashmaps that points to the successor / predecessor (and to save the smallest element)  --> Constant lookup time instead of O(log(n))
+     * And l1Remaining might better use an ArrayList.
+     */
     private final TreeSet<GraphElement> l1Remaining, l2Remaining;
     private final Pair<GraphElement, GraphElement> lastAddedEquivalence;
     private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
+    private final HeapConfigurationContext context;
+
 
     /**
-     * Initializes jointMorphism where all nodes are disjoint
+     *
+     * @param context
      */
-    public JointMorphism(Collection<GraphElement> l1, Collection<GraphElement> l2) {
-        l1Remaining = new TreeSet<>();
-        for (GraphElement elem : l1) {
-            l1Remaining.add(elem);
-        }
-        l2Remaining = new TreeSet<>();
-        for (GraphElement elem : l2) {
-            l2Remaining.add(elem);
-        }
+    protected JointMorphism(HeapConfigurationContext context) {
+        this.context = context;
+    }
+
+
+
+    protected JointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1Remaining, Collection<GraphElement> l2Remaining,
+                  Map<GraphElement, GraphElement> mapL1toL2, Map<GraphElement, GraphElement> mapL2toL1) {
+        this.context = context;
+        this.l1Remaining = new TreeSet<>(l1Remaining);
+        this.l2Remaining = new TreeSet<>(l2Remaining);
+        this.mapL1toL2 = mapL1toL2;
+        this.mapL2toL1 = mapL2toL1;
+        this.lastAddedEquivalence = null;
+    }
+
+    /**
+     * Initializes jointMorphism where all GraphElements are disjoint
+     */
+    protected JointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1, Collection<GraphElement> l2) {
+        this.context = context;
+        l1Remaining = new TreeSet<>(l1);
+        l2Remaining = new TreeSet<>(l2);
         lastAddedEquivalence = null;
         mapL1toL2 =  new HashMap<>();
         mapL2toL1 =  new HashMap<>();
     }
 
-    protected JointMorphism(JointMorphism oldJointMorphism) {  // TODO: Check if we need this method
-        l1Remaining = new TreeSet<>(oldJointMorphism.l1Remaining);
-        l2Remaining = new TreeSet<>(oldJointMorphism.l2Remaining);
-        lastAddedEquivalence = oldJointMorphism.lastAddedEquivalence;
-        mapL1toL2 =  new HashMap<>(oldJointMorphism.mapL1toL2);
-        mapL2toL1 =  new HashMap<>(oldJointMorphism.mapL2toL1);
-    }
 
-    protected JointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) { // TODO: Check if we need this method
+    protected JointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) {
+        context = oldJointMorphism.context;
         l1Remaining = new TreeSet<>(oldJointMorphism.l1Remaining);
         l1Remaining.remove(newEquivalence.first());
         l2Remaining = new TreeSet<>(oldJointMorphism.l2Remaining);
@@ -65,13 +83,13 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
             // If there is no higher node in hc2 the next equivalence we look for a higher node in hc1
             l1New = l1Remaining.higher(oldPair.first());
             if (l1New == null) {
-                // There are no more valid nodes in hc1
+                // There are no more valid GraphElements in hc1
                 return null;
             }
             // Start again by the lowest available node in hc2
             l2New = l2Remaining.first();
             if (l2New == null) {
-                // There are no more valid nodes in hc2
+                // There are no more valid GraphElements in hc2
                 return null;
             }
         } else {
@@ -84,7 +102,7 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
      * Returns the joint morphisms that contains only a single equivalence more.
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
      * according to the canonical ordering of node equivalences.
-     * The isNextPairCompatible method is used to only include compatible nodes
+     * The isNextPairCompatible method is used to only include compatible GraphElement
      */
     protected Collection<JointMorphism> getAllNextEquivalences() {
         Pair<GraphElement, GraphElement> nextNodeEquivalence;
@@ -120,7 +138,7 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     abstract boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair);
 
     /**
-     * Returns the
+     * Returns the JointMorphism if the newPair is added to the equivlaneces of this object.
      * @param newPair
      * @return
      */

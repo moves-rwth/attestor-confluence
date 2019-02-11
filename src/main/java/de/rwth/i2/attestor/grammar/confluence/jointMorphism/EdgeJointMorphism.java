@@ -1,10 +1,12 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
+import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 
@@ -18,18 +20,19 @@ import java.util.Map;
 public class EdgeJointMorphism extends JointMorphism {
     final private Map<Integer, Integer> mapNodeHc1ToHc2, mapNodeHc2ToHc1;
 
-    public EdgeJointMorphism(Collection<GraphElement> l1, Collection<GraphElement> l2) {
-        super(l1, l2);
-        this.mapNodeHc1ToHc2 = new HashMap<>();
-        this.mapNodeHc2ToHc1 = new HashMap<>();
-    }
+    Collection<GraphElement>
 
     /**
      * Returns a new empty JointMorphism
      * @param context
      */
     public EdgeJointMorphism(HeapConfigurationContext context) {
+        super(context, edges1, edges2);
         // TODO: Implement
+        // TODO: Get edges of hc1 and hc2
+        Collection<GraphElement> edges1 = new HashSet<>();
+        Collection<GraphElement> edges2 = new HashSet<>();
+
     }
 
     protected EdgeJointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) {
@@ -80,7 +83,7 @@ public class EdgeJointMorphism extends JointMorphism {
     }
 
     @Override
-    JointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair) {
+    EdgeJointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair) {
 
         return null;  // TODO: Implement
     }
