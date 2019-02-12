@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
@@ -14,6 +15,10 @@ public class NodeJointMorphism extends JointMorphism {
         super(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
     }
 
+    private NodeJointMorphism(NodeJointMorphism oldNodeJointMorphism, Pair<GraphElement, GraphElement> newPair) {
+        super(oldNodeJointMorphism, newPair);
+    }
+
     @Override
     boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair) {
         int id1 = newPair.first().getPrivateId();
@@ -24,18 +29,46 @@ public class NodeJointMorphism extends JointMorphism {
         Type t1 = (Type) getContext().getGraph1().getNodeLabel(id1);
         Type t2 = (Type) getContext().getGraph2().getNodeLabel(id2);
 
-        // 2. Check
-        return t1.matches(t2);
+        if (!t1.matches(t2)) {
+            return false;
+        }
+
+        // 2. Check compatibility with edges not in the intersection
+        /*
+        TODO:  Check that the additional node equivalence does not connect an edge not in the intersection
+        TODO:  with a node in other graph internally
+         */
+
+        return true;
     }
 
     @Override
     NodeJointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair) {
-        return null; // TODO: Implement
+        return new NodeJointMorphism(this, newPair);
     }
 
     public static NodeJointMorphism getNodeJointMorphism(HeapConfigurationContext context,
                                                          EdgeJointMorphism edgeJointMorphism) {
-        // TODO: compute the actual NodeJointMorphism
+        Collection<GraphElement> l1Remaining, l2Remaining;
+        Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
+
+        // Get induced node equivalences from edgeJointMorphism
+        mapL1toL2 = edgeJointMorphism.getNodeMapHC1ToHC2();
+        mapL2toL1 = edgeJointMorphism.getNodeMapHC2ToHC1();
+
+        // Get all remaining nodes
+        l1Remaining = getNodes(context.getGraph1(), mapL1toL2.keySet());
+        l2Remaining = getNodes(context.getGraph2(), mapL2toL1.keySet());
+
+        // Return the NodeJointMorphism
+        return new NodeJointMorphism(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
+    }
+
+    /**
+     * Returns a collection of all nodes in the given graph excluding the specified nodes.
+     */
+    private static Collection<GraphElement> getNodes(Graph graph, Collection<GraphElement> excludeNodes) {
+        // TODO
         return null;
     }
 }

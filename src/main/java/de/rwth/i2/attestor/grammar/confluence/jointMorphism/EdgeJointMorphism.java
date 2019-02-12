@@ -6,7 +6,6 @@ import de.rwth.i2.attestor.util.Pair;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 
@@ -18,7 +17,7 @@ import java.util.Map;
  *
  */
 public class EdgeJointMorphism extends JointMorphism {
-    final private Map<Integer, Integer> mapNodeHc1ToHc2, mapNodeHc2ToHc1;  // TODO: We probably only need one map
+    final private Map<GraphElement, GraphElement> mapNodeHc1ToHc2, mapNodeHc2ToHc1;  // TODO: We probably only need one map
 
     /**
      * Returns a new empty JointMorphism
@@ -40,6 +39,14 @@ public class EdgeJointMorphism extends JointMorphism {
 
         // 2. Add node equivalences induced by the added edge
         // TODO
+    }
+
+    public Map<GraphElement, GraphElement> getNodeMapHC1ToHC2() {
+        return new HashMap<>(this.mapNodeHc1ToHc2);
+    }
+
+    public Map<GraphElement, GraphElement> getNodeMapHC2ToHC1() {
+        return new HashMap<>(this.mapNodeHc2ToHc1);
     }
 
     @Override
