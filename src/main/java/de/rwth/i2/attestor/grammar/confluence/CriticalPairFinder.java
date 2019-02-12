@@ -75,8 +75,10 @@ public class CriticalPairFinder {
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
 
-        for (JointMorphism edgeMorphism : new EdgeJointMorphism(context)) {
-            for (JointMorphism nodeMorphism : new NodeJointMorphism(context, (EdgeJointMorphism) edgeMorphism)) {
+        for (JointMorphism edgeMorphism : EdgeJointMorphism.getEdgeJointMorphism(context)) {
+            // Check if the current edgeMorphism allows for compatible node morphisms
+            // TODO: All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph
+            for (JointMorphism nodeMorphism : NodeJointMorphism.getNodeJointMorphism(context, (EdgeJointMorphism) edgeMorphism)) {
                 // Found a compatible joint morphism
                 // 1. Compute the joint graph
                 // TODO

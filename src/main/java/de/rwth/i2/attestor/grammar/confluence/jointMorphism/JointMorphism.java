@@ -25,19 +25,9 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
     private final HeapConfigurationContext context;
 
-
-    /**
-     *
-     * @param context
-     */
-    protected JointMorphism(HeapConfigurationContext context) {
-        this.context = context;
-    }
-
-
-
-    protected JointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1Remaining, Collection<GraphElement> l2Remaining,
-                  Map<GraphElement, GraphElement> mapL1toL2, Map<GraphElement, GraphElement> mapL2toL1) {
+    protected JointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
+                            Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
+                            Map<GraphElement, GraphElement> mapL2toL1) {
         this.context = context;
         this.l1Remaining = new TreeSet<>(l1Remaining);
         this.l2Remaining = new TreeSet<>(l2Remaining);
@@ -124,6 +114,10 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
         return result;
     }
 
+    protected HeapConfigurationContext getContext() {
+        return context;
+    }
+
     @Override
     public Iterator<JointMorphism> iterator() {
         return new JointMorphismIterator(this);
@@ -138,7 +132,7 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     abstract boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair);
 
     /**
-     * Returns the JointMorphism if the newPair is added to the equivlaneces of this object.
+     * Returns the JointMorphism if the newPair is added to the equivalences of this object.
      * @param newPair
      * @return
      */
