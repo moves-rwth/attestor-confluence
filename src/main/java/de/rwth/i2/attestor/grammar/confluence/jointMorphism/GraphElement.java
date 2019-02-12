@@ -1,6 +1,12 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 
+import de.rwth.i2.attestor.graph.morphism.Graph;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * Represents nodes, nonterminal edges, variables and selectors from used in {@link de.rwth.i2.attestor.graph.morphism.Graph}.
  *
@@ -17,14 +23,6 @@ public class GraphElement implements Comparable<GraphElement> {
      */
     private final int privateId;
 
-    public int getPrivateId() {
-        return privateId;
-    }
-
-    public String getSelectorLabel() {
-        return selectorLabel;
-    }
-
     /**
      * In case of a selector edge this contains the label of the selector. Otherwise this is null.
      */
@@ -33,6 +31,14 @@ public class GraphElement implements Comparable<GraphElement> {
     public GraphElement(int privateId, String selectorLabel) {
         this.privateId = privateId;
         this.selectorLabel = selectorLabel;
+    }
+
+    public int getPrivateId() {
+        return privateId;
+    }
+
+    public String getSelectorLabel() {
+        return selectorLabel;
     }
 
     @Override
@@ -60,4 +66,36 @@ public class GraphElement implements Comparable<GraphElement> {
 
         }
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(privateId, selectorLabel);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GraphElement) {
+            GraphElement otherGraphElement = (GraphElement) o;
+            return this.compareTo(otherGraphElement) == 0;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns a list of GraphElements that represent the nodes connected to this edge. This object must be an edge in
+     * the given graph.
+     *
+     * @param graph  A graph in which this object must be an edge.
+     * @return
+     */
+    public List<GraphElement> getConnectedNodes(Graph graph) {
+        List<GraphElement> result = new ArrayList<>();
+        graph.getSuccessorsOf(privateId).forEach(nodePid -> {
+            result.add(new GraphElement(nodePid, null));
+            return true;
+        });
+        return result;
+    }
+
 }

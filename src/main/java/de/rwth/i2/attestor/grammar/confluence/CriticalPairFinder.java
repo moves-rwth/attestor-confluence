@@ -4,11 +4,7 @@ import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
 import de.rwth.i2.attestor.graph.Nonterminal;
-import de.rwth.i2.attestor.graph.SelectorLabel;
-import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
-import de.rwth.i2.attestor.graph.morphism.Graph;
-import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
@@ -78,6 +74,7 @@ public class CriticalPairFinder {
         for (JointMorphism edgeMorphism : EdgeJointMorphism.getEdgeJointMorphism(context)) {
             // Check if the current edgeMorphism allows for compatible node morphisms
             // TODO: All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph
+
             for (JointMorphism nodeMorphism : NodeJointMorphism.getNodeJointMorphism(context, (EdgeJointMorphism) edgeMorphism)) {
                 // Found a compatible joint morphism
                 // 1. Compute the joint graph
@@ -94,66 +91,5 @@ public class CriticalPairFinder {
             }
         }
     }
-
-
-    /**
-     * Converts the nodes of a {@link HeapConfiguration} into a collection of {@link GraphElement}.
-     *
-     * @param hc The input heap configuration (must be of type {@link Graph})
-     * @return A collection containing all nodes of hc
-     */
-    private Collection<GraphElement> getNodes(HeapConfiguration hc) {
-        if (!(hc instanceof Graph)) {
-            throw new IllegalArgumentException("HeapConfiguration not of type Graph");
-        }
-        Collection<GraphElement> result = new ArrayList<>();
-        Graph graph = (Graph) hc;
-        for (int privateId = 0; privateId < graph.size(); privateId++) {
-            NodeLabel label = graph.getNodeLabel(privateId);
-            if (label instanceof Type) {
-                // The current privateId corresponds to a node in hc
-                result.add(new GraphElement(privateId, null));
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Converts the nonterminal edges and selectors of a {@link HeapConfiguration} into a collection of
-     * {@link GraphElement}.
-     *
-     * @param hc The input heap configuration (must be of type {@link Graph})
-     * @return A collection containing all nonterminal edges and selectors of hc
-     */
-    private Collection<GraphElement> getEdges(HeapConfiguration hc) {
-        if (!(hc instanceof Graph)) {
-            throw new IllegalArgumentException("HeapConfiguration not of type Graph");
-        }
-        Collection<GraphElement> result = new ArrayList<>();
-        Graph graph = (Graph) hc;
-        for (int privateId = 0; privateId < graph.size(); privateId++) {
-            NodeLabel label = graph.getNodeLabel(privateId);
-            if (label instanceof Nonterminal) {
-                // The current privateId corresponds to a nonterminal edge
-                result.add(new GraphElement(privateId, null));
-            } else if (label instanceof Type) {
-                // The current privateId is a node. Check if there are any outgoing selectors
-                final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
-                graph.getSuccessorsOf(privateId).forEach(successor -> {
-                   for (Object edgeLabel : graph.getEdgeLabel(finalPrivateId, successor)) {
-                       if (edgeLabel instanceof SelectorLabel) {
-                           // There is a selector from privateId to successor
-                           String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
-                           result.add(new GraphElement(finalPrivateId, selectorLabel));
-                       }
-                   }
-                   return true;
-                });
-            }
-        }
-        return result;
-    }
-
-
 
 }

@@ -1,12 +1,13 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.Nonterminal;
+import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
+import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -81,7 +82,23 @@ public class EdgeJointMorphism extends JointMorphism {
         }
 
         // 2. Consider induced node equivalences
-        // TODO
+        List<GraphElement> connectedNodesHC1, connectedNodesHC2;
+        // Calculate the connected nodes (the lists must have same length because the types match)
+        connectedNodesHC1 = newPair.first().getConnectedNodes(getContext().getGraph1());
+        connectedNodesHC2 = newPair.second().getConnectedNodes(getContext().getGraph2());
+        for (int i = 0; i < connectedNodesHC1.size(); i++) {
+            if ()
+        }
+        // TODO: Continue implementation
+        getContext().getGraph1().getSuccessorsOf();
+        if (mapNodeHc1ToHc2.containsKey(id1)) {
+            return mapNodeHc1ToHc2.get(id1).equals(id2);
+        } else if (mapNodeHc2ToHc1.containsKey(id2)) {
+            // The node cannot map to the correct key, because id1 is not even in any equivalence
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
@@ -109,7 +126,27 @@ public class EdgeJointMorphism extends JointMorphism {
     }
 
     private static Collection<GraphElement> getEdgesOfGraph(Graph graph) {
-        // TODO: Extract edges
-        return null;
+        Collection<GraphElement> result = new ArrayList<>();
+        for (int privateId = 0; privateId < graph.size(); privateId++) {
+            NodeLabel label = graph.getNodeLabel(privateId);
+            if (label instanceof Nonterminal) {
+                // The current privateId corresponds to a nonterminal edge
+                result.add(new GraphElement(privateId, null));
+            } else if (label instanceof Type) {
+                // The current privateId is a node. Check if there are any outgoing selectors
+                final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
+                graph.getSuccessorsOf(privateId).forEach(successor -> {
+                    for (Object edgeLabel : graph.getEdgeLabel(finalPrivateId, successor)) {
+                        if (edgeLabel instanceof SelectorLabel) {
+                            // There is a selector from privateId to successor
+                            String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
+                            result.add(new GraphElement(finalPrivateId, selectorLabel));
+                        }
+                    }
+                    return true;
+                });
+            }
+        }
+        return result;
     }
 }

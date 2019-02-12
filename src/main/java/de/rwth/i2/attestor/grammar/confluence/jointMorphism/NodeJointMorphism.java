@@ -1,9 +1,11 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -68,7 +70,18 @@ public class NodeJointMorphism extends JointMorphism {
      * Returns a collection of all nodes in the given graph excluding the specified nodes.
      */
     private static Collection<GraphElement> getNodes(Graph graph, Collection<GraphElement> excludeNodes) {
-        // TODO
-        return null;
+        Collection<GraphElement> result = new ArrayList<>();
+        for (int privateId = 0; privateId < graph.size(); privateId++) {
+            NodeLabel label = graph.getNodeLabel(privateId);
+            if (label instanceof Type) {
+                // The current privateId corresponds to a node in hc
+                GraphElement newNode = new GraphElement(privateId, null);
+                // Add the node if it is not contained in 'excludeNodes'
+                if (!excludeNodes.contains(newNode)) {
+                    result.add(newNode);
+                }
+            }
+        }
+        return result;
     }
 }
