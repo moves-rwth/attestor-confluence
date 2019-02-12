@@ -39,7 +39,8 @@ public class EdgeJointMorphism extends JointMorphism {
         this.mapNodeHc2ToHc1 = new HashMap<>(oldEdgeJointMorphism.mapNodeHc2ToHc1);
 
         // 2. Add node equivalences induced by the added edge
-        // TODO
+        this.mapNodeHc1ToHc2.put(newEquivalence.first(), newEquivalence.second());
+        this.mapNodeHc2ToHc1.put(newEquivalence.second(), newEquivalence.first());
     }
 
     public Map<GraphElement, GraphElement> getNodeMapHC1ToHC2() {
@@ -62,17 +63,12 @@ public class EdgeJointMorphism extends JointMorphism {
             // Two hyperedges -> Need to get the type
             NodeLabel nodeLabel1 = getContext().getGraph1().getNodeLabel(id1);
             NodeLabel nodeLabel2 = getContext().getGraph2().getNodeLabel(id2);
-            if (nodeLabel1.matches(nodeLabel2)) {
-                return true;
-            } else {
+            if (!nodeLabel1.matches(nodeLabel2)) {
                 return false;
             }
         } else if (label1 != null && label2 != null) {
             // Two selector edges
-            if (label1.equals(label2)) {
-                // The selector edges are the same
-                return true;
-            } else {
+            if (!label1.equals(label2)) {
                 // The selector edges are not the same
                 return false;
             }
@@ -87,18 +83,22 @@ public class EdgeJointMorphism extends JointMorphism {
         connectedNodesHC1 = newPair.first().getConnectedNodes(getContext().getGraph1());
         connectedNodesHC2 = newPair.second().getConnectedNodes(getContext().getGraph2());
         for (int i = 0; i < connectedNodesHC1.size(); i++) {
-            if ()
+            GraphElement connectedNode1, connectedNode2;
+            connectedNode1 = connectedNodesHC1.get(i);
+            connectedNode2 = connectedNodesHC2.get(i);
+            if (mapNodeHc1ToHc2.containsKey(connectedNode1)) {
+                if (!mapNodeHc1ToHc2.get(connectedNode1).equals(connectedNode2)) {
+                    // The connected nodes are already in different equivalence classes
+                    return false;
+                }
+            } else if (mapNodeHc2ToHc1.containsKey(connectedNode2)) {
+                // The node2 is in the intersection, but node1 is not
+                return false;
+            }
         }
-        // TODO: Continue implementation
-        getContext().getGraph1().getSuccessorsOf();
-        if (mapNodeHc1ToHc2.containsKey(id1)) {
-            return mapNodeHc1ToHc2.get(id1).equals(id2);
-        } else if (mapNodeHc2ToHc1.containsKey(id2)) {
-            // The node cannot map to the correct key, because id1 is not even in any equivalence
-            return false;
-        } else {
-            return true;
-        }
+
+        // No violation found
+        return true;
     }
 
     @Override

@@ -32,6 +32,7 @@ public class NodeJointMorphism extends JointMorphism {
         Type t2 = (Type) getContext().getGraph2().getNodeLabel(id2);
 
         if (!t1.matches(t2)) {
+            // The node types do not match
             return false;
         }
 
