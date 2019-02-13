@@ -17,26 +17,26 @@ import java.util.*;
  * If a new edge is added this
  *
  */
-public class EdgeJointMorphism extends JointMorphism {
+public class EdgeOverlapping extends Overlapping {
     final private Map<GraphElement, GraphElement> mapNodeHc1ToHc2, mapNodeHc2ToHc1;  // TODO: We probably only need one map
 
     /**
-     * Returns a new empty JointMorphism
+     * Returns a new empty Overlapping
      * @param context
      */
-    private EdgeJointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
-                              Collection<GraphElement> l2Remaining) {
+    private EdgeOverlapping(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
+                            Collection<GraphElement> l2Remaining) {
         super(context, l1Remaining, l2Remaining);
         // Initialize empty node equivalences
         this.mapNodeHc1ToHc2 = new HashMap<>();
         this.mapNodeHc2ToHc1 = new HashMap<>();
     }
 
-    private EdgeJointMorphism(EdgeJointMorphism oldEdgeJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) {
-        super(oldEdgeJointMorphism, newEquivalence);
+    private EdgeOverlapping(EdgeOverlapping oldEdgeOverlapping, Pair<GraphElement, GraphElement> newEquivalence) {
+        super(oldEdgeOverlapping, newEquivalence);
         // 1. Copy old node equivalences
-        this.mapNodeHc1ToHc2 = new HashMap<>(oldEdgeJointMorphism.mapNodeHc1ToHc2);
-        this.mapNodeHc2ToHc1 = new HashMap<>(oldEdgeJointMorphism.mapNodeHc2ToHc1);
+        this.mapNodeHc1ToHc2 = new HashMap<>(oldEdgeOverlapping.mapNodeHc1ToHc2);
+        this.mapNodeHc2ToHc1 = new HashMap<>(oldEdgeOverlapping.mapNodeHc2ToHc1);
 
         // 2. Add node equivalences induced by the added edge
         this.mapNodeHc1ToHc2.put(newEquivalence.first(), newEquivalence.second());
@@ -102,27 +102,27 @@ public class EdgeJointMorphism extends JointMorphism {
     }
 
     @Override
-    EdgeJointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair) {
-        EdgeJointMorphism newJointMorphism = new EdgeJointMorphism(this, newPair);
-        return newJointMorphism;
+    EdgeOverlapping getOverlapping(Pair<GraphElement, GraphElement> newPair) {
+        EdgeOverlapping newOverlapping = new EdgeOverlapping(this, newPair);
+        return newOverlapping;
     }
 
     /**
-     * Returns the base EdgeJointMorphism object to interate over the joint morphisms of edges between the graphs stored
+     * Returns the base EdgeOverlapping object to interate over the overlapping of edges between the graphs stored
      * in the context.
      * We use a static method instead of a constructor because we need to do some work before calling the super
      * constructor.
      *
-     * @param context This context contains the two HeapConfiguration objects for the joint morphism.
+     * @param context This context contains the two HeapConfiguration objects for the overlapping.
      * @return
      */
-    public static EdgeJointMorphism getEdgeJointMorphism(HeapConfigurationContext context) {
+    public static EdgeOverlapping getEdgeOverlapping(HeapConfigurationContext context) {
         // Extract edges from the graphs
         Collection<GraphElement> edgesGraph1, edgesGraph2;
         edgesGraph1 = getEdgesOfGraph(context.getGraph1());
         edgesGraph2 = getEdgesOfGraph(context.getGraph2());
 
-        return new EdgeJointMorphism(context, edgesGraph1, edgesGraph2);
+        return new EdgeOverlapping(context, edgesGraph1, edgesGraph2);
     }
 
     private static Collection<GraphElement> getEdgesOfGraph(Graph graph) {

@@ -5,12 +5,12 @@ import de.rwth.i2.attestor.util.Pair;
 import java.util.*;
 
 /**
- * A joint-morphism is a morphism from two HCs hc1 and hc2 to an image hc H.
- * It can be directly classified by the nodes of hc1 and hc2 which map to the same node in H. These nodes can be
- * understood as node equivalences. Every joint-morphism therefore corresponds to a specific subset of the product of
- * the node sets of hc1 and hc2.
+ * An overlapping describes how two graphs (HC1 & HC2) overlap to build a new graph H.
+ * It can be directly classified by the nodes of HC1 and HC2 which map to the same node in H. These nodes can be
+ * understood as node equivalences. Every overlapping therefore corresponds to a specific subset of the product of
+ * the node sets of HC1 and HC2.
  */
-public abstract class JointMorphism implements Iterable<JointMorphism> {
+public abstract class Overlapping implements Iterable<Overlapping> {
     /**
      * TODO:
      * The attributes l1Remaining, l2Remaining might better use a different datastructures.
@@ -28,9 +28,9 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
     private final HeapConfigurationContext context;
 
-    protected JointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
-                            Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
-                            Map<GraphElement, GraphElement> mapL2toL1) {
+    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
+                          Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
+                          Map<GraphElement, GraphElement> mapL2toL1) {
         this.context = context;
         this.l1Remaining = new TreeSet<>(l1Remaining);
         this.l2Remaining = new TreeSet<>(l2Remaining);
@@ -40,9 +40,9 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     }
 
     /**
-     * Initializes jointMorphism where all GraphElements are disjoint
+     * Initializes an overlapping where all GraphElements are disjoint
      */
-    protected JointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1, Collection<GraphElement> l2) {
+    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> l1, Collection<GraphElement> l2) {
         this.context = context;
         l1Remaining = new TreeSet<>(l1);
         l2Remaining = new TreeSet<>(l2);
@@ -52,16 +52,16 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     }
 
 
-    protected JointMorphism(JointMorphism oldJointMorphism, Pair<GraphElement, GraphElement> newEquivalence) {
-        context = oldJointMorphism.context;
-        l1Remaining = new TreeSet<>(oldJointMorphism.l1Remaining);
+    protected Overlapping(Overlapping oldOverlapping, Pair<GraphElement, GraphElement> newEquivalence) {
+        context = oldOverlapping.context;
+        l1Remaining = new TreeSet<>(oldOverlapping.l1Remaining);
         l1Remaining.remove(newEquivalence.first());
-        l2Remaining = new TreeSet<>(oldJointMorphism.l2Remaining);
+        l2Remaining = new TreeSet<>(oldOverlapping.l2Remaining);
         l2Remaining.remove(newEquivalence.second());
         lastAddedEquivalence = newEquivalence;
-        mapL1toL2 =  new HashMap<>(oldJointMorphism.mapL1toL2);
+        mapL1toL2 =  new HashMap<>(oldOverlapping.mapL1toL2);
         mapL1toL2.put(newEquivalence.first(), newEquivalence.second());
-        mapL2toL1 =  new HashMap<>(oldJointMorphism.mapL2toL1);
+        mapL2toL1 =  new HashMap<>(oldOverlapping.mapL2toL1);
         mapL2toL1.put(newEquivalence.second(), newEquivalence.first());
     }
 
@@ -92,25 +92,25 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     }
 
     /**
-     * Returns the joint morphisms that contains only a single equivalence more.
+     * Returns the overlapping that contains only a single equivalence more.
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
      * according to the canonical ordering of node equivalences.
      * The isNextPairCompatible method is used to only include compatible GraphElement
      */
-    protected Collection<JointMorphism> getAllNextEquivalences() {
+    protected Collection<Overlapping> getAllNextEquivalences() {
         Pair<GraphElement, GraphElement> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
             if (l1Remaining.isEmpty() || l2Remaining.isEmpty()) {
-                throw new RuntimeException("First joint-morphism cannot be obtained.");
+                throw new RuntimeException("First overlapping cannot be obtained.");
             }
             nextNodeEquivalence = new Pair<>(l1Remaining.first(), l2Remaining.first());
         } else {
             nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
         }
-        Collection<JointMorphism> result = new ArrayList<>();
+        Collection<Overlapping> result = new ArrayList<>();
         while (nextNodeEquivalence != null) {
             if (this.isNextPairCompatible(nextNodeEquivalence)) {
-                result.add(getJointMorphism(nextNodeEquivalence));
+                result.add(getOverlapping(nextNodeEquivalence));
             }
             nextNodeEquivalence = getNextEquivalence(nextNodeEquivalence);
         }
@@ -122,8 +122,8 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
     }
 
     @Override
-    public Iterator<JointMorphism> iterator() {
-        return new JointMorphismIterator(this);
+    public Iterator<Overlapping> iterator() {
+        return new OverlappingIterator(this);
     }
 
     public Map<GraphElement, GraphElement> getMapL1toL2() {
@@ -138,15 +138,15 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
      *
      *
      * @param newPair  A pair of node equivalences
-     * @return true if 'newPair' can be added to this JointMorphism
+     * @return true if 'newPair' can be added to this Overlapping
      */
     abstract boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair);
 
     /**
-     * Returns the JointMorphism if the newPair is added to the equivalences of this object.
+     * Returns the Overlapping if the newPair is added to the equivalences of this object.
      * @param newPair
      * @return
      */
-    abstract JointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair);
+    abstract Overlapping getOverlapping(Pair<GraphElement, GraphElement> newPair);
 
 }

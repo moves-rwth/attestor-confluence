@@ -9,16 +9,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class NodeJointMorphism extends JointMorphism {
+public class NodeOverlapping extends Overlapping {
 
-    private NodeJointMorphism(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
-                              Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
-                              Map<GraphElement, GraphElement> mapL2toL1) {
+    private NodeOverlapping(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
+                            Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
+                            Map<GraphElement, GraphElement> mapL2toL1) {
         super(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
     }
 
-    private NodeJointMorphism(NodeJointMorphism oldNodeJointMorphism, Pair<GraphElement, GraphElement> newPair) {
-        super(oldNodeJointMorphism, newPair);
+    private NodeOverlapping(NodeOverlapping oldNodeOverlapping, Pair<GraphElement, GraphElement> newPair) {
+        super(oldNodeOverlapping, newPair);
     }
 
     @Override
@@ -83,25 +83,25 @@ public class NodeJointMorphism extends JointMorphism {
     }
 
     @Override
-    NodeJointMorphism getJointMorphism(Pair<GraphElement, GraphElement> newPair) {
-        return new NodeJointMorphism(this, newPair);
+    NodeOverlapping getOverlapping(Pair<GraphElement, GraphElement> newPair) {
+        return new NodeOverlapping(this, newPair);
     }
 
-    public static NodeJointMorphism getNodeJointMorphism(HeapConfigurationContext context,
-                                                         EdgeJointMorphism edgeJointMorphism) {
+    public static NodeOverlapping getNodeOverlapping(HeapConfigurationContext context,
+                                                     EdgeOverlapping edgeOverlapping) {
         Collection<GraphElement> l1Remaining, l2Remaining;
         Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
 
-        // Get induced node equivalences from edgeJointMorphism
-        mapL1toL2 = edgeJointMorphism.getNodeMapHC1ToHC2();
-        mapL2toL1 = edgeJointMorphism.getNodeMapHC2ToHC1();
+        // Get induced node equivalences from edgeOverlapping
+        mapL1toL2 = edgeOverlapping.getNodeMapHC1ToHC2();
+        mapL2toL1 = edgeOverlapping.getNodeMapHC2ToHC1();
 
         // Get all remaining nodes
         l1Remaining = getNodes(context.getGraph1(), mapL1toL2.keySet());
         l2Remaining = getNodes(context.getGraph2(), mapL2toL1.keySet());
 
-        // Return the NodeJointMorphism
-        return new NodeJointMorphism(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
+        // Return the NodeOverlapping
+        return new NodeOverlapping(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
     }
 
     /**

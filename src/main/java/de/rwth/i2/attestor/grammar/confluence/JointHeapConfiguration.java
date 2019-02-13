@@ -1,9 +1,8 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeJointMorphism;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.GraphElement;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.HeapConfigurationContext;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeJointMorphism;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeOverlapping;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeOverlapping;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
@@ -23,11 +22,11 @@ public class JointHeapConfiguration {
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
-     * The overlapping is specified by nodeJointMorphism and edgeJointMorphism.
+     * The overlapping is specified by nodeOverlapping and edgeOverlapping.
      */
     public JointHeapConfiguration(HeapConfigurationContext context,
-                                                         NodeJointMorphism nodeJointMorphism,
-                                                         EdgeJointMorphism edgeJointMorphism) {
+                                                         NodeOverlapping nodeOverlapping,
+                                                         EdgeOverlapping edgeOverlapping) {
         Graph graph1 = context.getGraph1();
         Graph graph2 = context.getGraph2();
         // Create a new HeapConfigurationBuilder (by using getEmpty() on one of the existing heap configurations
@@ -43,7 +42,7 @@ public class JointHeapConfiguration {
         addNodes(builder, graph1, mapHC1);
 
         // 1.2 Compute corresponding nodes in mapHC2
-        Map<GraphElement, GraphElement> mapHc1toHc2 = nodeJointMorphism.getMapL1toL2();
+        Map<GraphElement, GraphElement> mapHc1toHc2 = nodeOverlapping.getMapL1toL2();
         for (Map.Entry<GraphElement, Integer> entry: mapHC1.entrySet()) {
             if (mapHc1toHc2.containsKey(entry.getKey())) {
                 // The node in Hc1 corresponds to another node in Hc2
