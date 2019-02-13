@@ -126,6 +126,14 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
         return new JointMorphismIterator(this);
     }
 
+    public Map<GraphElement, GraphElement> getMapL1toL2() {
+        return new HashMap<>(mapL1toL2); // TODO: Maybe don't copy the map here
+    }
+
+    public Map<GraphElement, GraphElement> getMapL2toL1() {
+        return new HashMap<>(mapL2toL1);  // TODO: Maybe don't copy the map here
+    }
+
     /**
      *
      *
