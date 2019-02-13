@@ -1,9 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import de.rwth.i2.attestor.graph.Nonterminal;
-import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
-import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
 
@@ -19,6 +16,12 @@ public abstract class JointMorphism implements Iterable<JointMorphism> {
      * The attributes l1Remaining, l2Remaining might better use a different datastructures.
      * Instead of a TreeSet l2Remaining might better use two hashmaps that points to the successor / predecessor (and to save the smallest element)  --> Constant lookup time instead of O(log(n))
      * And l1Remaining might better use an ArrayList.
+     *
+     * TODO:
+     * Don't copy every information into the new object, but only add the new information. Save a pointer to the previous
+     * element.
+     * Advantage: Faster object creation
+     * Drawback: Slower queries on object
      */
     private final TreeSet<GraphElement> l1Remaining, l2Remaining;
     private final Pair<GraphElement, GraphElement> lastAddedEquivalence;

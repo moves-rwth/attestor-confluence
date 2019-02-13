@@ -23,13 +23,17 @@ public class NodeJointMorphism extends JointMorphism {
 
     @Override
     boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair) {
-        int id1 = newPair.first().getPrivateId();
-        int id2 = newPair.second().getPrivateId();
+        GraphElement node1 = newPair.first();
+        GraphElement node2 = newPair.second();
+        Graph graph1 = getContext().getGraph1();
+        Graph graph2 = getContext().getGraph2();
+        int id1 = node1.getPrivateId();
+        int id2 = node2.getPrivateId();
 
         // 1. Check that the node types match
         // Note: The node labels must be castable to 'Type', because they id1 and id2 belong to nodes (and not edges)
-        Type t1 = (Type) getContext().getGraph1().getNodeLabel(id1);
-        Type t2 = (Type) getContext().getGraph2().getNodeLabel(id2);
+        Type t1 = (Type) graph1.getNodeLabel(id1);
+        Type t2 = (Type) graph2.getNodeLabel(id2);
 
         if (!t1.matches(t2)) {
             // The node types do not match
@@ -37,12 +41,45 @@ public class NodeJointMorphism extends JointMorphism {
         }
 
         // 2. Check compatibility with edges not in the intersection
-        /*
-        TODO:  Check that the additional node equivalence does not connect an edge not in the intersection
-        TODO:  with a node in other graph internally
-         */
+        // Note: The given node cannot be connected to edges in the intersection!
+        if (isNodeViolationPointInGraph(graph1, node1, graph2, node2) ||
+                isNodeViolationPointInGraph(graph2, node2, graph1, node1)) {
+            // There is a violation
+            return false;
+        } else {
+            // There is no violation
+            return true;
+        }
+    }
 
-        return true;
+    /**
+     * For a node that is present in graph1 and graph2 the method returns true if the node is external in the graph2 or
+     * if is not connected to any edges in graph1.
+     *
+     * We require that edges that are in the intersection cannot be connected to the node.
+     *
+     * @param graph1
+     * @param node1  The GraphElement of the node in graph1
+     * @param graph2
+     * @param node2  The GraphElement of the node in graph2
+     */
+    private static boolean isNodeViolationPointInGraph(Graph graph1, GraphElement node1, Graph graph2, GraphElement node2) {
+        // 1. Check if node is internal in graph
+        if (graph2.isExternal(node2.getPrivateId())) {
+            // The node is external -> Cannot be a violation point
+            return false;
+        }
+
+        // 2. Check if there are any connected edges (If we assume single component right hand sides this can be omitted)
+        if (graph1.getPredecessorsOf(node1.getPrivateId()).size() == 0) {
+            // There are no edges connected to the node -> No violation point
+            return false;
+        } else {
+            // There are edges connected to the node
+            // -> Because of requirement (see docstring of method) those edges are not in the intersection
+            // -> Violation
+            return true;
+        }
     }
 
     @Override

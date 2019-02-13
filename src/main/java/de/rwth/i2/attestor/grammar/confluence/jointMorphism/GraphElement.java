@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 
+import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 
 import java.util.ArrayList;
@@ -91,10 +92,32 @@ public class GraphElement implements Comparable<GraphElement> {
      */
     public List<GraphElement> getConnectedNodes(Graph graph) {
         List<GraphElement> result = new ArrayList<>();
-        graph.getSuccessorsOf(privateId).forEach(nodePid -> {
-            result.add(new GraphElement(nodePid, null));
-            return true;
-        });
+        if (selectorLabel == null) {
+            // This is a nonterminal edge -> The successors are the connected nodes
+            graph.getSuccessorsOf(privateId).forEach(nodePid -> {
+                result.add(new GraphElement(nodePid, null));
+                return true;
+            });
+            if (result.size() == 0) {
+                throw new IllegalArgumentException("The GraphElement is not a nonterminal edge in the given graph.");
+            }
+        } else {
+            // selector edge -> The privateId and the successor (edge label equal selectorLabel) are the connected nodes
+            result.add(new GraphElement(privateId, null));
+            graph.getSuccessorsOf(privateId).forEach(successorId -> {
+               for (Object edgeLabel : graph.getEdgeLabel(privateId, successorId)) {
+                   if (edgeLabel instanceof SelectorLabel && ((SelectorLabel) edgeLabel).hasLabel(selectorLabel)) {
+                       // Found the correct successor
+                       result.add(new GraphElement(successorId, null));
+                       return false; // Don't continue the forEach loop
+                   }
+               }
+               return true;  // successorId is not the correct connected node -> Search for other successors
+            });
+            if (result.size() != 2) {
+                throw new IllegalArgumentException("The GraphElement is not a selectorEdge in the given graph.");
+            }
+        }
         return result;
     }
 
