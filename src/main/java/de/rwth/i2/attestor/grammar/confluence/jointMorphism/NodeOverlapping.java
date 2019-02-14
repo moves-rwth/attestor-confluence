@@ -70,7 +70,7 @@ public class NodeOverlapping extends Overlapping {
             return false;
         }
 
-        // 2. Check if there are any connected edges (If we assume single component right hand sides this can be omitted)
+        // 2. Check if there are any connected edges (Only neccessary if isolated nodes are allowed in RHS)
         if (graph1.getPredecessorsOf(node1.getPrivateId()).size() == 0) {
             // There are no edges connected to the node -> No violation point
             return false;

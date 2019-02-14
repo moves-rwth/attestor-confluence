@@ -115,8 +115,40 @@ public class EdgeOverlapping extends Overlapping {
      * All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph
      */
     public boolean isEdgeOverlappingValid() {
-        // TODO
-        return false;
+        // Check if the edge overlapping is valid for the edges not in the intersection in Hc1 and in Hc2
+        return isEdgeOverlappingValid(getHc1Remaining(), getNodeMapHC1ToHC2(), getContext().getGraph1(), getContext().getGraph2()) &&
+                isEdgeOverlappingValid(getHc2Remaining(), getNodeMapHC2ToHC1(), getContext().getGraph2(), getContext().getGraph1());
+    }
+
+    /**
+     * Checks if the edge overlapping is valid for the given remaining edges that are not in the intersection.
+     *
+     * Checks if the nodes connected to the remaining edges (edges not in the intersection) do not correspond to an
+     * internal node in graph2.
+     *
+     * @param remainingEdges1  The remaining edges for which violations are considered
+     * @param mapNode1To2  A map of nodes from graph1 to graph2
+     * @param graph1  The graph that contain the edges from remainingEdges1
+     * @param graph2  The graph that does *not* contain the edges from remainingEdges1
+     * @return  true if there are no violations
+     */
+    private boolean isEdgeOverlappingValid(Collection<GraphElement> remainingEdges1, Map<GraphElement, GraphElement> mapNode1To2, Graph graph1, Graph graph2) {
+        for (GraphElement edge : remainingEdges1) {
+            for (GraphElement connectedNode1 : edge.getConnectedNodes(graph1)) {
+                // Check if connectedNode1 is already in the intersection
+                if (mapNode1To2.containsKey(connectedNode1)) {
+                    // Check if the corresponding other node is external in graph2
+                    GraphElement connectedNode2 = mapNode1To2.get(connectedNode1);
+                    if (!graph2.isExternal(connectedNode2.getPrivateId())) {
+                        // Found a violation. connectedNode1 corresponds to an internal node in graph2.
+                        return false;
+                    }
+
+                }
+
+            }
+        }
+        return true;
     }
 
     /**

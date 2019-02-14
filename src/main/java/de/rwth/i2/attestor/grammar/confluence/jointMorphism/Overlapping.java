@@ -91,6 +91,14 @@ public abstract class Overlapping implements Iterable<Overlapping> {
         return new Pair<>(hc1New, hc2New);
     }
 
+    public TreeSet<GraphElement> getHc1Remaining() {
+        return hc1Remaining;
+    }
+
+    public TreeSet<GraphElement> getHc2Remaining() {
+        return hc2Remaining;
+    }
+
     /**
      * Returns the overlapping that contains only a single equivalence more.
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
