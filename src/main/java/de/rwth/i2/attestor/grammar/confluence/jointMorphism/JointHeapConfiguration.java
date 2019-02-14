@@ -74,7 +74,7 @@ public class JointHeapConfiguration {
             // Check if privId is a node
             NodeLabel nodeLabel = graph.getNodeLabel(privId);
             if (nodeLabel instanceof Type) {
-                GraphElement currentNode = new GraphElement(privId, null);
+                NodeGraphElement currentNode = new NodeGraphElement(privId);
                 if (!pubIdMap.containsKey(currentNode)) {
                     // The node was not been added yet
                     nodeList.clear(1);
@@ -106,10 +106,10 @@ public class JointHeapConfiguration {
                         for (Object edgeLabel : graph.getEdgeLabel(selectorSource, succId)) {
                             if (edgeLabel instanceof SelectorLabel) {
                                 // Get public ids (all nodes must already be present in the pubIdMap)
-                                int pubIdFrom = pubIdMap.get(new GraphElement(selectorSource, null));
-                                int pubIdTo = pubIdMap.get(new GraphElement(succId, null));
+                                int pubIdFrom = pubIdMap.get(new NodeGraphElement(selectorSource));
+                                int pubIdTo = pubIdMap.get(new NodeGraphElement(succId));
                                 SelectorLabel selectorLabel = (SelectorLabel) edgeLabel;
-                                GraphElement selectorElement = new GraphElement(selectorSource, selectorLabel.getLabel());
+                                EdgeGraphElement selectorElement = new EdgeGraphElement(selectorSource, selectorLabel.getLabel());
                                 // If the selector does not yet exist -> add it
                                 if (!pubIdMap.containsKey(selectorElement)) {
                                     // Selector does not yet exist -> add it to builder
@@ -125,7 +125,7 @@ public class JointHeapConfiguration {
                 });
             } else if (nodeLabel instanceof Nonterminal) {
                 // The privId corresponds to a nonterminal -> add the edge
-                GraphElement edgeElement = new GraphElement(privId, null);
+                EdgeGraphElement edgeElement = new EdgeGraphElement(privId, null);
                 if (!pubIdMap.containsKey(edgeElement)) {
                     // Nonterminal edge not yet present -> Add it
                     Nonterminal nonterminal = (Nonterminal) nodeLabel;

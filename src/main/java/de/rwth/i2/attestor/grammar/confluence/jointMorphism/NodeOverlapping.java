@@ -113,7 +113,7 @@ public class NodeOverlapping extends Overlapping {
             NodeLabel label = graph.getNodeLabel(privateId);
             if (label instanceof Type) {
                 // The current privateId corresponds to a node in hc
-                GraphElement newNode = new GraphElement(privateId, null);
+                GraphElement newNode = new NodeGraphElement(privateId);
                 // Add the node if it is not contained in 'excludeNodes'
                 if (!excludeNodes.contains(newNode)) {
                     result.add(newNode);

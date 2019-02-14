@@ -78,10 +78,10 @@ public class EdgeOverlapping extends Overlapping {
         }
 
         // 2. Consider induced node equivalences
-        List<GraphElement> connectedNodesHC1, connectedNodesHC2;
+        List<NodeGraphElement> connectedNodesHC1, connectedNodesHC2;
         // Calculate the connected nodes (the lists must have same length because the types match)
-        connectedNodesHC1 = newPair.first().getConnectedNodes(getContext().getGraph1());
-        connectedNodesHC2 = newPair.second().getConnectedNodes(getContext().getGraph2());
+        connectedNodesHC1 = ((EdgeGraphElement) newPair.first()).getConnectedNodes(getContext().getGraph1());
+        connectedNodesHC2 = ((EdgeGraphElement) newPair.second()).getConnectedNodes(getContext().getGraph2());
         for (int i = 0; i < connectedNodesHC1.size(); i++) {
             GraphElement connectedNode1, connectedNode2;
             connectedNode1 = connectedNodesHC1.get(i);
@@ -134,7 +134,7 @@ public class EdgeOverlapping extends Overlapping {
      */
     private boolean isEdgeOverlappingValid(Collection<GraphElement> remainingEdges1, Map<GraphElement, GraphElement> mapNode1To2, Graph graph1, Graph graph2) {
         for (GraphElement edge : remainingEdges1) {
-            for (GraphElement connectedNode1 : edge.getConnectedNodes(graph1)) {
+            for (GraphElement connectedNode1 : ((EdgeGraphElement) edge).getConnectedNodes(graph1)) {
                 // Check if connectedNode1 is already in the intersection
                 if (mapNode1To2.containsKey(connectedNode1)) {
                     // Check if the corresponding other node is external in graph2
@@ -175,7 +175,7 @@ public class EdgeOverlapping extends Overlapping {
             NodeLabel label = graph.getNodeLabel(privateId);
             if (label instanceof Nonterminal) {
                 // The current privateId corresponds to a nonterminal edge
-                result.add(new GraphElement(privateId, null));
+                result.add(new EdgeGraphElement(privateId, null));
             } else if (label instanceof Type) {
                 // The current privateId is a node. Check if there are any outgoing selectors
                 final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
@@ -184,7 +184,7 @@ public class EdgeOverlapping extends Overlapping {
                         if (edgeLabel instanceof SelectorLabel) {
                             // There is a selector from privateId to successor
                             String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
-                            result.add(new GraphElement(finalPrivateId, selectorLabel));
+                            result.add(new EdgeGraphElement(finalPrivateId, selectorLabel));
                         }
                     }
                     return true;
