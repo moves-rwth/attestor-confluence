@@ -13,9 +13,9 @@ import java.util.*;
 public abstract class Overlapping implements Iterable<Overlapping> {
     /**
      * TODO:
-     * The attributes l1Remaining, l2Remaining might better use a different datastructures.
-     * Instead of a TreeSet l2Remaining might better use two hashmaps that points to the successor / predecessor (and to save the smallest element)  --> Constant lookup time instead of O(log(n))
-     * And l1Remaining might better use an ArrayList.
+     * The attributes hc1Remaining, hc2Remaining might better use a different datastructures.
+     * Instead of a TreeSet hc2Remaining might better use two hashmaps that points to the successor / predecessor (and to save the smallest element)  --> Constant lookup time instead of O(log(n))
+     * And hc1Remaining might better use an ArrayList.
      *
      * TODO:
      * Don't copy every information into the new object, but only add the new information. Save a pointer to the previous
@@ -23,46 +23,46 @@ public abstract class Overlapping implements Iterable<Overlapping> {
      * Advantage: Faster object creation
      * Drawback: Slower queries on object
      */
-    private final TreeSet<GraphElement> l1Remaining, l2Remaining;
+    private final TreeSet<GraphElement> hc1Remaining, hc2Remaining;
     private final Pair<GraphElement, GraphElement> lastAddedEquivalence;
-    private final Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
+    private final Map<GraphElement, GraphElement> mapHC1toHC2, mapHC2toHC1;
     private final HeapConfigurationContext context;
 
-    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
-                          Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
-                          Map<GraphElement, GraphElement> mapL2toL1) {
+    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> hc1Remaining,
+                          Collection<GraphElement> hc2Remaining, Map<GraphElement, GraphElement> mapHC1toHC2,
+                          Map<GraphElement, GraphElement> mapHC2toHC1) {
         this.context = context;
-        this.l1Remaining = new TreeSet<>(l1Remaining);
-        this.l2Remaining = new TreeSet<>(l2Remaining);
-        this.mapL1toL2 = mapL1toL2;
-        this.mapL2toL1 = mapL2toL1;
+        this.hc1Remaining = new TreeSet<>(hc1Remaining);
+        this.hc2Remaining = new TreeSet<>(hc2Remaining);
+        this.mapHC1toHC2 = mapHC1toHC2;
+        this.mapHC2toHC1 = mapHC2toHC1;
         this.lastAddedEquivalence = null;
     }
 
     /**
      * Initializes an overlapping where all GraphElements are disjoint
      */
-    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> l1, Collection<GraphElement> l2) {
+    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> hc1, Collection<GraphElement> hc2) {
         this.context = context;
-        l1Remaining = new TreeSet<>(l1);
-        l2Remaining = new TreeSet<>(l2);
+        hc1Remaining = new TreeSet<>(hc1);
+        hc2Remaining = new TreeSet<>(hc2);
         lastAddedEquivalence = null;
-        mapL1toL2 =  new HashMap<>();
-        mapL2toL1 =  new HashMap<>();
+        mapHC1toHC2 =  new HashMap<>();
+        mapHC2toHC1 =  new HashMap<>();
     }
 
 
     protected Overlapping(Overlapping oldOverlapping, Pair<GraphElement, GraphElement> newEquivalence) {
         context = oldOverlapping.context;
-        l1Remaining = new TreeSet<>(oldOverlapping.l1Remaining);
-        l1Remaining.remove(newEquivalence.first());
-        l2Remaining = new TreeSet<>(oldOverlapping.l2Remaining);
-        l2Remaining.remove(newEquivalence.second());
+        hc1Remaining = new TreeSet<>(oldOverlapping.hc1Remaining);
+        hc1Remaining.remove(newEquivalence.first());
+        hc2Remaining = new TreeSet<>(oldOverlapping.hc2Remaining);
+        hc2Remaining.remove(newEquivalence.second());
         lastAddedEquivalence = newEquivalence;
-        mapL1toL2 =  new HashMap<>(oldOverlapping.mapL1toL2);
-        mapL1toL2.put(newEquivalence.first(), newEquivalence.second());
-        mapL2toL1 =  new HashMap<>(oldOverlapping.mapL2toL1);
-        mapL2toL1.put(newEquivalence.second(), newEquivalence.first());
+        mapHC1toHC2 =  new HashMap<>(oldOverlapping.mapHC1toHC2);
+        mapHC1toHC2.put(newEquivalence.first(), newEquivalence.second());
+        mapHC2toHC1 =  new HashMap<>(oldOverlapping.mapHC2toHC1);
+        mapHC2toHC1.put(newEquivalence.second(), newEquivalence.first());
     }
 
     /**
@@ -70,25 +70,25 @@ public abstract class Overlapping implements Iterable<Overlapping> {
      * If there is no successor returns null
      */
     private Pair<GraphElement, GraphElement> getNextEquivalence(Pair<GraphElement, GraphElement> oldPair) {
-        GraphElement l1New, l2New;
-        l2New = l2Remaining.higher(oldPair.second());
-        if (l2New == null) {
+        GraphElement hc1New, hc2New;
+        hc2New = hc2Remaining.higher(oldPair.second());
+        if (hc2New == null) {
             // If there is no higher node in hc2 the next equivalence we look for a higher node in hc1
-            l1New = l1Remaining.higher(oldPair.first());
-            if (l1New == null) {
+            hc1New = hc1Remaining.higher(oldPair.first());
+            if (hc1New == null) {
                 // There are no more valid GraphElements in hc1
                 return null;
             }
             // Start again by the lowest available node in hc2
-            l2New = l2Remaining.first();
-            if (l2New == null) {
+            hc2New = hc2Remaining.first();
+            if (hc2New == null) {
                 // There are no more valid GraphElements in hc2
                 return null;
             }
         } else {
-            l1New = oldPair.first();
+            hc1New = oldPair.first();
         }
-        return new Pair<>(l1New, l2New);
+        return new Pair<>(hc1New, hc2New);
     }
 
     /**
@@ -100,10 +100,10 @@ public abstract class Overlapping implements Iterable<Overlapping> {
     protected Collection<Overlapping> getAllNextEquivalences() {
         Pair<GraphElement, GraphElement> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
-            if (l1Remaining.isEmpty() || l2Remaining.isEmpty()) {
+            if (hc1Remaining.isEmpty() || hc2Remaining.isEmpty()) {
                 throw new RuntimeException("First overlapping cannot be obtained.");
             }
-            nextNodeEquivalence = new Pair<>(l1Remaining.first(), l2Remaining.first());
+            nextNodeEquivalence = new Pair<>(hc1Remaining.first(), hc2Remaining.first());
         } else {
             nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
         }
@@ -126,12 +126,12 @@ public abstract class Overlapping implements Iterable<Overlapping> {
         return new OverlappingIterator(this);
     }
 
-    public Map<GraphElement, GraphElement> getMapL1toL2() {
-        return new HashMap<>(mapL1toL2); // TODO: Maybe don't copy the map here
+    public Map<GraphElement, GraphElement> getMapHC1toHC2() {
+        return new HashMap<>(mapHC1toHC2); // TODO: Maybe don't copy the map here
     }
 
-    public Map<GraphElement, GraphElement> getMapL2toL1() {
-        return new HashMap<>(mapL2toL1);  // TODO: Maybe don't copy the map here
+    public Map<GraphElement, GraphElement> getMapHC2toHC1() {
+        return new HashMap<>(mapHC2toHC1);  // TODO: Maybe don't copy the map here
     }
 
     /**

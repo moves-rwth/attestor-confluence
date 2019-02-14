@@ -1,8 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeOverlapping;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeOverlapping;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
@@ -27,6 +25,7 @@ public class JointHeapConfiguration {
     public JointHeapConfiguration(HeapConfigurationContext context,
                                                          NodeOverlapping nodeOverlapping,
                                                          EdgeOverlapping edgeOverlapping) {
+        this.context = context;
         Graph graph1 = context.getGraph1();
         Graph graph2 = context.getGraph2();
         // Create a new HeapConfigurationBuilder (by using getEmpty() on one of the existing heap configurations
@@ -42,13 +41,7 @@ public class JointHeapConfiguration {
         addNodes(builder, graph1, mapHC1);
 
         // 1.2 Compute corresponding nodes in mapHC2
-        Map<GraphElement, GraphElement> mapHc1toHc2 = nodeOverlapping.getMapL1toL2();
-        for (Map.Entry<GraphElement, Integer> entry: mapHC1.entrySet()) {
-            if (mapHc1toHc2.containsKey(entry.getKey())) {
-                // The node in Hc1 corresponds to another node in Hc2
-                mapHC2.put(mapHc1toHc2.get(entry.getKey()), entry.getValue());
-            }
-        }
+        computeCorrespondingElements(mapHC1, nodeOverlapping.getMapHC1toHC2(), mapHC2);
 
         // 1.3 Add remaining nodes that are exclusively in graph2
         addNodes(builder, graph2, mapHC2);
@@ -59,10 +52,10 @@ public class JointHeapConfiguration {
         addEdges(builder, graph1, mapHC1);
 
         // 2.2 Compute corresponding edges
-        // TODO
+        computeCorrespondingElements(mapHC1, edgeOverlapping.getNodeMapHC1ToHC2(), mapHC2);
 
         // 2.3 Add remaining edges from graph2
-        // TODO: Add edges from both graphs
+        addEdges(builder, graph2, mapHC2);
 
         // 3. Build the completed HeapConfiguration
         jointHeapConfiguration = builder.build();
@@ -126,12 +119,17 @@ public class JointHeapConfiguration {
     }
 
     /**
+     * Adds entries to the valuePubIdMap that correspond to the overlapping graph elements from the overlapping that are already present in the keyPubIdMap
      *
-     * @param keyPubIdMap  Maps GraphElements (that are keys in the overlapping) to public ids in the joint heap configuration
+     * @param keyPubIdMap  Maps GraphElements (that are keys in the overlapping) to public ids in the joint heap configuration (its key-set must contain at least the keys of the overlapping)
      * @param overlapping  Maps GraphElements from one graph to equivalent GraphElements of the other graph
-     * @param valuePubIdMap Maps GraphElements (that are values in the overlapping) to public ids in the joint heap configuration
+     * @param valuePubIdMap Maps GraphElements (that are values in the overlapping) to public ids in the joint heap configuration (here we add corresponding entries that exist in the keyPubIdMap)
      */
     private static void computeCorrespondingElements(Map<GraphElement, Integer> keyPubIdMap, Map<GraphElement, GraphElement> overlapping, Map<GraphElement, Integer> valuePubIdMap) {
-        // TODO
+        for (Map.Entry<GraphElement, GraphElement> entry: overlapping.entrySet()) {
+            int pubId = keyPubIdMap.get(entry.getKey());  // The value must be present
+            // Add pubId in valuePubIdMap for the corresponding GraphElement
+            valuePubIdMap.put(entry.getValue(), pubId);
+        }
     }
 }

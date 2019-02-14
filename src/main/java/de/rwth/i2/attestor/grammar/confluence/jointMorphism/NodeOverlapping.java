@@ -11,10 +11,10 @@ import java.util.Map;
 
 public class NodeOverlapping extends Overlapping {
 
-    private NodeOverlapping(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
-                            Collection<GraphElement> l2Remaining, Map<GraphElement, GraphElement> mapL1toL2,
-                            Map<GraphElement, GraphElement> mapL2toL1) {
-        super(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
+    private NodeOverlapping(HeapConfigurationContext context, Collection<GraphElement> hc1Remaining,
+                            Collection<GraphElement> hc2Remaining, Map<GraphElement, GraphElement> mapHc1toHc2,
+                            Map<GraphElement, GraphElement> mapHc2toHc1) {
+        super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
     }
 
     private NodeOverlapping(NodeOverlapping oldNodeOverlapping, Pair<GraphElement, GraphElement> newPair) {
@@ -89,19 +89,19 @@ public class NodeOverlapping extends Overlapping {
 
     public static NodeOverlapping getNodeOverlapping(HeapConfigurationContext context,
                                                      EdgeOverlapping edgeOverlapping) {
-        Collection<GraphElement> l1Remaining, l2Remaining;
-        Map<GraphElement, GraphElement> mapL1toL2, mapL2toL1;
+        Collection<GraphElement> hc1Remaining, hc2Remaining;
+        Map<GraphElement, GraphElement> mapHc1toHc2, mapHc2toHc1;
 
         // Get induced node equivalences from edgeOverlapping
-        mapL1toL2 = edgeOverlapping.getNodeMapHC1ToHC2();
-        mapL2toL1 = edgeOverlapping.getNodeMapHC2ToHC1();
+        mapHc1toHc2 = edgeOverlapping.getNodeMapHC1ToHC2();
+        mapHc2toHc1 = edgeOverlapping.getNodeMapHC2ToHC1();
 
         // Get all remaining nodes
-        l1Remaining = getNodes(context.getGraph1(), mapL1toL2.keySet());
-        l2Remaining = getNodes(context.getGraph2(), mapL2toL1.keySet());
+        hc1Remaining = getNodes(context.getGraph1(), mapHc1toHc2.keySet());
+        hc2Remaining = getNodes(context.getGraph2(), mapHc2toHc1.keySet());
 
         // Return the NodeOverlapping
-        return new NodeOverlapping(context, l1Remaining, l2Remaining, mapL1toL2, mapL2toL1);
+        return new NodeOverlapping(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
     }
 
     /**

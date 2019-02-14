@@ -24,9 +24,9 @@ public class EdgeOverlapping extends Overlapping {
      * Returns a new empty Overlapping
      * @param context
      */
-    private EdgeOverlapping(HeapConfigurationContext context, Collection<GraphElement> l1Remaining,
-                            Collection<GraphElement> l2Remaining) {
-        super(context, l1Remaining, l2Remaining);
+    private EdgeOverlapping(HeapConfigurationContext context, Collection<GraphElement> hc1Remaining,
+                            Collection<GraphElement> hc2Remaining) {
+        super(context, hc1Remaining, hc2Remaining);
         // Initialize empty node equivalences
         this.mapNodeHc1ToHc2 = new HashMap<>();
         this.mapNodeHc2ToHc1 = new HashMap<>();
@@ -55,20 +55,20 @@ public class EdgeOverlapping extends Overlapping {
     boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair) {
         int id1 = newPair.first().getPrivateId();
         int id2 = newPair.second().getPrivateId();
-        String label1 = newPair.first().getSelectorLabel();
-        String label2 = newPair.second().getSelectorLabel();
+        String labeHc1 = newPair.first().getSelectorLabel();
+        String labeHc2 = newPair.second().getSelectorLabel();
 
         // 1. Check if the edge types are compatible
-        if (label1 == null && label2 == null) {
+        if (labeHc1 == null && labeHc2 == null) {
             // Two hyperedges -> Need to get the type
-            NodeLabel nodeLabel1 = getContext().getGraph1().getNodeLabel(id1);
-            NodeLabel nodeLabel2 = getContext().getGraph2().getNodeLabel(id2);
-            if (!nodeLabel1.matches(nodeLabel2)) {
+            NodeLabel nodeLabeHc1 = getContext().getGraph1().getNodeLabel(id1);
+            NodeLabel nodeLabeHc2 = getContext().getGraph2().getNodeLabel(id2);
+            if (!nodeLabeHc1.matches(nodeLabeHc2)) {
                 return false;
             }
-        } else if (label1 != null && label2 != null) {
+        } else if (labeHc1 != null && labeHc2 != null) {
             // Two selector edges
-            if (!label1.equals(label2)) {
+            if (!labeHc1.equals(labeHc2)) {
                 // The selector edges are not the same
                 return false;
             }
