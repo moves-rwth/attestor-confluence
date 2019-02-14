@@ -1,11 +1,5 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-
-import de.rwth.i2.attestor.graph.SelectorLabel;
-import de.rwth.i2.attestor.graph.morphism.Graph;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
