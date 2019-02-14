@@ -108,7 +108,19 @@ public class EdgeOverlapping extends Overlapping {
     }
 
     /**
-     * Returns the base EdgeOverlapping object to interate over the overlapping of edges between the graphs stored
+     * Checks if the current edge overlapping allows for compatible whole overlappings.
+     * This method checks all remaining edges to see if there are any violations.
+     * If the method returns true one can start to look for node overlappings based on this edge overlapping.
+     *
+     * All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph
+     */
+    public boolean isEdgeOverlappingValid() {
+        // TODO
+        return false;
+    }
+
+    /**
+     * Returns the base EdgeOverlapping object to iterate over the overlapping of edges between the graphs stored
      * in the context.
      * We use a static method instead of a constructor because we need to do some work before calling the super
      * constructor.

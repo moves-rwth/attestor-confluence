@@ -1,6 +1,5 @@
-package de.rwth.i2.attestor.grammar.confluence;
+package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
@@ -14,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JointHeapConfiguration {
-    Map<GraphElement, Integer> mapHC1, mapHC2;
+    Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
     HeapConfigurationContext context;
     HeapConfiguration jointHeapConfiguration;
 
@@ -33,29 +32,29 @@ public class JointHeapConfiguration {
         HeapConfigurationBuilder builder = context.getHc1().getEmpty().builder();
 
         // Create maps to keep track of which GraphElement maps to which public ID in the new HeapConfiguration
-        mapHC1 = new HashMap<>();
-        mapHC2 = new HashMap<>();
+        hc1PubIdMap = new HashMap<>();
+        hc2PubIdMap = new HashMap<>();
 
         // 1. Add nodes
         // 1.1 Add all nodes from graph1
-        addNodes(builder, graph1, mapHC1);
+        addNodes(builder, graph1, hc1PubIdMap);
 
-        // 1.2 Compute corresponding nodes in mapHC2
-        computeCorrespondingElements(mapHC1, nodeOverlapping.getMapHC1toHC2(), mapHC2);
+        // 1.2 Compute corresponding nodes in hc2PubIdMap
+        computeCorrespondingElements(hc1PubIdMap, nodeOverlapping.getMapHC1toHC2(), hc2PubIdMap);
 
         // 1.3 Add remaining nodes that are exclusively in graph2
-        addNodes(builder, graph2, mapHC2);
+        addNodes(builder, graph2, hc2PubIdMap);
 
 
         // 2. Add edges
         // 2.1 Add all edges from graph1
-        addEdges(builder, graph1, mapHC1);
+        addEdges(builder, graph1, hc1PubIdMap);
 
         // 2.2 Compute corresponding edges
-        computeCorrespondingElements(mapHC1, edgeOverlapping.getNodeMapHC1ToHC2(), mapHC2);
+        computeCorrespondingElements(hc1PubIdMap, edgeOverlapping.getNodeMapHC1ToHC2(), hc2PubIdMap);
 
         // 2.3 Add remaining edges from graph2
-        addEdges(builder, graph2, mapHC2);
+        addEdges(builder, graph2, hc2PubIdMap);
 
         // 3. Build the completed HeapConfiguration
         jointHeapConfiguration = builder.build();
@@ -89,29 +88,51 @@ public class JointHeapConfiguration {
     /**
      * Adds edges from graph that are not yet in the pubIdMap to the builder.
      * It stores which graph edges correspond to which pubId and saves the mapping in the pubIdMap
+     *
+     * @param builder  The new edges are added to this builder.
+     * @param graph  The graph from which the edges are added.
+     * @param pubIdMap  Must already contain the mappings from all nodes to pubId.
      */
     private static void addEdges(HeapConfigurationBuilder builder, Graph graph, Map<GraphElement, Integer> pubIdMap) {
+        // Iterate over all elements in the graph
         for (int privId = 0; privId < graph.size(); privId++) {
             NodeLabel nodeLabel = graph.getNodeLabel(privId);
             if (nodeLabel instanceof Type) {
-                // The privId corresponds to a node -> check for outgoing selectors
+                // The privId corresponds to a node -> find all outgoing selectors
                 final int selectorSource = privId;  // Lambda expression below needs final variable
                 graph.getSuccessorsOf(selectorSource).forEach(succId -> {
                     if (graph.getNodeLabel(succId) instanceof Type) {
                         // There is a selector edge from privId to succId
                         for (Object edgeLabel : graph.getEdgeLabel(selectorSource, succId)) {
                             if (edgeLabel instanceof SelectorLabel) {
-                                // Add the selector with edgeLabel
-                                // TODO
+                                // Get public ids (all nodes must already be present in the pubIdMap)
+                                int pubIdFrom = pubIdMap.get(new GraphElement(selectorSource, null));
+                                int pubIdTo = pubIdMap.get(new GraphElement(succId, null));
+                                SelectorLabel selectorLabel = (SelectorLabel) edgeLabel;
+                                GraphElement selectorElement = new GraphElement(selectorSource, selectorLabel.getLabel());
+                                // If the selector does not yet exist -> add it
+                                if (!pubIdMap.containsKey(selectorElement)) {
+                                    // Selector does not yet exist -> add it to builder
+                                    builder.addSelector(pubIdFrom, selectorLabel, pubIdTo);
+                                    // Save selector in the map to remember that is was added
+                                    pubIdMap.put(selectorElement, pubIdFrom);
+                                }
                             }
                         }
                     }
+                    // Check next successor
                     return true;
                 });
-                // TODO
             } else if (nodeLabel instanceof Nonterminal) {
                 // The privId corresponds to a nonterminal -> add the edge
-                // TODO
+                GraphElement edgeElement = new GraphElement(privId, null);
+                if (!pubIdMap.containsKey(edgeElement)) {
+                    // Nonterminal edge not yet present -> Add it
+                    Nonterminal nonterminal = (Nonterminal) nodeLabel;
+                    TIntArrayList attachedNodes = graph.getSuccessorsOf(privId);
+                    int nonterminalPubId = builder.addNonterminalEdgeAndReturnId(nonterminal, attachedNodes);
+                    pubIdMap.put(edgeElement, nonterminalPubId);
+                }
             } else {
                 throw new IllegalArgumentException("Graph should only contain nodes with NodeLabel 'Type' or 'Nonterminal'");
             }

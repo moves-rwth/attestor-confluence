@@ -71,23 +71,26 @@ public class CriticalPairFinder {
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
 
-        for (Overlapping edgeMorphism : EdgeOverlapping.getEdgeOverlapping(context)) {
-            // Check if the current edgeMorphism allows for compatible node overlappings
-            // TODO: All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph
+        for (Overlapping eOverlapping : EdgeOverlapping.getEdgeOverlapping(context)) {
+            EdgeOverlapping edgeOverlapping = (EdgeOverlapping) eOverlapping;
+            // Check if the current edgeOverlapping allows for compatible node overlappings
+            if (edgeOverlapping.isEdgeOverlappingValid()) {
+                for (Overlapping nodeOverlapping : NodeOverlapping.getNodeOverlapping(context, edgeOverlapping)) {
+                    // Found a compatible overlapping
 
-            for (Overlapping nodeMorphism : NodeOverlapping.getNodeOverlapping(context, (EdgeOverlapping) edgeMorphism)) {
-                // Found a compatible overlapping
-                // 1. Compute the joint graph
-                // TODO
+                    // 1. Compute the joint graph
+                    JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context,
+                            (NodeOverlapping) nodeOverlapping, edgeOverlapping);
 
-                // 2. Compute fully abstracted heap configuration (apply r1 first)
-                // TODO
+                    // 2. Compute fully abstracted heap configuration (apply r1 first)
+                    // TODO
 
-                // 3. Compute fully abstracted heap configuration (apply r2 first)
-                // TODO
+                    // 3. Compute fully abstracted heap configuration (apply r2 first)
+                    // TODO
 
-                // 4. Check if both fully abstracted heap configurations are isomorphic
-                // TODO
+                    // 4. Check if both fully abstracted heap configurations are isomorphic
+                    // TODO
+                }
             }
         }
     }
