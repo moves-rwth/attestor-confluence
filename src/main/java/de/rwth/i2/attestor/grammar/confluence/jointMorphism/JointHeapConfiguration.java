@@ -51,7 +51,7 @@ public class JointHeapConfiguration {
         addEdges(builder, graph1, hc1PubIdMap);
 
         // 2.2 Compute corresponding edges
-        computeCorrespondingElements(hc1PubIdMap, edgeOverlapping.getNodeMapHC1ToHC2(), hc2PubIdMap);
+        computeCorrespondingElements(hc1PubIdMap, edgeOverlapping.getMapHC1toHC2(), hc2PubIdMap);
 
         // 2.3 Add remaining edges from graph2
         addEdges(builder, graph2, hc2PubIdMap);

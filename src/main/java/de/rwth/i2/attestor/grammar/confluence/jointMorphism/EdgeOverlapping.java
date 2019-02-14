@@ -47,8 +47,24 @@ public class EdgeOverlapping extends Overlapping {
         return new HashMap<>(this.mapNodeHc1ToHc2);
     }
 
+    public GraphElement getHC2Node(GraphElement hc1Element) {
+        if (this.mapNodeHc1ToHc2.containsKey(hc1Element)) {
+            return this.mapNodeHc1ToHc2.get(hc1Element);
+        } else {
+            return null;
+        }
+    }
+
     public Map<GraphElement, GraphElement> getNodeMapHC2ToHC1() {
         return new HashMap<>(this.mapNodeHc2ToHc1);
+    }
+
+    public GraphElement getHC1Node(GraphElement hc2Element) {
+        if (this.mapNodeHc2ToHc1.containsKey(hc2Element)) {
+            return this.mapNodeHc2ToHc1.get(hc2Element);
+        } else {
+            return null;
+        }
     }
 
     @Override
