@@ -18,7 +18,7 @@ public class OverlappingIterator<Element extends GraphElement> implements Iterat
     @Override
     public Overlapping<Element> next() {
         Overlapping<Element> next = remainingOverlappings.remove();
-        remainingOverlappings.addAll(next.getAllNextEquivalences());
+        remainingOverlappings.addAll(next.getAllNextOverlappings());
         return next;
     }
 }

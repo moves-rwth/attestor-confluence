@@ -105,11 +105,12 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
      * according to the canonical ordering of node equivalences.
      * The isNextPairCompatible method is used to only include compatible Element
      */
-    protected Collection<Overlapping<Element>> getAllNextEquivalences() {
+    protected Collection<Overlapping<Element>> getAllNextOverlappings() {
         Pair<Element, Element> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
             if (hc1Remaining.isEmpty() || hc2Remaining.isEmpty()) {
-                throw new RuntimeException("First overlapping cannot be obtained.");
+                // No overlapping possible
+                return new ArrayList<>();
             }
             nextNodeEquivalence = new Pair<>(hc1Remaining.first(), hc2Remaining.first());
         } else {
