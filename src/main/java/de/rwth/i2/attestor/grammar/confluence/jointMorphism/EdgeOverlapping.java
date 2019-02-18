@@ -119,6 +119,7 @@ public class EdgeOverlapping extends Overlapping {
                 // The node2 is in the intersection, but node1 is not
                 return false;
             }
+            // TODO: Check that the types of the nodes are compatible
         }
 
         // No violation found
@@ -187,34 +188,9 @@ public class EdgeOverlapping extends Overlapping {
     public static EdgeOverlapping getEdgeOverlapping(HeapConfigurationContext context) {
         // Extract edges from the graphs
         Collection<GraphElement> edgesGraph1, edgesGraph2;
-        edgesGraph1 = getEdgesOfGraph(context.getGraph1());
-        edgesGraph2 = getEdgesOfGraph(context.getGraph2());
+        edgesGraph1 = EdgeGraphElement.getEdgesOfGraph(context.getGraph1());
+        edgesGraph2 = EdgeGraphElement.getEdgesOfGraph(context.getGraph2());
 
         return new EdgeOverlapping(context, edgesGraph1, edgesGraph2);
-    }
-
-    private static Collection<GraphElement> getEdgesOfGraph(Graph graph) {
-        Collection<GraphElement> result = new ArrayList<>();
-        for (int privateId = 0; privateId < graph.size(); privateId++) {
-            NodeLabel label = graph.getNodeLabel(privateId);
-            if (label instanceof Nonterminal) {
-                // The current privateId corresponds to a nonterminal edge
-                result.add(new EdgeGraphElement(privateId, null));
-            } else if (label instanceof Type) {
-                // The current privateId is a node. Check if there are any outgoing selectors
-                final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
-                graph.getSuccessorsOf(privateId).forEach(successor -> {
-                    for (Object edgeLabel : graph.getEdgeLabel(finalPrivateId, successor)) {
-                        if (edgeLabel instanceof SelectorLabel) {
-                            // There is a selector from privateId to successor
-                            String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
-                            result.add(new EdgeGraphElement(finalPrivateId, selectorLabel));
-                        }
-                    }
-                    return true;
-                });
-            }
-        }
-        return result;
     }
 }

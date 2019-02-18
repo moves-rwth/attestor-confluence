@@ -1,9 +1,14 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
+import de.rwth.i2.attestor.types.Type;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 public class EdgeGraphElement extends GraphElement {
@@ -46,6 +51,31 @@ public class EdgeGraphElement extends GraphElement {
             });
             if (result.size() != 2) {
                 throw new IllegalArgumentException("The GraphElement is not a selectorEdge in the given graph.");
+            }
+        }
+        return result;
+    }
+
+    public static Collection<GraphElement> getEdgesOfGraph(Graph graph) {
+        Collection<GraphElement> result = new ArrayList<>();
+        for (int privateId = 0; privateId < graph.size(); privateId++) {
+            NodeLabel label = graph.getNodeLabel(privateId);
+            if (label instanceof Nonterminal) {
+                // The current privateId corresponds to a nonterminal edge
+                result.add(new EdgeGraphElement(privateId, null));
+            } else if (label instanceof Type) {
+                // The current privateId is a node. Check if there are any outgoing selectors
+                final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
+                graph.getSuccessorsOf(privateId).forEach(successor -> {
+                    for (Object edgeLabel : graph.getEdgeLabel(finalPrivateId, successor)) {
+                        if (edgeLabel instanceof SelectorLabel) {
+                            // There is a selector from privateId to successor
+                            String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
+                            result.add(new EdgeGraphElement(finalPrivateId, selectorLabel));
+                        }
+                    }
+                    return true;
+                });
             }
         }
         return result;
