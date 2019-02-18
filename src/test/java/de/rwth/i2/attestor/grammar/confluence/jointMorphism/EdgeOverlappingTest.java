@@ -1,9 +1,5 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import de.rwth.i2.attestor.MockupSceneObject;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
@@ -17,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+
+import static org.junit.Assert.*;
 
 /**
  * Cases that are tested:
@@ -119,10 +117,13 @@ public class EdgeOverlappingTest {
         EdgeGraphElement edgeHc2 = new EdgeGraphElement(nodesHc2.get(2), "test");
         assertEquals(edgeHc1, nextEdgeOverlapping.getHC1Element(edgeHc2));
         assertEquals(edgeHc2, nextEdgeOverlapping.getHC2Element(edgeHc1));
+
+        // 6. This EdgeOverlapping should also be a valid overlapping
+        assertTrue(nextEdgeOverlapping.isEdgeOverlappingValid());
     }
 
     @Test
-    public void testGetAllNextEquivalences_NonMatchingSelectorEdges() {
+    public void testIsValid_NonMatchingSelectorEdges() {
         // 1. Setup the test
         SelectorLabel sel1 = hcImplFactory.scene().getSelectorLabel("test1");
         SelectorLabel sel2 = hcImplFactory.scene().getSelectorLabel("test2");
@@ -192,6 +193,9 @@ public class EdgeOverlappingTest {
         EdgeGraphElement edgeHc2 = EdgeGraphElement.getEdgesOfGraph(context.getGraph2()).iterator().next();
         assertEquals(edgeHc1, nextEdgeOverlapping.getHC1Element(edgeHc2));
         assertEquals(edgeHc2, nextEdgeOverlapping.getHC2Element(edgeHc1));
+
+        // 6. This EdgeOverlapping should also be a valid overlapping
+        assertTrue(nextEdgeOverlapping.isEdgeOverlappingValid());
     }
 
     @Test
@@ -355,8 +359,25 @@ public class EdgeOverlappingTest {
      */
     @Test
     public void testIsEdgeOverlappingValid_NonIntersectionNodeConnection() {
+        // 1. Setup test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(4);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 4, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .build();
 
-        // TODO
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .build();
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
+
+        // 2. Check isEdgeOverlappingValid()
+        assertTrue(edgeOverlapping.isEdgeOverlappingValid());
     }
 
     /**
@@ -366,7 +387,28 @@ public class EdgeOverlappingTest {
      */
     @Test
     public void testIsEdgeOverlappingValid_ExternalIntersectionNodeConnection() {
-        // TODO
+        // 1. Setup test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(2);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(1), selector, nodesHc1.get(0))
+                .build();
+
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .setExternal(nodesHc2.get(0)).setExternal(nodesHc2.get(1))
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .build();
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeGraphElement edge = new EdgeGraphElement(0, "test");
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge, edge));
+
+        // 2. Check isEdgeOverlappingValid()
+        assertTrue(edgeOverlapping.isEdgeOverlappingValid());
     }
 
     /**
@@ -376,16 +418,28 @@ public class EdgeOverlappingTest {
      */
     @Test
     public void testIsEdgeOverlappingValid_InternalIntersectionNodeConnection() {
-        // TODO
-    }
+        // 1. Setup test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(2);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(1), selector, nodesHc1.get(0))
+                .build();
 
-    /**
-     * Tests the isEdgeOverlappingValid() method where the overlapping contains an edge that is in the intersection.
-     * This case should be valid.
-     */
-    @Test
-    public void testIsEdgeOverlappingValid_EdgeInIntersection() {
-        // TODO
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .setExternal(nodesHc2.get(0))
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .build();
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeGraphElement edge = new EdgeGraphElement(0, "test");
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge, edge));
+
+        // 2. Check isEdgeOverlappingValid()
+        assertFalse(edgeOverlapping.isEdgeOverlappingValid());
     }
 
 }

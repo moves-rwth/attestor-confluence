@@ -13,8 +13,8 @@ import java.util.*;
 public abstract class Overlapping<Element extends GraphElement> implements Iterable<Overlapping<Element>> {
     /**
      * TODO:
-     * The attributes hc1Remaining, hc2Remaining might better use a different datastructures.
-     * Instead of a TreeSet hc2Remaining might better use two hashmaps that points to the successor / predecessor (and to save the smallest element)  --> Constant lookup time instead of O(log(n))
+     * The attributes hc1Remaining, hc2Remaining might better use a different data structures.
+     * Instead of a TreeSet hc2Remaining might better use two hash maps that points to the successor / predecessor (and to save the smallest element)  --> Constant lookup time instead of O(log(n))
      * And hc1Remaining might better use an ArrayList.
      *
      * TODO:
