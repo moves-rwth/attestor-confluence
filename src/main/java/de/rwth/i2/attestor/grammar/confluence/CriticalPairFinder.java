@@ -98,6 +98,8 @@ public class CriticalPairFinder {
                 for (Overlapping nodeOverlapping : NodeOverlapping.getNodeOverlapping(context, edgeOverlapping)) {
                     // Found a compatible overlapping
 
+                    // TODO: Do we need to check that the rule applications are not independent?
+
                     // 1. Compute the joint graph
                     JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context,
                             (NodeOverlapping) nodeOverlapping, edgeOverlapping);
