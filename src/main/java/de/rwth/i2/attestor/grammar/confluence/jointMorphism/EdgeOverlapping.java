@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
+import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
@@ -53,11 +54,7 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
     }
 
     public NodeGraphElement getHC2Node(NodeGraphElement hc1Element) {
-        if (this.mapNodeHc1ToHc2.containsKey(hc1Element)) {
-            return this.mapNodeHc1ToHc2.get(hc1Element);
-        } else {
-            return null;
-        }
+        return mapNodeHc1ToHc2.getOrDefault(hc1Element, null);
     }
 
     public Map<NodeGraphElement, NodeGraphElement> getNodeMapHC2ToHC1() {
@@ -65,11 +62,7 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
     }
 
     public NodeGraphElement getHC1Node(NodeGraphElement hc2Element) {
-        if (this.mapNodeHc2ToHc1.containsKey(hc2Element)) {
-            return this.mapNodeHc2ToHc1.get(hc2Element);
-        } else {
-            return null;
-        }
+        return mapNodeHc2ToHc1.getOrDefault(hc2Element, null);
     }
 
     @Override
@@ -116,7 +109,14 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
                 // The node2 is in the intersection, but node1 is not
                 return false;
             }
-            // TODO: Check that the types of the nodes are compatible
+
+            Type t1 = (Type) getContext().getGraph1().getNodeLabel(connectedNode1.getPrivateId());
+            Type t2 = (Type) getContext().getGraph2().getNodeLabel(connectedNode2.getPrivateId());
+
+            if (!t1.matches(t2)) {
+                // The types of connected nodes do not match
+                return false;
+            }
         }
 
         // No violation found

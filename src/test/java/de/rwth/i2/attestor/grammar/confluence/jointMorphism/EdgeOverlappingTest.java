@@ -11,6 +11,7 @@ import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.internal.ExampleHcImplFactory;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.types.Type;
+import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import java.util.Collection;
  *
  *  TODO: Some kind of self loop test
  *  TODO: Test that the types of implied node overlappings are compatible
+ *  TODO: I assume that the publicId of nodes is the same as the privateId (if the nodes are added at the beginning)
  */
 
 public class EdgeOverlappingTest {
@@ -194,17 +196,56 @@ public class EdgeOverlappingTest {
 
     @Test
     public void testGetAllNextEquivalences_NonMatchingNonterminalEdges() {
-        // TODO
+        // 1. Setup the test
+        Nonterminal nonterminal1 = hcImplFactory.scene().createNonterminal("test1", 2, new boolean[]{false, false});
+        Nonterminal nonterminal2 = hcImplFactory.scene().createNonterminal("test2", 2, new boolean[]{false, false});
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(2);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc1)
+                .addNonterminalEdge(nonterminal1, nodesHc1)
+                .build();
+
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .addNonterminalEdge(nonterminal2, nodesHc2)
+                .build();
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
+
+        // 2. Invoke method
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
+
+        // 3. Check that there are no possible edge overlappings
+        assertEquals(0, result.size());
     }
 
     @Test
     public void testGetAllNextEquivalences_SelectorInOneGraphNonterminalInOtherGraph() {
-        // TODO
-    }
+        // 1. Setup the test
+        Nonterminal nonterminal = hcImplFactory.scene().createNonterminal("test", 2, new boolean[]{false, false});
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(2);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc1)
+                .addNonterminalEdge(nonterminal, nodesHc1)
+                .build();
 
-    @Test
-    public void testGetAllNextEquivalences_MatchingEdgeNoViolationWithNodeInIntersection() {
-        // TODO
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .build();
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
+
+        // 2. Invoke method
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
+
+        // 3. Check that there are no possible edge overlappings
+        assertEquals(0, result.size());
     }
 
     /**
@@ -213,7 +254,33 @@ public class EdgeOverlappingTest {
      */
     @Test
     public void testGetAllNextEquivalences_MatchingEdgesViolationHC1Intersection() {
-        // TODO
+        // 1. Setup the test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(3);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 3, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(1), selector, nodesHc1.get(2))
+                .build();
+
+        TIntArrayList nodesHc2 = new TIntArrayList(3);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 3, nodesHc2)
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .addSelector(nodesHc2.get(1), selector, nodesHc2.get(2))
+                .build();
+        // Get the edge overlapping that already contains the equivalence between the edge (2, 0) in hc1 and (1, 2) in hc2
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeGraphElement edge1 = new EdgeGraphElement(nodesHc1.get(0), "test");
+        EdgeGraphElement edge2 = new EdgeGraphElement(nodesHc2.get(1), "test");
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge1, edge2));
+
+        // 2. Invoke method
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
+
+        // 3. Check that there are no possible edge overlappings
+        assertEquals(0, result.size());
     }
 
     /**
@@ -222,8 +289,65 @@ public class EdgeOverlappingTest {
      */
     @Test
     public void testGetAllNextEquivalences_MatchingEdgesViolationHC2Intersection() {
-        // TODO
+        // 1. Setup the test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(3);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 3, nodesHc1)
+                .addSelector(nodesHc1.get(2), selector, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(1), selector, nodesHc1.get(0))
+                .build();
+
+        TIntArrayList nodesHc2 = new TIntArrayList(3);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 3, nodesHc2)
+                .addSelector(nodesHc2.get(2), selector, nodesHc2.get(1))
+                .addSelector(nodesHc2.get(1), selector, nodesHc2.get(0))
+                .build();
+        // Get the edge overlapping that already contains the equivalence between the edge (2, 0) in hc1 and (1, 2) in hc2
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeGraphElement edge1 = new EdgeGraphElement(nodesHc1.get(1), "test");
+        EdgeGraphElement edge2 = new EdgeGraphElement(nodesHc2.get(2), "test");
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge1, edge2));
+
+        // 2. Invoke method
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
+
+        // 3. Check that there are no possible edge overlappings
+        assertEquals(0, result.size());
     }
+
+    @Test
+    public void testGetAllNextEquivalences_MatchingEdgesViolationNodeType() {
+        // 1. Setup the test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type1 = hcImplFactory.scene().getType("node1");
+        Type type2 = hcImplFactory.scene().getType("node2");
+        TIntArrayList nodesHc1 = new TIntArrayList(2);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type1, 2, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .build();
+
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type1, 1, nodesHc2)
+                .addNodes(type2, 1, nodesHc2)
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .build();
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
+
+        // 2. Invoke method
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
+
+        // 3. Check that there are no possible edge overlappings
+        assertEquals(0, result.size());
+    }
+
+
+
 
     /**
      * Tests the isEdgeOverlappingValid() method where the overlapping contains an edge that is not in the intersection
@@ -231,6 +355,7 @@ public class EdgeOverlappingTest {
      */
     @Test
     public void testIsEdgeOverlappingValid_NonIntersectionNodeConnection() {
+
         // TODO
     }
 
