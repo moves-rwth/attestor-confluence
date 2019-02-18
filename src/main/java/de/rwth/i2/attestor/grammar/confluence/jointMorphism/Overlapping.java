@@ -52,7 +52,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
     }
 
 
-    protected Overlapping(Overlapping oldOverlapping, Pair<Element, Element> newEquivalence) {
+    protected Overlapping(Overlapping<Element> oldOverlapping, Pair<Element, Element> newEquivalence) {
         context = oldOverlapping.context;
         hc1Remaining = new TreeSet<>(oldOverlapping.hc1Remaining);
         hc1Remaining.remove(newEquivalence.first());

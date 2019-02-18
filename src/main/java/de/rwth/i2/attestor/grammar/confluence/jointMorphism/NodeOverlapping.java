@@ -23,8 +23,8 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
 
     @Override
     boolean isNextPairCompatible(Pair<NodeGraphElement, NodeGraphElement> newPair) {
-        GraphElement node1 = newPair.first();
-        GraphElement node2 = newPair.second();
+        NodeGraphElement node1 = newPair.first();
+        NodeGraphElement node2 = newPair.second();
         Graph graph1 = getContext().getGraph1();
         Graph graph2 = getContext().getGraph2();
         int id1 = node1.getPrivateId();
@@ -59,11 +59,11 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
      * We require that edges that are in the intersection cannot be connected to the node.
      *
      * @param graph1
-     * @param node1  The GraphElement of the node in graph1
+     * @param node1  The NodeGraphElement of the node in graph1
      * @param graph2
-     * @param node2  The GraphElement of the node in graph2
+     * @param node2  The NodeGraphElement of the node in graph2
      */
-    private static boolean isNodeViolationPointInGraph(Graph graph1, GraphElement node1, Graph graph2, GraphElement node2) {
+    private static boolean isNodeViolationPointInGraph(Graph graph1, NodeGraphElement node1, Graph graph2, NodeGraphElement node2) {
         // 1. Check if node is internal in graph
         if (graph2.isExternal(node2.getPrivateId())) {
             // The node is external -> Cannot be a violation point
