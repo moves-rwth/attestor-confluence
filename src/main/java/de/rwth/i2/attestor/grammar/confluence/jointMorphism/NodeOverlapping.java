@@ -9,20 +9,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class NodeOverlapping extends Overlapping {
+public class NodeOverlapping extends Overlapping<NodeGraphElement> {
 
-    private NodeOverlapping(HeapConfigurationContext context, Collection<GraphElement> hc1Remaining,
-                            Collection<GraphElement> hc2Remaining, Map<GraphElement, GraphElement> mapHc1toHc2,
-                            Map<GraphElement, GraphElement> mapHc2toHc1) {
+    private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
+                            Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
+                            Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1) {
         super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
     }
 
-    private NodeOverlapping(NodeOverlapping oldNodeOverlapping, Pair<GraphElement, GraphElement> newPair) {
+    private NodeOverlapping(NodeOverlapping oldNodeOverlapping, Pair<NodeGraphElement, NodeGraphElement> newPair) {
         super(oldNodeOverlapping, newPair);
     }
 
     @Override
-    boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair) {
+    boolean isNextPairCompatible(Pair<NodeGraphElement, NodeGraphElement> newPair) {
         GraphElement node1 = newPair.first();
         GraphElement node2 = newPair.second();
         Graph graph1 = getContext().getGraph1();
@@ -83,14 +83,14 @@ public class NodeOverlapping extends Overlapping {
     }
 
     @Override
-    NodeOverlapping getOverlapping(Pair<GraphElement, GraphElement> newPair) {
+    NodeOverlapping getOverlapping(Pair<NodeGraphElement, NodeGraphElement> newPair) {
         return new NodeOverlapping(this, newPair);
     }
 
     public static NodeOverlapping getNodeOverlapping(HeapConfigurationContext context,
                                                      EdgeOverlapping edgeOverlapping) {
-        Collection<GraphElement> hc1Remaining, hc2Remaining;
-        Map<GraphElement, GraphElement> mapHc1toHc2, mapHc2toHc1;
+        Collection<NodeGraphElement> hc1Remaining, hc2Remaining;
+        Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2, mapHc2toHc1;
 
         // Get induced node equivalences from edgeOverlapping
         mapHc1toHc2 = edgeOverlapping.getNodeMapHC1ToHC2();
@@ -107,13 +107,13 @@ public class NodeOverlapping extends Overlapping {
     /**
      * Returns a collection of all nodes in the given graph excluding the specified nodes.
      */
-    private static Collection<GraphElement> getNodes(Graph graph, Collection<GraphElement> excludeNodes) {
-        Collection<GraphElement> result = new ArrayList<>();
+    private static Collection<NodeGraphElement> getNodes(Graph graph, Collection<NodeGraphElement> excludeNodes) {
+        Collection<NodeGraphElement> result = new ArrayList<>();
         for (int privateId = 0; privateId < graph.size(); privateId++) {
             NodeLabel label = graph.getNodeLabel(privateId);
             if (label instanceof Type) {
                 // The current privateId corresponds to a node in hc
-                GraphElement newNode = new NodeGraphElement(privateId);
+                NodeGraphElement newNode = new NodeGraphElement(privateId);
                 // Add the node if it is not contained in 'excludeNodes'
                 if (!excludeNodes.contains(newNode)) {
                     result.add(newNode);

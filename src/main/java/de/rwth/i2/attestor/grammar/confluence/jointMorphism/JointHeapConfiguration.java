@@ -146,8 +146,8 @@ public class JointHeapConfiguration {
      * @param overlapping  Maps GraphElements from one graph to equivalent GraphElements of the other graph
      * @param valuePubIdMap Maps GraphElements (that are values in the overlapping) to public ids in the joint heap configuration (here we add corresponding entries that exist in the keyPubIdMap)
      */
-    private static void computeCorrespondingElements(Map<GraphElement, Integer> keyPubIdMap, Map<GraphElement, GraphElement> overlapping, Map<GraphElement, Integer> valuePubIdMap) {
-        for (Map.Entry<GraphElement, GraphElement> entry: overlapping.entrySet()) {
+    private static <Element extends GraphElement> void computeCorrespondingElements(Map<GraphElement, Integer> keyPubIdMap, Map<Element, Element> overlapping, Map<GraphElement, Integer> valuePubIdMap) {
+        for (Map.Entry<Element, Element> entry: overlapping.entrySet()) {
             int pubId = keyPubIdMap.get(entry.getKey());  // The value must be present
             // Add pubId in valuePubIdMap for the corresponding GraphElement
             valuePubIdMap.put(entry.getValue(), pubId);

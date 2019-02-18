@@ -94,7 +94,7 @@ public class EdgeOverlappingTest {
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
 
         // 2. Invoke method
-        Collection<Overlapping> result = edgeOverlapping.getAllNextEquivalences();
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
 
         // 3. Basic checks
         assertEquals(1, result.size());
@@ -103,18 +103,18 @@ public class EdgeOverlappingTest {
         EdgeOverlapping nextEdgeOverlapping = (EdgeOverlapping) nextOverlapping;
 
         // 4. Test if nodes map correctly
-        GraphElement node0Hc1 = new NodeGraphElement(nodesHc1.get(0));
-        GraphElement node0Hc2 = new NodeGraphElement(nodesHc2.get(2));
-        GraphElement node1Hc1 = new NodeGraphElement(nodesHc1.get(1));
-        GraphElement node1Hc2 = new NodeGraphElement(nodesHc2.get(3));
+        NodeGraphElement node0Hc1 = new NodeGraphElement(nodesHc1.get(0));
+        NodeGraphElement node0Hc2 = new NodeGraphElement(nodesHc2.get(2));
+        NodeGraphElement node1Hc1 = new NodeGraphElement(nodesHc1.get(1));
+        NodeGraphElement node1Hc2 = new NodeGraphElement(nodesHc2.get(3));
         assertEquals(node0Hc1, nextEdgeOverlapping.getHC1Node(node0Hc2));
         assertEquals(node0Hc2, nextEdgeOverlapping.getHC2Node(node0Hc1));
         assertEquals(node1Hc1, nextEdgeOverlapping.getHC1Node(node1Hc2));
         assertEquals(node1Hc2, nextEdgeOverlapping.getHC2Node(node1Hc1));
 
         // 5. Test if edges map correctly
-        GraphElement edgeHc1 = new EdgeGraphElement(nodesHc1.get(0), "test");
-        GraphElement edgeHc2 = new EdgeGraphElement(nodesHc2.get(2), "test");
+        EdgeGraphElement edgeHc1 = new EdgeGraphElement(nodesHc1.get(0), "test");
+        EdgeGraphElement edgeHc2 = new EdgeGraphElement(nodesHc2.get(2), "test");
         assertEquals(edgeHc1, nextEdgeOverlapping.getHC1Element(edgeHc2));
         assertEquals(edgeHc2, nextEdgeOverlapping.getHC2Element(edgeHc1));
     }
@@ -140,7 +140,7 @@ public class EdgeOverlappingTest {
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
 
         // 2. Invoke method
-        Collection<Overlapping> result = edgeOverlapping.getAllNextEquivalences();
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
 
         // 3. Check that there are no possible edge overlappings
         assertEquals(0, result.size());
@@ -167,7 +167,7 @@ public class EdgeOverlappingTest {
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
 
         // 2. Invoke method
-        Collection<Overlapping> result = edgeOverlapping.getAllNextEquivalences();
+        Collection<Overlapping<EdgeGraphElement>> result = edgeOverlapping.getAllNextEquivalences();
 
         // 3. Basic checks
         assertEquals(1, result.size());
@@ -176,18 +176,18 @@ public class EdgeOverlappingTest {
         EdgeOverlapping nextEdgeOverlapping = (EdgeOverlapping) nextOverlapping;
 
         // 4. Test if nodes map correctly
-        GraphElement node0Hc1 = new NodeGraphElement(nodesHc1.get(0));
-        GraphElement node0Hc2 = new NodeGraphElement(nodesHc2.get(2));
-        GraphElement node1Hc1 = new NodeGraphElement(nodesHc1.get(1));
-        GraphElement node1Hc2 = new NodeGraphElement(nodesHc2.get(3));
+        NodeGraphElement node0Hc1 = new NodeGraphElement(nodesHc1.get(0));
+        NodeGraphElement node0Hc2 = new NodeGraphElement(nodesHc2.get(2));
+        NodeGraphElement node1Hc1 = new NodeGraphElement(nodesHc1.get(1));
+        NodeGraphElement node1Hc2 = new NodeGraphElement(nodesHc2.get(3));
         assertEquals(node0Hc1, nextEdgeOverlapping.getHC1Node(node0Hc2));
         assertEquals(node0Hc2, nextEdgeOverlapping.getHC2Node(node0Hc1));
         assertEquals(node1Hc1, nextEdgeOverlapping.getHC1Node(node1Hc2));
         assertEquals(node1Hc2, nextEdgeOverlapping.getHC2Node(node1Hc1));
 
         // 5. Test if edges map correctly
-        EdgeGraphElement edgeHc1 = (EdgeGraphElement) EdgeGraphElement.getEdgesOfGraph(context.getGraph1()).iterator().next();
-        EdgeGraphElement edgeHc2 = (EdgeGraphElement) EdgeGraphElement.getEdgesOfGraph(context.getGraph2()).iterator().next();
+        EdgeGraphElement edgeHc1 = EdgeGraphElement.getEdgesOfGraph(context.getGraph1()).iterator().next();
+        EdgeGraphElement edgeHc2 = EdgeGraphElement.getEdgesOfGraph(context.getGraph2()).iterator().next();
         assertEquals(edgeHc1, nextEdgeOverlapping.getHC1Element(edgeHc2));
         assertEquals(edgeHc2, nextEdgeOverlapping.getHC2Element(edgeHc1));
     }

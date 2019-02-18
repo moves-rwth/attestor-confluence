@@ -2,10 +2,10 @@ package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import java.util.*;
 
-public class OverlappingIterator implements Iterator<Overlapping> {
-    private final Queue<Overlapping> remainingOverlappings;
+public class OverlappingIterator<Element extends GraphElement> implements Iterator<Overlapping<Element>> {
+    private final Queue<Overlapping<Element>> remainingOverlappings;
 
-    OverlappingIterator(Overlapping baseOverlapping) {
+    OverlappingIterator(Overlapping<Element> baseOverlapping) {
         remainingOverlappings = new ArrayDeque<>();
         remainingOverlappings.add(baseOverlapping);
     }
@@ -16,8 +16,8 @@ public class OverlappingIterator implements Iterator<Overlapping> {
     }
 
     @Override
-    public Overlapping next() {
-        Overlapping next = remainingOverlappings.remove();
+    public Overlapping<Element> next() {
+        Overlapping<Element> next = remainingOverlappings.remove();
         remainingOverlappings.addAll(next.getAllNextEquivalences());
         return next;
     }

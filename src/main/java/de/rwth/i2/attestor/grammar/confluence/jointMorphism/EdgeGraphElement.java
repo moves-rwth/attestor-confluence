@@ -56,8 +56,8 @@ public class EdgeGraphElement extends GraphElement {
         return result;
     }
 
-    public static Collection<GraphElement> getEdgesOfGraph(Graph graph) {
-        Collection<GraphElement> result = new ArrayList<>();
+    public static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
+        Collection<EdgeGraphElement> result = new ArrayList<>();
         for (int privateId = 0; privateId < graph.size(); privateId++) {
             NodeLabel label = graph.getNodeLabel(privateId);
             if (label instanceof Nonterminal) {

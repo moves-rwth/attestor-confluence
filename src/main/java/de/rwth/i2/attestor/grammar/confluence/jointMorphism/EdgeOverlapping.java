@@ -1,10 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import de.rwth.i2.attestor.graph.Nonterminal;
-import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
-import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
@@ -17,45 +14,45 @@ import java.util.*;
  * If a new edge is added this
  *
  */
-public class EdgeOverlapping extends Overlapping {
-    final private Map<GraphElement, GraphElement> mapNodeHc1ToHc2, mapNodeHc2ToHc1;  // TODO: We probably only need one map
+public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
+    final private Map<NodeGraphElement, NodeGraphElement> mapNodeHc1ToHc2, mapNodeHc2ToHc1;  // TODO: We probably only need one map
 
     /**
      * Returns a new empty Overlapping
      * @param context
      */
-    private EdgeOverlapping(HeapConfigurationContext context, Collection<GraphElement> hc1Remaining,
-                            Collection<GraphElement> hc2Remaining) {
+    private EdgeOverlapping(HeapConfigurationContext context, Collection<EdgeGraphElement> hc1Remaining,
+                            Collection<EdgeGraphElement> hc2Remaining) {
         super(context, hc1Remaining, hc2Remaining);
         // Initialize empty node equivalences
         this.mapNodeHc1ToHc2 = new HashMap<>();
         this.mapNodeHc2ToHc1 = new HashMap<>();
     }
 
-    private EdgeOverlapping(EdgeOverlapping oldEdgeOverlapping, Pair<GraphElement, GraphElement> newEquivalence) {
+    private EdgeOverlapping(EdgeOverlapping oldEdgeOverlapping, Pair<EdgeGraphElement, EdgeGraphElement> newEquivalence) {
         super(oldEdgeOverlapping, newEquivalence);
         // 1. Copy old node equivalences
         this.mapNodeHc1ToHc2 = new HashMap<>(oldEdgeOverlapping.mapNodeHc1ToHc2);
         this.mapNodeHc2ToHc1 = new HashMap<>(oldEdgeOverlapping.mapNodeHc2ToHc1);
 
         // 2. Add node equivalences induced by the added edge
-        EdgeGraphElement hc1Edge = (EdgeGraphElement) newEquivalence.first();
-        EdgeGraphElement hc2Edge = (EdgeGraphElement) newEquivalence.second();
+        EdgeGraphElement hc1Edge = newEquivalence.first();
+        EdgeGraphElement hc2Edge = newEquivalence.second();
         List<NodeGraphElement> connectedNodesHc1 = hc1Edge.getConnectedNodes(getContext().getGraph1());
         List<NodeGraphElement> connectedNodesHc2 = hc2Edge.getConnectedNodes(getContext().getGraph2());
         for (int i = 0; i<connectedNodesHc1.size(); i++) {
-            GraphElement nodeHc1 = connectedNodesHc1.get(i);
-            GraphElement nodeHc2 = connectedNodesHc2.get(i);
+            NodeGraphElement nodeHc1 = connectedNodesHc1.get(i);
+            NodeGraphElement nodeHc2 = connectedNodesHc2.get(i);
             this.mapNodeHc1ToHc2.put(nodeHc1, nodeHc2);
             this.mapNodeHc2ToHc1.put(nodeHc2, nodeHc1);
         }
     }
 
-    public Map<GraphElement, GraphElement> getNodeMapHC1ToHC2() {
+    public Map<NodeGraphElement, NodeGraphElement> getNodeMapHC1ToHC2() {
         return new HashMap<>(this.mapNodeHc1ToHc2);
     }
 
-    public GraphElement getHC2Node(GraphElement hc1Element) {
+    public NodeGraphElement getHC2Node(NodeGraphElement hc1Element) {
         if (this.mapNodeHc1ToHc2.containsKey(hc1Element)) {
             return this.mapNodeHc1ToHc2.get(hc1Element);
         } else {
@@ -63,11 +60,11 @@ public class EdgeOverlapping extends Overlapping {
         }
     }
 
-    public Map<GraphElement, GraphElement> getNodeMapHC2ToHC1() {
+    public Map<NodeGraphElement, NodeGraphElement> getNodeMapHC2ToHC1() {
         return new HashMap<>(this.mapNodeHc2ToHc1);
     }
 
-    public GraphElement getHC1Node(GraphElement hc2Element) {
+    public NodeGraphElement getHC1Node(NodeGraphElement hc2Element) {
         if (this.mapNodeHc2ToHc1.containsKey(hc2Element)) {
             return this.mapNodeHc2ToHc1.get(hc2Element);
         } else {
@@ -76,7 +73,7 @@ public class EdgeOverlapping extends Overlapping {
     }
 
     @Override
-    boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair) {
+    boolean isNextPairCompatible(Pair<EdgeGraphElement, EdgeGraphElement> newPair) {
         int id1 = newPair.first().getPrivateId();
         int id2 = newPair.second().getPrivateId();
         String labeHc1 = newPair.first().getSelectorLabel();
@@ -104,10 +101,10 @@ public class EdgeOverlapping extends Overlapping {
         // 2. Consider induced node equivalences
         List<NodeGraphElement> connectedNodesHC1, connectedNodesHC2;
         // Calculate the connected nodes (the lists must have same length because the types match)
-        connectedNodesHC1 = ((EdgeGraphElement) newPair.first()).getConnectedNodes(getContext().getGraph1());
-        connectedNodesHC2 = ((EdgeGraphElement) newPair.second()).getConnectedNodes(getContext().getGraph2());
+        connectedNodesHC1 = newPair.first().getConnectedNodes(getContext().getGraph1());
+        connectedNodesHC2 = newPair.second().getConnectedNodes(getContext().getGraph2());
         for (int i = 0; i < connectedNodesHC1.size(); i++) {
-            GraphElement connectedNode1, connectedNode2;
+            NodeGraphElement connectedNode1, connectedNode2;
             connectedNode1 = connectedNodesHC1.get(i);
             connectedNode2 = connectedNodesHC2.get(i);
             if (mapNodeHc1ToHc2.containsKey(connectedNode1)) {
@@ -127,7 +124,7 @@ public class EdgeOverlapping extends Overlapping {
     }
 
     @Override
-    EdgeOverlapping getOverlapping(Pair<GraphElement, GraphElement> newPair) {
+    EdgeOverlapping getOverlapping(Pair<EdgeGraphElement, EdgeGraphElement> newPair) {
         EdgeOverlapping newOverlapping = new EdgeOverlapping(this, newPair);
         return newOverlapping;
     }
@@ -157,13 +154,13 @@ public class EdgeOverlapping extends Overlapping {
      * @param graph2  The graph that does *not* contain the edges from remainingEdges1
      * @return  true if there are no violations
      */
-    private boolean isEdgeOverlappingValid(Collection<GraphElement> remainingEdges1, Map<GraphElement, GraphElement> mapNode1To2, Graph graph1, Graph graph2) {
-        for (GraphElement edge : remainingEdges1) {
-            for (GraphElement connectedNode1 : ((EdgeGraphElement) edge).getConnectedNodes(graph1)) {
+    private boolean isEdgeOverlappingValid(Collection<EdgeGraphElement> remainingEdges1, Map<NodeGraphElement, NodeGraphElement> mapNode1To2, Graph graph1, Graph graph2) {
+        for (EdgeGraphElement edge : remainingEdges1) {
+            for (NodeGraphElement connectedNode1 : edge.getConnectedNodes(graph1)) {
                 // Check if connectedNode1 is already in the intersection
                 if (mapNode1To2.containsKey(connectedNode1)) {
                     // Check if the corresponding other node is external in graph2
-                    GraphElement connectedNode2 = mapNode1To2.get(connectedNode1);
+                    NodeGraphElement connectedNode2 = mapNode1To2.get(connectedNode1);
                     if (!graph2.isExternal(connectedNode2.getPrivateId())) {
                         // Found a violation. connectedNode1 corresponds to an internal node in graph2.
                         return false;
@@ -187,10 +184,11 @@ public class EdgeOverlapping extends Overlapping {
      */
     public static EdgeOverlapping getEdgeOverlapping(HeapConfigurationContext context) {
         // Extract edges from the graphs
-        Collection<GraphElement> edgesGraph1, edgesGraph2;
+        Collection<EdgeGraphElement> edgesGraph1, edgesGraph2;
         edgesGraph1 = EdgeGraphElement.getEdgesOfGraph(context.getGraph1());
         edgesGraph2 = EdgeGraphElement.getEdgesOfGraph(context.getGraph2());
 
         return new EdgeOverlapping(context, edgesGraph1, edgesGraph2);
     }
+
 }

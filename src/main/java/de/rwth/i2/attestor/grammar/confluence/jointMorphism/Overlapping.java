@@ -10,7 +10,7 @@ import java.util.*;
  * understood as node equivalences. Every overlapping therefore corresponds to a specific subset of the product of
  * the node sets of HC1 and HC2.
  */
-public abstract class Overlapping implements Iterable<Overlapping> {
+public abstract class Overlapping<Element extends GraphElement> implements Iterable<Overlapping<Element>> {
     /**
      * TODO:
      * The attributes hc1Remaining, hc2Remaining might better use a different datastructures.
@@ -23,14 +23,14 @@ public abstract class Overlapping implements Iterable<Overlapping> {
      * Advantage: Faster object creation
      * Drawback: Slower queries on object
      */
-    private final TreeSet<GraphElement> hc1Remaining, hc2Remaining;
-    private final Pair<GraphElement, GraphElement> lastAddedEquivalence;
-    private final Map<GraphElement, GraphElement> mapHC1toHC2, mapHC2toHC1;
+    private final TreeSet<Element> hc1Remaining, hc2Remaining;
+    private final Pair<Element, Element> lastAddedEquivalence;
+    private final Map<Element, Element> mapHC1toHC2, mapHC2toHC1;
     private final HeapConfigurationContext context;
 
-    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> hc1Remaining,
-                          Collection<GraphElement> hc2Remaining, Map<GraphElement, GraphElement> mapHC1toHC2,
-                          Map<GraphElement, GraphElement> mapHC2toHC1) {
+    protected Overlapping(HeapConfigurationContext context, Collection<Element> hc1Remaining,
+                          Collection<Element> hc2Remaining, Map<Element, Element> mapHC1toHC2,
+                          Map<Element, Element> mapHC2toHC1) {
         this.context = context;
         this.hc1Remaining = new TreeSet<>(hc1Remaining);
         this.hc2Remaining = new TreeSet<>(hc2Remaining);
@@ -40,9 +40,9 @@ public abstract class Overlapping implements Iterable<Overlapping> {
     }
 
     /**
-     * Initializes an overlapping where all GraphElements are disjoint
+     * Initializes an overlapping where all Elements are disjoint
      */
-    protected Overlapping(HeapConfigurationContext context, Collection<GraphElement> hc1, Collection<GraphElement> hc2) {
+    protected Overlapping(HeapConfigurationContext context, Collection<Element> hc1, Collection<Element> hc2) {
         this.context = context;
         hc1Remaining = new TreeSet<>(hc1);
         hc2Remaining = new TreeSet<>(hc2);
@@ -52,7 +52,7 @@ public abstract class Overlapping implements Iterable<Overlapping> {
     }
 
 
-    protected Overlapping(Overlapping oldOverlapping, Pair<GraphElement, GraphElement> newEquivalence) {
+    protected Overlapping(Overlapping oldOverlapping, Pair<Element, Element> newEquivalence) {
         context = oldOverlapping.context;
         hc1Remaining = new TreeSet<>(oldOverlapping.hc1Remaining);
         hc1Remaining.remove(newEquivalence.first());
@@ -69,20 +69,20 @@ public abstract class Overlapping implements Iterable<Overlapping> {
      * Returns the next possible successor for a node equivalence.
      * If there is no successor returns null
      */
-    private Pair<GraphElement, GraphElement> getNextEquivalence(Pair<GraphElement, GraphElement> oldPair) {
-        GraphElement hc1New, hc2New;
+    private Pair<Element, Element> getNextEquivalence(Pair<Element, Element> oldPair) {
+        Element hc1New, hc2New;
         hc2New = hc2Remaining.higher(oldPair.second());
         if (hc2New == null) {
             // If there is no higher node in hc2 the next equivalence we look for a higher node in hc1
             hc1New = hc1Remaining.higher(oldPair.first());
             if (hc1New == null) {
-                // There are no more valid GraphElements in hc1
+                // There are no more valid Element in hc1
                 return null;
             }
             // Start again by the lowest available node in hc2
             hc2New = hc2Remaining.first();
             if (hc2New == null) {
-                // There are no more valid GraphElements in hc2
+                // There are no more valid Elements in hc2
                 return null;
             }
         } else {
@@ -91,11 +91,11 @@ public abstract class Overlapping implements Iterable<Overlapping> {
         return new Pair<>(hc1New, hc2New);
     }
 
-    public TreeSet<GraphElement> getHc1Remaining() {
+    public TreeSet<Element> getHc1Remaining() {
         return hc1Remaining;
     }
 
-    public TreeSet<GraphElement> getHc2Remaining() {
+    public TreeSet<Element> getHc2Remaining() {
         return hc2Remaining;
     }
 
@@ -103,10 +103,10 @@ public abstract class Overlapping implements Iterable<Overlapping> {
      * Returns the overlapping that contains only a single equivalence more.
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
      * according to the canonical ordering of node equivalences.
-     * The isNextPairCompatible method is used to only include compatible GraphElement
+     * The isNextPairCompatible method is used to only include compatible Element
      */
-    protected Collection<Overlapping> getAllNextEquivalences() {
-        Pair<GraphElement, GraphElement> nextNodeEquivalence;
+    protected Collection<Overlapping<Element>> getAllNextEquivalences() {
+        Pair<Element, Element> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
             if (hc1Remaining.isEmpty() || hc2Remaining.isEmpty()) {
                 throw new RuntimeException("First overlapping cannot be obtained.");
@@ -115,7 +115,7 @@ public abstract class Overlapping implements Iterable<Overlapping> {
         } else {
             nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
         }
-        Collection<Overlapping> result = new ArrayList<>();
+        Collection<Overlapping<Element>> result = new ArrayList<>();
         while (nextNodeEquivalence != null) {
             if (this.isNextPairCompatible(nextNodeEquivalence)) {
                 result.add(getOverlapping(nextNodeEquivalence));
@@ -130,23 +130,23 @@ public abstract class Overlapping implements Iterable<Overlapping> {
     }
 
     @Override
-    public Iterator<Overlapping> iterator() {
+    public Iterator<Overlapping<Element>> iterator() {
         return new OverlappingIterator(this);
     }
 
-    public Map<GraphElement, GraphElement> getMapHC1toHC2() {
+    public Map<Element, Element> getMapHC1toHC2() {
         return new HashMap<>(mapHC1toHC2); // TODO: Maybe don't copy the map here
     }
 
-    public GraphElement getHC2Element(GraphElement hc1Element) {
+    public Element getHC2Element(Element hc1Element) {
         return mapHC1toHC2.getOrDefault(hc1Element, null);
     }
 
-    public Map<GraphElement, GraphElement> getMapHC2toHC1() {
+    public Map<Element, Element> getMapHC2toHC1() {
         return new HashMap<>(mapHC2toHC1);  // TODO: Maybe don't copy the map here
     }
 
-    public GraphElement getHC1Element(GraphElement hc2Element) {
+    public Element getHC1Element(Element hc2Element) {
         return mapHC2toHC1.getOrDefault(hc2Element, null);
     }
 
@@ -156,13 +156,13 @@ public abstract class Overlapping implements Iterable<Overlapping> {
      * @param newPair  A pair of node equivalences
      * @return true if 'newPair' can be added to this Overlapping
      */
-    abstract boolean isNextPairCompatible(Pair<GraphElement, GraphElement> newPair);
+    abstract boolean isNextPairCompatible(Pair<Element, Element> newPair);
 
     /**
      * Returns the Overlapping if the newPair is added to the equivalences of this object.
      * @param newPair
      * @return
      */
-    abstract Overlapping getOverlapping(Pair<GraphElement, GraphElement> newPair);
+    abstract Overlapping<Element> getOverlapping(Pair<Element, Element> newPair);
 
 }
