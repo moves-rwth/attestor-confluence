@@ -1,10 +1,18 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
+import de.rwth.i2.attestor.grammar.AbstractionOptions;
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationHelper;
+import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationStrategy;
+import de.rwth.i2.attestor.grammar.canonicalization.EmbeddingCheckerProvider;
+import de.rwth.i2.attestor.grammar.canonicalization.GeneralCanonicalizationStrategy;
+import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
@@ -25,11 +33,21 @@ public class CriticalPairFinder {
 
     final Grammar underlyingGrammar;
     final Set<CriticalPair> criticalPairs;
+    final CanonicalizationStrategy canonicalizationStrategy;
 
     public CriticalPairFinder(Grammar grammar) {
         this.underlyingGrammar = grammar;
         this.criticalPairs = new HashSet<>();
+        MorphismOptions options = new AbstractionOptions()  // TODO: Check what this really does
+                .setAdmissibleAbstraction(true)
+                .setAdmissibleConstants(true)
+                .setAdmissibleMarkings(true);
+
+        EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
+        CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
+        canonicalizationStrategy = new GeneralCanonicalizationStrategy(grammar, canonicalizationHelper);
         computeAllCriticalPairs();
+
     }
 
     private void computeAllCriticalPairs() {
@@ -66,6 +84,8 @@ public class CriticalPairFinder {
      */
     private void addCriticalPairsForCollapsedRule(Pair<Nonterminal, CollapsedHeapConfiguration> r1,
                                                   Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
+        Nonterminal nt1 = r1.first();
+        Nonterminal nt2 = r2.first();
         HeapConfiguration hc1 = r1.second().getCollapsed();
         HeapConfiguration hc2 = r2.second().getCollapsed();
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
@@ -83,10 +103,12 @@ public class CriticalPairFinder {
                             (NodeOverlapping) nodeOverlapping, edgeOverlapping);
 
                     // 2. Compute fully abstracted heap configuration (apply r1 first)
-                    // TODO
+                    HeapConfiguration hc1Unabstracted = hc1.clone().builder().replaceMatching(jointHeapConfiguration.getMatching1(), nt1).build();
+                    HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(hc1Unabstracted);
 
                     // 3. Compute fully abstracted heap configuration (apply r2 first)
-                    // TODO
+                    HeapConfiguration hc2Unabstracted = hc1.clone().builder().replaceMatching(jointHeapConfiguration.getMatching2(), nt2).build();
+                    HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
 
                     // 4. Check if both fully abstracted heap configurations are isomorphic
                     // TODO

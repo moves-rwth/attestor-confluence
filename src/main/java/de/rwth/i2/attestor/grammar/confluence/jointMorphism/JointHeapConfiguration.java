@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.heap.Matching;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
@@ -16,6 +17,7 @@ public class JointHeapConfiguration {
     Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
     HeapConfigurationContext context;
     HeapConfiguration jointHeapConfiguration;
+    Matching matching1, matching2;
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
@@ -58,6 +60,9 @@ public class JointHeapConfiguration {
 
         // 3. Build the completed HeapConfiguration
         jointHeapConfiguration = builder.build();
+
+        // 4. Create the corresponding matchings
+        // TODO
     }
 
     public HeapConfiguration getHeapConfiguration() {
@@ -83,6 +88,14 @@ public class JointHeapConfiguration {
                 }
             }
         }
+    }
+
+    public Matching getMatching1() {
+        return matching1;
+    }
+
+    public Matching getMatching2() {
+        return matching2;
     }
 
     /**
