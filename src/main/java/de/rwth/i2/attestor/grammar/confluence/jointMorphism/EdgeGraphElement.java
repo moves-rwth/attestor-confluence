@@ -50,4 +50,13 @@ public class EdgeGraphElement extends GraphElement {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        if (getSelectorLabel() == null) {
+            return "nonterminal" + getPrivateId();
+        } else {
+            return "selector(" + getPrivateId() + "," + getSelectorLabel() + ")";
+        }
+    }
 }

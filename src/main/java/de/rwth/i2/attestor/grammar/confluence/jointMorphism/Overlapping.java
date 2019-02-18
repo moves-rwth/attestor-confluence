@@ -138,8 +138,16 @@ public abstract class Overlapping implements Iterable<Overlapping> {
         return new HashMap<>(mapHC1toHC2); // TODO: Maybe don't copy the map here
     }
 
+    public GraphElement getHC2Element(GraphElement hc1Element) {
+        return mapHC1toHC2.getOrDefault(hc1Element, null);
+    }
+
     public Map<GraphElement, GraphElement> getMapHC2toHC1() {
         return new HashMap<>(mapHC2toHC1);  // TODO: Maybe don't copy the map here
+    }
+
+    public GraphElement getHC1Element(GraphElement hc2Element) {
+        return mapHC2toHC1.getOrDefault(hc2Element, null);
     }
 
     /**

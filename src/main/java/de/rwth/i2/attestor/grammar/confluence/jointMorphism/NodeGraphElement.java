@@ -4,4 +4,9 @@ public class NodeGraphElement extends GraphElement {
     public NodeGraphElement(int privateId) {
         super(privateId, null);
     }
+
+    @Override
+    public String toString() {
+        return "node" + getPrivateId();
+    }
 }

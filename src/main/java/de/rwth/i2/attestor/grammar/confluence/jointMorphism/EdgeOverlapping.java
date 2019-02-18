@@ -39,8 +39,16 @@ public class EdgeOverlapping extends Overlapping {
         this.mapNodeHc2ToHc1 = new HashMap<>(oldEdgeOverlapping.mapNodeHc2ToHc1);
 
         // 2. Add node equivalences induced by the added edge
-        this.mapNodeHc1ToHc2.put(newEquivalence.first(), newEquivalence.second());
-        this.mapNodeHc2ToHc1.put(newEquivalence.second(), newEquivalence.first());
+        EdgeGraphElement hc1Edge = (EdgeGraphElement) newEquivalence.first();
+        EdgeGraphElement hc2Edge = (EdgeGraphElement) newEquivalence.second();
+        List<NodeGraphElement> connectedNodesHc1 = hc1Edge.getConnectedNodes(getContext().getGraph1());
+        List<NodeGraphElement> connectedNodesHc2 = hc2Edge.getConnectedNodes(getContext().getGraph2());
+        for (int i = 0; i<connectedNodesHc1.size(); i++) {
+            GraphElement nodeHc1 = connectedNodesHc1.get(i);
+            GraphElement nodeHc2 = connectedNodesHc2.get(i);
+            this.mapNodeHc1ToHc2.put(nodeHc1, nodeHc2);
+            this.mapNodeHc2ToHc1.put(nodeHc2, nodeHc1);
+        }
     }
 
     public Map<GraphElement, GraphElement> getNodeMapHC1ToHC2() {
