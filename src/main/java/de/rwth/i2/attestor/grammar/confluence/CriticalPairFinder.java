@@ -29,14 +29,17 @@ import java.util.*;
  * Graph-based Model Transformation" by Leen Lambers, Hartmut Ehrig & Fernando Orejas
  * TODO: How to correctly cite in javadoc
  *
+ *
+ * TODO: Add option to early abort if critical pairs already Strong joinable or weak joinable
+ *
  * @author Johannes Schulte
  */
 public class CriticalPairFinder {
 
-    final Grammar underlyingGrammar;
-    final Set<CriticalPair> criticalPairs;
-    final CanonicalizationStrategy canonicalizationStrategy;
-    final VF2IsomorphismChecker checker;
+    final private Grammar underlyingGrammar;
+    final private Set<CriticalPair> criticalPairs;
+    final private CanonicalizationStrategy canonicalizationStrategy;
+    final private VF2IsomorphismChecker checker;
 
     public CriticalPairFinder(Grammar grammar) {
         this.underlyingGrammar = grammar;

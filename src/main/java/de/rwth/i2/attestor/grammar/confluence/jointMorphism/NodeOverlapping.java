@@ -58,9 +58,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
      *
      * We require that edges that are in the intersection cannot be connected to the node.
      *
-     * @param graph1
      * @param node1  The NodeGraphElement of the node in graph1
-     * @param graph2
      * @param node2  The NodeGraphElement of the node in graph2
      */
     private static boolean isNodeViolationPointInGraph(Graph graph1, NodeGraphElement node1, Graph graph2, NodeGraphElement node2) {
@@ -70,7 +68,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
             return false;
         }
 
-        // 2. Check if there are any connected edges (Only neccessary if isolated nodes are allowed in RHS)
+        // 2. Check if there are any connected edges (Only necessary if isolated nodes are allowed in RHS)
         if (graph1.getPredecessorsOf(node1.getPrivateId()).size() == 0) {
             // There are no edges connected to the node -> No violation point
             return false;

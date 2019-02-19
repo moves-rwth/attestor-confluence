@@ -132,7 +132,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
 
     @Override
     public Iterator<Overlapping<Element>> iterator() {
-        return new OverlappingIterator(this);
+        return new OverlappingIterator<>(this);
     }
 
     public Map<Element, Element> getMapHC1toHC2() {
@@ -161,8 +161,6 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
 
     /**
      * Returns the Overlapping if the newPair is added to the equivalences of this object.
-     * @param newPair
-     * @return
      */
     abstract Overlapping<Element> getOverlapping(Pair<Element, Element> newPair);
 

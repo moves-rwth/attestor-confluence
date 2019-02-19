@@ -40,10 +40,8 @@ import static org.junit.Assert.*;
  *        - 2.1 Case: The node is not external in the other graph
  *
  *  TODO: Some kind of self loop test
- *  TODO: Test that the types of implied node overlappings are compatible
  *  TODO: I assume that the publicId of nodes is the same as the privateId (if the nodes are added at the beginning)
  */
-
 public class EdgeOverlappingTest {
 
     private SceneObject sceneObject;

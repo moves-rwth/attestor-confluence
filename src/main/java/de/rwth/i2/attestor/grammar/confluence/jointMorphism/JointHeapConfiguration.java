@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JointHeapConfiguration {
-    Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
-    HeapConfigurationContext context;
-    HeapConfiguration jointHeapConfiguration;
-    Matching matching1, matching2;
+    private final Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
+    private final HeapConfigurationContext context;
+    private final HeapConfiguration jointHeapConfiguration;
+    private final Matching matching1, matching2;
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
@@ -62,6 +62,8 @@ public class JointHeapConfiguration {
         jointHeapConfiguration = builder.build();
 
         // 4. Create the corresponding matchings
+        matching1 = null;
+        matching2 = null;
         // TODO
     }
 

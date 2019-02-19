@@ -23,7 +23,7 @@ public abstract class GraphElement implements Comparable<GraphElement> {
      */
     private final String selectorLabel;
 
-    public GraphElement(int privateId, String selectorLabel) {
+    GraphElement(int privateId, String selectorLabel) {
         this.privateId = privateId;
         this.selectorLabel = selectorLabel;
     }

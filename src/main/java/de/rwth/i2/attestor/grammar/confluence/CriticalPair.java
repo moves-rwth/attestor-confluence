@@ -22,6 +22,6 @@ public class CriticalPair {
     }
 
     public enum Joinability {
-        STRONGLY_JOINABLE, WEAKLY_JOINABLE, NOT_JOINABLE;
+        STRONGLY_JOINABLE, WEAKLY_JOINABLE, NOT_JOINABLE
     }
 }

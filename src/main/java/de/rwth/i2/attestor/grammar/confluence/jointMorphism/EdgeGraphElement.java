@@ -8,7 +8,6 @@ import de.rwth.i2.attestor.types.Type;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 public class EdgeGraphElement extends GraphElement {
@@ -21,7 +20,6 @@ public class EdgeGraphElement extends GraphElement {
      * the given graph.
      *
      * @param graph  A graph in which this object must be an edge.
-     * @return
      */
     public List<NodeGraphElement> getConnectedNodes(Graph graph) {
         List<NodeGraphElement> result = new ArrayList<>();

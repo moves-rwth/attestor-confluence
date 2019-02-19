@@ -20,7 +20,6 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
 
     /**
      * Returns a new empty Overlapping
-     * @param context
      */
     private EdgeOverlapping(HeapConfigurationContext context, Collection<EdgeGraphElement> hc1Remaining,
                             Collection<EdgeGraphElement> hc2Remaining) {
@@ -69,20 +68,20 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
     boolean isNextPairCompatible(Pair<EdgeGraphElement, EdgeGraphElement> newPair) {
         int id1 = newPair.first().getPrivateId();
         int id2 = newPair.second().getPrivateId();
-        String labeHc1 = newPair.first().getSelectorLabel();
-        String labeHc2 = newPair.second().getSelectorLabel();
+        String labelHc1 = newPair.first().getSelectorLabel();
+        String labelHc2 = newPair.second().getSelectorLabel();
 
         // 1. Check if the edge types are compatible
-        if (labeHc1 == null && labeHc2 == null) {
+        if (labelHc1 == null && labelHc2 == null) {
             // Two hyperedges -> Need to get the type
-            NodeLabel nodeLabeHc1 = getContext().getGraph1().getNodeLabel(id1);
-            NodeLabel nodeLabeHc2 = getContext().getGraph2().getNodeLabel(id2);
-            if (!nodeLabeHc1.matches(nodeLabeHc2)) {
+            NodeLabel nodeLabelHc1 = getContext().getGraph1().getNodeLabel(id1);
+            NodeLabel nodeLabelHc2 = getContext().getGraph2().getNodeLabel(id2);
+            if (!nodeLabelHc1.matches(nodeLabelHc2)) {
                 return false;
             }
-        } else if (labeHc1 != null && labeHc2 != null) {
+        } else if (labelHc1 != null && labelHc2 != null) {
             // Two selector edges
-            if (!labeHc1.equals(labeHc2)) {
+            if (!labelHc1.equals(labelHc2)) {
                 // The selector edges are not the same
                 return false;
             }
@@ -125,8 +124,7 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
 
     @Override
     EdgeOverlapping getOverlapping(Pair<EdgeGraphElement, EdgeGraphElement> newPair) {
-        EdgeOverlapping newOverlapping = new EdgeOverlapping(this, newPair);
-        return newOverlapping;
+        return new EdgeOverlapping(this, newPair);
     }
 
     /**
@@ -180,7 +178,6 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
      * constructor.
      *
      * @param context This context contains the two HeapConfiguration objects for the overlapping.
-     * @return
      */
     public static EdgeOverlapping getEdgeOverlapping(HeapConfigurationContext context) {
         // Extract edges from the graphs
