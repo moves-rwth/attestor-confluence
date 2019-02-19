@@ -1,24 +1,44 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
 public class NodeOverlapping extends Overlapping<NodeGraphElement> {
 
+    private final boolean isNodeOverlappingIndependent;
+
     private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
                             Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
                             Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1) {
         super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
+        // The node overlapping is independent if the already existing node equivalences are only containing external nodes
+        isNodeOverlappingIndependent = areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet())
+                && areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet());
+    }
+
+    private boolean areAllNodesExternal(Graph graph, Collection<NodeGraphElement> nodes) {
+        for (NodeGraphElement node : nodes) {
+            if (!graph.isExternal(node.getPrivateId())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private NodeOverlapping(NodeOverlapping oldNodeOverlapping, Pair<NodeGraphElement, NodeGraphElement> newPair) {
         super(oldNodeOverlapping, newPair);
+        if (oldNodeOverlapping.isNodeOverlappingIndependent()) {
+            // Check if the overlapping is still independent with the new pair (if the newPair is external in each graph)
+            isNodeOverlappingIndependent = getContext().getGraph1().isExternal(newPair.first().getPrivateId())
+                    && getContext().getGraph2().isExternal(newPair.second().getPrivateId());
+        } else {
+            // Once an overlapping is not independent its children cannot be independent again
+            isNodeOverlappingIndependent = false;
+        }
     }
 
     @Override
@@ -95,29 +115,21 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         mapHc2toHc1 = edgeOverlapping.getNodeMapHC2ToHC1();
 
         // Get all remaining nodes
-        hc1Remaining = getNodes(context.getGraph1(), mapHc1toHc2.keySet());
-        hc2Remaining = getNodes(context.getGraph2(), mapHc2toHc1.keySet());
+        hc1Remaining = NodeGraphElement.getNodes(context.getGraph1(), mapHc1toHc2.keySet());
+        hc2Remaining = NodeGraphElement.getNodes(context.getGraph2(), mapHc2toHc1.keySet());
 
         // Return the NodeOverlapping
         return new NodeOverlapping(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
     }
 
     /**
-     * Returns a collection of all nodes in the given graph excluding the specified nodes.
+     * An overlapping is independent if it allows that both rules that the overlapping is based on can be applied
+     * directly after the other.
+     * This is the case if the intersection of nodes does not contain any internal nodes
      */
-    private static Collection<NodeGraphElement> getNodes(Graph graph, Collection<NodeGraphElement> excludeNodes) {
-        Collection<NodeGraphElement> result = new ArrayList<>();
-        for (int privateId = 0; privateId < graph.size(); privateId++) {
-            NodeLabel label = graph.getNodeLabel(privateId);
-            if (label instanceof Type) {
-                // The current privateId corresponds to a node in hc
-                NodeGraphElement newNode = new NodeGraphElement(privateId);
-                // Add the node if it is not contained in 'excludeNodes'
-                if (!excludeNodes.contains(newNode)) {
-                    result.add(newNode);
-                }
-            }
-        }
-        return result;
+    public boolean isNodeOverlappingIndependent() {
+        return isNodeOverlappingIndependent;
     }
+
+
 }

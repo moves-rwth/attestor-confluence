@@ -106,45 +106,46 @@ public class CriticalPairFinder {
                     // Found a compatible overlapping
                     NodeOverlapping nodeOverlapping = (NodeOverlapping) nOverlapping;
 
-                    // TODO: Check that the rule applications are not independent (They should share at least one internal node)
+                    // Check that the rule applications are not independent (They should share at least one internal node)
+                    if (nodeOverlapping.isNodeOverlappingIndependent()) {
+                        // 1. Compute the joint graph
+                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context, nodeOverlapping, edgeOverlapping);
+                        HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
 
-                    // 1. Compute the joint graph
-                    JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context, nodeOverlapping, edgeOverlapping);
-                    HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
+                        // 2. Compute fully abstracted heap configuration (apply r1 first)
+                        HeapConfiguration hc1Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching1(), nt1).build();
+                        HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(hc1Unabstracted);
 
-                    // 2. Compute fully abstracted heap configuration (apply r1 first)
-                    HeapConfiguration hc1Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching1(), nt1).build();
-                    HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(hc1Unabstracted);
+                        // 3. Compute fully abstracted heap configuration (apply r2 first)
+                        HeapConfiguration hc2Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching2(), nt2).build();
+                        HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
 
-                    // 3. Compute fully abstracted heap configuration (apply r2 first)
-                    HeapConfiguration hc2Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching2(), nt2).build();
-                    HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
+                        // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
+                        boolean isStronglyJoinable = false;
+                        if (fullyAbstracted1.nodes().equals(fullyAbstracted2.nodes())) {
+                            // Both fully abstracted heap configurations contain the nodes
+                            // Check if track morphism defines the isomorphism (strong joinable)
+                            HeapConfiguration fullyAbstracted1Track = setExternalNodesAccordingToIds(fullyAbstracted1);
+                            HeapConfiguration fullyAbstracted2Track = setExternalNodesAccordingToIds(fullyAbstracted2);
 
-                    // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
-                    boolean isStronglyJoinable = false;
-                    if (fullyAbstracted1.nodes().equals(fullyAbstracted2.nodes())) {
-                        // Both fully abstracted heap configurations contain the nodes
-                        // Check if track morphism defines the isomorphism (strong joinable)
-                        HeapConfiguration fullyAbstracted1Track = setExternalNodesAccordingToIds(fullyAbstracted1);
-                        HeapConfiguration fullyAbstracted2Track = setExternalNodesAccordingToIds(fullyAbstracted2);
-
-                        checker.run((Graph) fullyAbstracted1Track, (Graph) fullyAbstracted2Track);
-                        if (checker.hasMorphism()) {
-                            // Strongly joinable
-                            isStronglyJoinable = true;
-                            criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
+                            checker.run((Graph) fullyAbstracted1Track, (Graph) fullyAbstracted2Track);
+                            if (checker.hasMorphism()) {
+                                // Strongly joinable
+                                isStronglyJoinable = true;
+                                criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
+                            }
                         }
-                    }
-                    if (!isStronglyJoinable){
-                        // The critical pair is not strongly joinable -> check if it is weakly joinable
-                        // Check if there is ANY isomorphism
-                        checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
-                        if (checker.hasMorphism()) {
-                            // Weakly joinable
-                            criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.WEAKLY_JOINABLE));
-                        } else {
-                            // Not joinable
-                            criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.NOT_JOINABLE));
+                        if (!isStronglyJoinable) {
+                            // The critical pair is not strongly joinable -> check if it is weakly joinable
+                            // Check if there is ANY isomorphism
+                            checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
+                            if (checker.hasMorphism()) {
+                                // Weakly joinable
+                                criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.WEAKLY_JOINABLE));
+                            } else {
+                                // Not joinable
+                                criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.NOT_JOINABLE));
+                            }
                         }
                     }
                 }
