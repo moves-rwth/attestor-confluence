@@ -12,7 +12,9 @@ import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
+import de.rwth.i2.attestor.graph.morphism.checkers.VF2IsomorphismChecker;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
@@ -34,10 +36,12 @@ public class CriticalPairFinder {
     final Grammar underlyingGrammar;
     final Set<CriticalPair> criticalPairs;
     final CanonicalizationStrategy canonicalizationStrategy;
+    final VF2IsomorphismChecker checker;
 
     public CriticalPairFinder(Grammar grammar) {
         this.underlyingGrammar = grammar;
         this.criticalPairs = new HashSet<>();
+        this.checker = new VF2IsomorphismChecker();
         MorphismOptions options = new AbstractionOptions()  // TODO: Check what this really does
                 .setAdmissibleAbstraction(true)
                 .setAdmissibleConstants(true)
@@ -95,25 +99,46 @@ public class CriticalPairFinder {
             EdgeOverlapping edgeOverlapping = (EdgeOverlapping) eOverlapping;
             // Check if the current edgeOverlapping allows for compatible node overlappings
             if (edgeOverlapping.isEdgeOverlappingValid()) {
-                for (Overlapping nodeOverlapping : NodeOverlapping.getNodeOverlapping(context, edgeOverlapping)) {
+                for (Overlapping nOverlapping : NodeOverlapping.getNodeOverlapping(context, edgeOverlapping)) {
                     // Found a compatible overlapping
+                    NodeOverlapping nodeOverlapping = (NodeOverlapping) nOverlapping;
 
-                    // TODO: Do we need to check that the rule applications are not independent?
+                    // TODO: Check that the rule applications are not independent
 
                     // 1. Compute the joint graph
-                    JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context,
-                            (NodeOverlapping) nodeOverlapping, edgeOverlapping);
+                    JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context, nodeOverlapping, edgeOverlapping);
+                    HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
 
                     // 2. Compute fully abstracted heap configuration (apply r1 first)
-                    HeapConfiguration hc1Unabstracted = hc1.clone().builder().replaceMatching(jointHeapConfiguration.getMatching1(), nt1).build();
+                    HeapConfiguration hc1Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching1(), nt1).build();
                     HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(hc1Unabstracted);
 
                     // 3. Compute fully abstracted heap configuration (apply r2 first)
-                    HeapConfiguration hc2Unabstracted = hc1.clone().builder().replaceMatching(jointHeapConfiguration.getMatching2(), nt2).build();
+                    HeapConfiguration hc2Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching2(), nt2).build();
                     HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
 
-                    // 4. Check if both fully abstracted heap configurations are isomorphic
-                    // TODO
+                    // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
+                    // Check if track morphism defines the isomorphism (strong joinable)
+                    HeapConfigurationBuilder fullyAbstracted1TrackBuilder = fullyAbstracted1.clone().builder();
+                    HeapConfigurationBuilder fullyAbstracted2TrackBuilder = fullyAbstracted2.clone().builder();
+
+                    // TODO: Set all nodes external in the fully abstracted graphs according to the track morphism
+
+                    checker.run((Graph) fullyAbstracted1TrackBuilder.build(), (Graph) fullyAbstracted2TrackBuilder.build());
+                    if (checker.hasMorphism()) {
+                        // Strongly joinable
+                        criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
+                    } else {
+                        // Check if there is any isomorphism
+                        checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
+                        if (checker.hasMorphism()) {
+                            // Weakly joinable
+                            criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.WEAKLY_JOINABLE));
+                        } else {
+                            // Not joinable
+                            criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.NOT_JOINABLE));
+                        }
+                    }
                 }
             }
         }
