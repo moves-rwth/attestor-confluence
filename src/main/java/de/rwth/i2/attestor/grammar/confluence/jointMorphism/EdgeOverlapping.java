@@ -48,19 +48,19 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         }
     }
 
-    public Map<NodeGraphElement, NodeGraphElement> getNodeMapHC1ToHC2() {
+    Map<NodeGraphElement, NodeGraphElement> getNodeMapHC1ToHC2() {
         return new HashMap<>(this.mapNodeHc1ToHc2);
     }
 
-    public NodeGraphElement getHC2Node(NodeGraphElement hc1Element) {
+    NodeGraphElement getHC2Node(NodeGraphElement hc1Element) {
         return mapNodeHc1ToHc2.getOrDefault(hc1Element, null);
     }
 
-    public Map<NodeGraphElement, NodeGraphElement> getNodeMapHC2ToHC1() {
+    Map<NodeGraphElement, NodeGraphElement> getNodeMapHC2ToHC1() {
         return new HashMap<>(this.mapNodeHc2ToHc1);
     }
 
-    public NodeGraphElement getHC1Node(NodeGraphElement hc2Element) {
+    NodeGraphElement getHC1Node(NodeGraphElement hc2Element) {
         return mapNodeHc2ToHc1.getOrDefault(hc2Element, null);
     }
 

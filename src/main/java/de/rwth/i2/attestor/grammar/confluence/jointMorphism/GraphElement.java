@@ -28,7 +28,7 @@ public abstract class GraphElement implements Comparable<GraphElement> {
         this.selectorLabel = selectorLabel;
     }
 
-    public int getPrivateId() {
+    int getPrivateId() {
         return privateId;
     }
 

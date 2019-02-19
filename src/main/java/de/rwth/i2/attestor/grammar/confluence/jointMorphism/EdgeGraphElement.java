@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class EdgeGraphElement extends GraphElement {
-    public EdgeGraphElement(int privateId, String selectorLabel) {
+    EdgeGraphElement(int privateId, String selectorLabel) {
         super(privateId, selectorLabel);
     }
 
@@ -21,7 +21,7 @@ public class EdgeGraphElement extends GraphElement {
      *
      * @param graph  A graph in which this object must be an edge.
      */
-    public List<NodeGraphElement> getConnectedNodes(Graph graph) {
+    List<NodeGraphElement> getConnectedNodes(Graph graph) {
         List<NodeGraphElement> result = new ArrayList<>();
         String selectorLabel = getSelectorLabel();
         int privateId = getPrivateId();
@@ -54,7 +54,7 @@ public class EdgeGraphElement extends GraphElement {
         return result;
     }
 
-    public static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
+    static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
         Collection<EdgeGraphElement> result = new ArrayList<>();
         for (int privateId = 0; privateId < graph.size(); privateId++) {
             NodeLabel label = graph.getNodeLabel(privateId);

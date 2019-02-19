@@ -2,7 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import java.util.*;
 
-public class OverlappingIterator<Element extends GraphElement> implements Iterator<Overlapping<Element>> {
+class OverlappingIterator<Element extends GraphElement> implements Iterator<Overlapping<Element>> {
     private final Queue<Overlapping<Element>> remainingOverlappings;
 
     OverlappingIterator(Overlapping<Element> baseOverlapping) {

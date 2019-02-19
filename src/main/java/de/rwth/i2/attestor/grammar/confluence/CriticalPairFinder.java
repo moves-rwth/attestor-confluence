@@ -36,8 +36,8 @@ import java.util.*;
  */
 public class CriticalPairFinder {
 
+    private Set<CriticalPair> criticalPairs;
     final private Grammar underlyingGrammar;
-    final private Set<CriticalPair> criticalPairs;
     final private CanonicalizationStrategy canonicalizationStrategy;
     final private VF2IsomorphismChecker checker;
 
@@ -58,7 +58,7 @@ public class CriticalPairFinder {
     }
 
     private void computeAllCriticalPairs() {
-        Set<CriticalPair> criticalPairs = new HashSet<>();
+        criticalPairs = new HashSet<>();
         // Add critical pairs for all combinations of rules
 
         // 1. Create a list with all *individual* grammar rules
@@ -147,4 +147,7 @@ public class CriticalPairFinder {
         }
     }
 
+    public Set<CriticalPair> getCriticalPairs() {
+        return criticalPairs;
+    }
 }

@@ -28,7 +28,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
     private final Map<Element, Element> mapHC1toHC2, mapHC2toHC1;
     private final HeapConfigurationContext context;
 
-    protected Overlapping(HeapConfigurationContext context, Collection<Element> hc1Remaining,
+    Overlapping(HeapConfigurationContext context, Collection<Element> hc1Remaining,
                           Collection<Element> hc2Remaining, Map<Element, Element> mapHC1toHC2,
                           Map<Element, Element> mapHC2toHC1) {
         this.context = context;
@@ -42,7 +42,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
     /**
      * Initializes an overlapping where all Elements are disjoint
      */
-    protected Overlapping(HeapConfigurationContext context, Collection<Element> hc1, Collection<Element> hc2) {
+    Overlapping(HeapConfigurationContext context, Collection<Element> hc1, Collection<Element> hc2) {
         this.context = context;
         hc1Remaining = new TreeSet<>(hc1);
         hc2Remaining = new TreeSet<>(hc2);
@@ -52,7 +52,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
     }
 
 
-    protected Overlapping(Overlapping<Element> oldOverlapping, Pair<Element, Element> newEquivalence) {
+    Overlapping(Overlapping<Element> oldOverlapping, Pair<Element, Element> newEquivalence) {
         context = oldOverlapping.context;
         hc1Remaining = new TreeSet<>(oldOverlapping.hc1Remaining);
         hc1Remaining.remove(newEquivalence.first());
@@ -91,11 +91,11 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         return new Pair<>(hc1New, hc2New);
     }
 
-    public TreeSet<Element> getHc1Remaining() {
+    TreeSet<Element> getHc1Remaining() {
         return hc1Remaining;
     }
 
-    public TreeSet<Element> getHc2Remaining() {
+    TreeSet<Element> getHc2Remaining() {
         return hc2Remaining;
     }
 
@@ -105,7 +105,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
      * according to the canonical ordering of node equivalences.
      * The isNextPairCompatible method is used to only include compatible Element
      */
-    protected Collection<Overlapping<Element>> getAllNextOverlappings() {
+    Collection<Overlapping<Element>> getAllNextOverlappings() {
         Pair<Element, Element> nextNodeEquivalence;
         if (lastAddedEquivalence == null) {
             if (hc1Remaining.isEmpty() || hc2Remaining.isEmpty()) {
@@ -126,7 +126,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         return result;
     }
 
-    protected HeapConfigurationContext getContext() {
+    HeapConfigurationContext getContext() {
         return context;
     }
 
@@ -135,19 +135,19 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         return new OverlappingIterator<>(this);
     }
 
-    public Map<Element, Element> getMapHC1toHC2() {
+    Map<Element, Element> getMapHC1toHC2() {
         return new HashMap<>(mapHC1toHC2); // TODO: Maybe don't copy the map here
     }
 
-    public Element getHC2Element(Element hc1Element) {
+    Element getHC2Element(Element hc1Element) {
         return mapHC1toHC2.getOrDefault(hc1Element, null);
     }
 
-    public Map<Element, Element> getMapHC2toHC1() {
+    Map<Element, Element> getMapHC2toHC1() {
         return new HashMap<>(mapHC2toHC1);  // TODO: Maybe don't copy the map here
     }
 
-    public Element getHC1Element(Element hc2Element) {
+    Element getHC1Element(Element hc2Element) {
         return mapHC2toHC1.getOrDefault(hc2Element, null);
     }
 
