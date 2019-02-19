@@ -6,7 +6,10 @@ import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.Matching;
+import de.rwth.i2.attestor.graph.heap.internal.HeapConfigurationIdConverter;
+import de.rwth.i2.attestor.graph.heap.internal.InternalMatching;
 import de.rwth.i2.attestor.graph.morphism.Graph;
+import de.rwth.i2.attestor.graph.morphism.Morphism;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -14,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JointHeapConfiguration {
-    private final Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
-    private final HeapConfigurationContext context;
     private final HeapConfiguration jointHeapConfiguration;
     private final Matching matching1, matching2;
 
@@ -26,7 +27,6 @@ public class JointHeapConfiguration {
     public JointHeapConfiguration(HeapConfigurationContext context,
                                                          NodeOverlapping nodeOverlapping,
                                                          EdgeOverlapping edgeOverlapping) {
-        this.context = context;
         Graph graph1 = context.getGraph1();
         Graph graph2 = context.getGraph2();
         // Create a new HeapConfigurationBuilder (by using getEmpty() on one of the existing heap configurations
@@ -34,6 +34,7 @@ public class JointHeapConfiguration {
         HeapConfigurationBuilder builder = context.getHc1().getEmpty().builder();
 
         // Create maps to keep track of which GraphElement maps to which public ID in the new HeapConfiguration
+        Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
         hc1PubIdMap = new HashMap<>();
         hc2PubIdMap = new HashMap<>();
 
@@ -62,9 +63,29 @@ public class JointHeapConfiguration {
         jointHeapConfiguration = builder.build();
 
         // 4. Create the corresponding matchings
-        matching1 = null;
-        matching2 = null;
-        // TODO
+        matching1 = new InternalMatching(context.getHc1(), getMorphism(context.getGraph1(), hc1PubIdMap), jointHeapConfiguration);
+        matching2 = new InternalMatching(context.getHc2(), getMorphism(context.getGraph2(), hc2PubIdMap), jointHeapConfiguration);
+    }
+
+    private Morphism getMorphism(Graph graph, Map<GraphElement, Integer> patternPrivateToTargetPublic){
+        int morphism[] = new int[graph.size()];
+        for (int patternPrivateId = 0; patternPrivateId < morphism.length; patternPrivateId++) {
+            GraphElement graphElement;
+            NodeLabel nodeLabel = graph.getNodeLabel(patternPrivateId);
+            if (nodeLabel instanceof Type) {
+                // Node
+                graphElement = new NodeGraphElement(patternPrivateId);
+            } else if (nodeLabel instanceof Nonterminal) {
+                // Edge
+                graphElement = new EdgeGraphElement(patternPrivateId, null);
+            } else {
+                throw new RuntimeException("Unexpected NodeLabel");
+            }
+            int targetPublicId = patternPrivateToTargetPublic.get(graphElement);
+            int targetPrivateId = HeapConfigurationIdConverter.getGraphId(jointHeapConfiguration, targetPublicId);
+            morphism[patternPrivateId] = targetPrivateId;
+        }
+        return new Morphism(morphism);
     }
 
     public HeapConfiguration getHeapConfiguration() {
