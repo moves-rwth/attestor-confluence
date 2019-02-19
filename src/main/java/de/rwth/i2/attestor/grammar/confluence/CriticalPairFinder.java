@@ -54,7 +54,6 @@ public class CriticalPairFinder {
         CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
         canonicalizationStrategy = new GeneralCanonicalizationStrategy(grammar, canonicalizationHelper);
         computeAllCriticalPairs();
-
     }
 
     private void computeAllCriticalPairs() {
@@ -121,7 +120,7 @@ public class CriticalPairFinder {
                         HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
 
                         // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
-                        boolean isStronglyJoinable = false;
+                        CriticalPair.Joinability joinability = null;
                         if (fullyAbstracted1.nodes().equals(fullyAbstracted2.nodes())) {
                             // Both fully abstracted heap configurations contain the nodes
                             // Check if track morphism defines the isomorphism (strong joinable)
@@ -131,22 +130,20 @@ public class CriticalPairFinder {
                             checker.run((Graph) fullyAbstracted1Track, (Graph) fullyAbstracted2Track);
                             if (checker.hasMorphism()) {
                                 // Strongly joinable
-                                isStronglyJoinable = true;
-                                criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
+                                joinability = CriticalPair.Joinability.STRONGLY_JOINABLE;
                             }
                         }
-                        if (!isStronglyJoinable) {
+                        if (joinability == null) {
                             // The critical pair is not strongly joinable -> check if it is weakly joinable
                             // Check if there is ANY isomorphism
                             checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
                             if (checker.hasMorphism()) {
-                                // Weakly joinable
-                                criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.WEAKLY_JOINABLE));
+                                joinability = CriticalPair.Joinability.WEAKLY_JOINABLE;
                             } else {
-                                // Not joinable
-                                criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.NOT_JOINABLE));
+                                joinability = CriticalPair.Joinability.NOT_JOINABLE;
                             }
                         }
+                        criticalPairs.add(new CriticalPair(nt1, nt2, jointHeapConfiguration, joinability));
                     }
                 }
             }
