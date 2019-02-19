@@ -45,10 +45,10 @@ public class CriticalPairFinder {
         this.underlyingGrammar = grammar;
         this.criticalPairs = new HashSet<>();
         this.checker = new VF2IsomorphismChecker();
-        MorphismOptions options = new AbstractionOptions()  // TODO: Check what this really does
-                .setAdmissibleAbstraction(true)
-                .setAdmissibleConstants(true)
-                .setAdmissibleMarkings(true);
+        MorphismOptions options = new AbstractionOptions()
+                .setAdmissibleAbstraction(false)
+                .setAdmissibleConstants(false)
+                .setAdmissibleMarkings(false);
 
         EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
         CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
@@ -106,7 +106,7 @@ public class CriticalPairFinder {
                     // Found a compatible overlapping
                     NodeOverlapping nodeOverlapping = (NodeOverlapping) nOverlapping;
 
-                    // TODO: Check that the rule applications are not independent
+                    // TODO: Check that the rule applications are not independent (They should share at least one internal node)
 
                     // 1. Compute the joint graph
                     JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context, nodeOverlapping, edgeOverlapping);
@@ -121,17 +121,22 @@ public class CriticalPairFinder {
                     HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
 
                     // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
-                    // Check if track morphism defines the isomorphism (strong joinable)
-                    HeapConfigurationBuilder fullyAbstracted1TrackBuilder = fullyAbstracted1.clone().builder();
-                    HeapConfigurationBuilder fullyAbstracted2TrackBuilder = fullyAbstracted2.clone().builder();
+                    boolean isStronglyJoinable = false;
+                    if (fullyAbstracted1.nodes().equals(fullyAbstracted2.nodes())) {
+                        // Both fully abstracted heap configurations contain the nodes
+                        // Check if track morphism defines the isomorphism (strong joinable)
+                        HeapConfiguration fullyAbstracted1Track = setExternalNodesAccordingToIds(fullyAbstracted1);
+                        HeapConfiguration fullyAbstracted2Track = setExternalNodesAccordingToIds(fullyAbstracted2);
 
-                    // TODO: Set all nodes external in the fully abstracted graphs according to the track morphism
-
-                    checker.run((Graph) fullyAbstracted1TrackBuilder.build(), (Graph) fullyAbstracted2TrackBuilder.build());
-                    if (checker.hasMorphism()) {
-                        // Strongly joinable
-                        criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
-                    } else {
+                        checker.run((Graph) fullyAbstracted1Track, (Graph) fullyAbstracted2Track);
+                        if (checker.hasMorphism()) {
+                            // Strongly joinable
+                            isStronglyJoinable = true;
+                            criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
+                        }
+                    }
+                    if (!isStronglyJoinable){
+                        // The critical pair is not strongly joinable -> check if it is weakly joinable
                         // Check if there is ANY isomorphism
                         checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
                         if (checker.hasMorphism()) {
@@ -145,6 +150,17 @@ public class CriticalPairFinder {
                 }
             }
         }
+    }
+
+    private static HeapConfiguration setExternalNodesAccordingToIds(HeapConfiguration hc) {
+        // Clone the HeapConfiguration
+        HeapConfigurationBuilder builder = hc.clone().builder();
+        // TODO: Assumes the ids in hc.nodes() are in ascending order. Is this ok?
+        hc.nodes().forEach(hcId -> {
+            builder.setExternal(hcId);
+            return true;
+        });
+        return builder.build();
     }
 
     public Set<CriticalPair> getCriticalPairs() {
