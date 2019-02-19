@@ -129,7 +129,7 @@ public class CriticalPairFinder {
                         // Strongly joinable
                         criticalPairs.add(new CriticalPair(nt1, hc1, nt2, hc2, nodeOverlapping, CriticalPair.Joinability.STRONGLY_JOINABLE));
                     } else {
-                        // Check if there is any isomorphism
+                        // Check if there is ANY isomorphism
                         checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
                         if (checker.hasMorphism()) {
                             // Weakly joinable

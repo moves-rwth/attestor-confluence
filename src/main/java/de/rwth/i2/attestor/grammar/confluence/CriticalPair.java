@@ -10,6 +10,7 @@ public class CriticalPair {
     private final NodeOverlapping nodeOverlapping;
     private final Joinability joinability;
 
+    // TODO: Change what the CriticalPair actually stores (maybe the JointHeapConfiguration object)
     public CriticalPair(Nonterminal nt1, HeapConfiguration hc1, Nonterminal nt2, HeapConfiguration hc2,
                         NodeOverlapping nodeOverlapping, Joinability joinability) {
         this.nt1 = nt1;
