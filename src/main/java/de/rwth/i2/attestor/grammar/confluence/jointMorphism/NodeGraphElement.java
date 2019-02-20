@@ -6,7 +6,6 @@ import de.rwth.i2.attestor.graph.heap.internal.HeapConfigurationIdConverter;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
-import soot.jimple.parser.node.TInt;
 
 import java.util.ArrayList;
 import java.util.Collection;

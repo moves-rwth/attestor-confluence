@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.util.Pair;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
@@ -67,26 +68,48 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
 
     /**
      * Returns the next possible successor for a node equivalence.
-     * If there is no successor returns null
+     *
+     * @param previousPair  The last equivalence returned from this method. Set to null for the first call.
+     * @return The returned pair corresponds to the immediate successor child after the 'previousPair'.
+     *         If there are no more successors this method return null.
      */
-    private Pair<Element, Element> getNextEquivalence(Pair<Element, Element> oldPair) {
+    Pair<Element, Element> getNextEquivalence(Pair<Element, Element> previousPair) {
+        if (hc1Remaining.isEmpty() || hc2Remaining.isEmpty()) {
+            // No overlapping possible
+            return null;
+        }
+        Element hc1Old, hc2Old;
+        if (previousPair == null) {
+            if (lastAddedEquivalence == null) {
+                // This is the base overlapping
+                return new Pair<>(hc1Remaining.first(), hc2Remaining.first());
+            } else {
+                // This is not the base overlapping -> The last added equivalence is the actual oldPair
+                hc1Old = hc1Remaining.higher(lastAddedEquivalence.first());
+                if (hc1Old == null) {
+                    return null;
+                }
+                hc2Old = hc2Remaining.first();
+                return new Pair<>(hc1Old, hc2Old);
+            }
+        } else {
+            hc1Old = previousPair.first();
+            hc2Old = previousPair.second();
+        }
+
         Element hc1New, hc2New;
-        hc2New = hc2Remaining.higher(oldPair.second());
+        hc2New = hc2Remaining.higher(hc2Old);
         if (hc2New == null) {
             // If there is no higher node in hc2 the next equivalence we look for a higher node in hc1
-            hc1New = hc1Remaining.higher(oldPair.first());
+            hc1New = hc1Remaining.higher(hc1Old);
             if (hc1New == null) {
                 // There are no more valid Element in hc1
                 return null;
             }
             // Start again by the lowest available node in hc2
-            hc2New = hc2Remaining.first();
-            if (hc2New == null) {
-                // There are no more valid Elements in hc2
-                return null;
-            }
+            hc2New = hc2Remaining.first(); // hc2Remaining is not empty (checked at the beginning)
         } else {
-            hc1New = oldPair.first();
+            hc1New = hc1Old;
         }
         return new Pair<>(hc1New, hc2New);
     }
@@ -104,18 +127,13 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
      * Furthermore the added equivalence has to come after the 'lastAddedEquivalence' from this object
      * according to the canonical ordering of node equivalences.
      * The isNextPairCompatible method is used to only include compatible Element
+     *
+     * @deprecated This should be done by the iterator
      */
+    @Deprecated
     Collection<Overlapping<Element>> getAllNextOverlappings() {
         Pair<Element, Element> nextNodeEquivalence;
-        if (lastAddedEquivalence == null) {
-            if (hc1Remaining.isEmpty() || hc2Remaining.isEmpty()) {
-                // No overlapping possible
-                return new ArrayList<>();
-            }
-            nextNodeEquivalence = new Pair<>(hc1Remaining.first(), hc2Remaining.first());
-        } else {
-            nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
-        }
+        nextNodeEquivalence = getNextEquivalence(lastAddedEquivalence);
         Collection<Overlapping<Element>> result = new ArrayList<>();
         while (nextNodeEquivalence != null) {
             if (this.isNextPairCompatible(nextNodeEquivalence)) {
@@ -149,10 +167,6 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
 
     Element getHC1Element(Element hc2Element) {
         return mapHC2toHC1.getOrDefault(hc2Element, null);
-    }
-
-    Pair<Element, Element> getLastAddedEquivalence() {
-        return lastAddedEquivalence;
     }
 
     /**
