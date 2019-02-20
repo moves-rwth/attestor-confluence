@@ -6,6 +6,7 @@ import de.rwth.i2.attestor.graph.heap.internal.HeapConfigurationIdConverter;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
+import soot.jimple.parser.node.TInt;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,5 +59,23 @@ public class NodeGraphElement extends GraphElement {
 
     public EdgeGraphElement getOutgoingSelectorEdge(String label) {
         return new EdgeGraphElement(getPrivateId(), label);
+    }
+
+    public boolean hasConnectedEdges(Graph graph) {
+        if (graph.getPredecessorsOf(getPrivateId()).size() != 0) {
+            // There is either a nonterminal edge connected to the node, or a selector edge points to this node
+            return true;
+        } else {
+            // Check if there is an outgoing selector edge
+            TIntArrayList successors = graph.getSuccessorsOf(getPrivateId());
+            for (int i = 0; i < successors.size(); i++) {
+                if (graph.getNodeLabel(successors.get(i)) instanceof Type) {
+                    // The successor is a node & we have found a selector
+                    return true;
+                }
+            }
+            // No incoming selector edge was found
+            return false;
+        }
     }
 }

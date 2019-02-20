@@ -101,7 +101,7 @@ public class CriticalPairFinder {
             EdgeOverlapping edgeOverlapping = (EdgeOverlapping) eOverlapping;
             // Check if the current edgeOverlapping allows for compatible node overlappings
             if (edgeOverlapping.isEdgeOverlappingValid()) {
-                for (Overlapping nOverlapping : NodeOverlapping.getNodeOverlapping(context, edgeOverlapping)) {
+                for (Overlapping nOverlapping : NodeOverlapping.getNodeOverlapping(edgeOverlapping)) {
                     // Found a compatible overlapping
                     NodeOverlapping nodeOverlapping = (NodeOverlapping) nOverlapping;
 

@@ -9,10 +9,14 @@ import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
+import org.jboss.util.graph.Edge;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -44,26 +48,24 @@ import static org.junit.Assert.*;
  */
 public class EdgeOverlappingTest {
 
-    private SceneObject sceneObject;
     private ExampleHcImplFactory hcImplFactory;
-    private EdgeOverlapping baseOverlapping;
 
     @Before
     public void setUp() {
-        sceneObject = new MockupSceneObject();
+        SceneObject sceneObject = new MockupSceneObject();
         hcImplFactory = new ExampleHcImplFactory(sceneObject);
     }
 
     @Test
-    public void testGetAllNextOverlappings_EmptyOverlapping() {
+    public void testIterator_EmptyOverlapping() {
         // Setup an overlapping with empty graphs
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc();
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc();
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
-        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
-
-        // Check that there are no next overlappings
-        assertEquals(0, edgeOverlapping.getAllNextOverlappings().size());
+        Iterator<Overlapping<EdgeGraphElement>> iterator = EdgeOverlapping.getEdgeOverlapping(context).iterator();
+        assertTrue(iterator.hasNext());  // The iterator should return the base overlapping
+        iterator.next();
+        assertFalse(iterator.hasNext()); // Check that there are no additional overlappings
     }
 
     @Test
@@ -442,6 +444,119 @@ public class EdgeOverlappingTest {
 
         // 2. Check isEdgeOverlappingValid()
         assertFalse(edgeOverlapping.isEdgeOverlappingValid());
+    }
+
+    /**
+     * This test checks if the EdgeGraphElements are enumerated correctly.
+     */
+    @Test
+    public void testGetAllNextOverlappings_CorrectNextEquivalences() {
+        // 1. Setup test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(4);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 4, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(2), selector, nodesHc1.get(3))
+                .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
+
+        TIntArrayList nodesHc2 = new TIntArrayList(4);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 4, nodesHc2)
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .addSelector(nodesHc2.get(2), selector, nodesHc2.get(3))
+                .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeOverlapping baseOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
+        EdgeGraphElement edge0Hc1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge1Hc1 = graphNodesHc1[2].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge0Hc2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge1Hc2 = graphNodesHc2[2].getOutgoingSelectorEdge("test");
+        Pair<EdgeGraphElement, EdgeGraphElement> edgePair00 = new Pair<>(edge0Hc1, edge0Hc2);
+        Pair<EdgeGraphElement, EdgeGraphElement> edgePair01 = new Pair<>(edge0Hc1, edge1Hc2);
+        Pair<EdgeGraphElement, EdgeGraphElement> edgePair10 = new Pair<>(edge1Hc1, edge0Hc2);
+        Pair<EdgeGraphElement, EdgeGraphElement> edgePair11 = new Pair<>(edge1Hc1, edge1Hc2);
+
+
+        // 2. Check the immediate successors of the base overlapping
+        Set<Pair<EdgeGraphElement,EdgeGraphElement>> correctAddedEquivalences = new HashSet<>();
+        correctAddedEquivalences.add(edgePair00);
+        correctAddedEquivalences.add(edgePair01);
+        correctAddedEquivalences.add(edgePair10);
+        correctAddedEquivalences.add(edgePair11);
+        assertEquals(correctAddedEquivalences, allNextAddedEquivalences(baseOverlapping));
+
+        // 3. Check the immediate successors of the children of the base overlapping
+        // Add edgePair00 first
+        EdgeOverlapping childOverlapping = baseOverlapping.getOverlapping(edgePair00);
+        correctAddedEquivalences = new HashSet<>();
+        correctAddedEquivalences.add(edgePair11);
+        assertEquals(correctAddedEquivalences, allNextAddedEquivalences(childOverlapping));
+        childOverlapping = childOverlapping.getOverlapping(edgePair11);  // Add remaining pair
+        assertEquals(0, allNextAddedEquivalences(childOverlapping).size());
+
+        // Add edgePair01 first
+        childOverlapping = baseOverlapping.getOverlapping(edgePair01);
+        correctAddedEquivalences = new HashSet<>();
+        correctAddedEquivalences.add(edgePair10);
+        assertEquals(correctAddedEquivalences, allNextAddedEquivalences(childOverlapping));
+        childOverlapping = childOverlapping.getOverlapping(edgePair10);  // Add remaining pair
+        assertEquals(0, allNextAddedEquivalences(childOverlapping).size());
+
+        // Add edgePair10 first
+        childOverlapping = baseOverlapping.getOverlapping(edgePair10);
+        assertEquals(0, allNextAddedEquivalences(childOverlapping).size());
+
+        // Add edgePair11 first
+        childOverlapping = baseOverlapping.getOverlapping(edgePair11);
+        assertEquals(0, allNextAddedEquivalences(childOverlapping).size());
+    }
+
+
+    /**
+     * This test checks how the getAllNextOverlappings() method handles if there are a different number of edge
+     */
+    @Test
+    public void testGetAllNextOverlappings_() {
+        // 1. Setup test
+        SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
+        Type type = hcImplFactory.scene().getType("node");
+        TIntArrayList nodesHc1 = new TIntArrayList(4);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 4, nodesHc1)
+                .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(2), selector, nodesHc1.get(3))
+                .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
+
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
+                .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeOverlapping baseOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
+        EdgeGraphElement edge0Hc1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge1Hc1 = graphNodesHc1[2].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge0Hc2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
+        Pair<EdgeGraphElement, EdgeGraphElement> edgePair00 = new Pair<>(edge0Hc1, edge0Hc2);
+        Pair<EdgeGraphElement, EdgeGraphElement> edgePair10 = new Pair<>(edge1Hc1, edge0Hc2);
+
+        
+    }
+
+    private static Set<Pair<EdgeGraphElement,EdgeGraphElement>> allNextAddedEquivalences(EdgeOverlapping overlapping) {
+        Set<Pair<EdgeGraphElement,EdgeGraphElement>> result = new HashSet<>();
+        for (Overlapping nextOverlapping : overlapping.getAllNextOverlappings()) {
+            result.add(nextOverlapping.getLastAddedEquivalence());
+        }
+        return result;
     }
 
 }

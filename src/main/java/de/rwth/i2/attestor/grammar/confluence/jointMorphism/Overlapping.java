@@ -151,6 +151,10 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         return mapHC2toHC1.getOrDefault(hc2Element, null);
     }
 
+    Pair<Element, Element> getLastAddedEquivalence() {
+        return lastAddedEquivalence;
+    }
+
     /**
      *
      *

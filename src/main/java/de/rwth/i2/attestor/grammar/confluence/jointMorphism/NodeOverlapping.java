@@ -9,14 +9,14 @@ import java.util.Map;
 
 public class NodeOverlapping extends Overlapping<NodeGraphElement> {
 
-    private final boolean isNodeOverlappingIndependent;
+    private final boolean isIndependent;
 
     private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
                             Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
                             Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1) {
         super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
         // The node overlapping is independent if the already existing node equivalences are only containing external nodes
-        isNodeOverlappingIndependent = areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet())
+        isIndependent = areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet())
                 && areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet());
     }
 
@@ -33,11 +33,11 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         super(oldNodeOverlapping, newPair);
         if (oldNodeOverlapping.isNodeOverlappingIndependent()) {
             // Check if the overlapping is still independent with the new pair (if the newPair is external in each graph)
-            isNodeOverlappingIndependent = getContext().getGraph1().isExternal(newPair.first().getPrivateId())
+            isIndependent = getContext().getGraph1().isExternal(newPair.first().getPrivateId())
                     && getContext().getGraph2().isExternal(newPair.second().getPrivateId());
         } else {
             // Once an overlapping is not independent its children cannot be independent again
-            isNodeOverlappingIndependent = false;
+            isIndependent = false;
         }
     }
 
@@ -73,7 +73,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
     }
 
     /**
-     * For a node that is present in graph1 and graph2 the method returns true if the node is external in the graph2 or
+     * For a node that is present in graph1 and graph2 the method returns false if the node is external in the graph2 or
      * if is not connected to any edges in graph1.
      *
      * We require that edges that are in the intersection cannot be connected to the node.
@@ -89,15 +89,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         }
 
         // 2. Check if there are any connected edges (Only necessary if isolated nodes are allowed in RHS)
-        if (graph1.getPredecessorsOf(node1.getPrivateId()).size() == 0) {
-            // There are no edges connected to the node -> No violation point
-            return false;
-        } else {
-            // There are edges connected to the node
-            // -> Because of requirement (see docstring of method) those edges are not in the intersection
-            // -> Violation
-            return true;
-        }
+        return node1.hasConnectedEdges(graph1);
     }
 
     @Override
@@ -105,8 +97,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         return new NodeOverlapping(this, newPair);
     }
 
-    public static NodeOverlapping getNodeOverlapping(HeapConfigurationContext context,
-                                                     EdgeOverlapping edgeOverlapping) {
+    public static NodeOverlapping getNodeOverlapping(EdgeOverlapping edgeOverlapping) {
         Collection<NodeGraphElement> hc1Remaining, hc2Remaining;
         Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2, mapHc2toHc1;
 
@@ -115,11 +106,11 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         mapHc2toHc1 = edgeOverlapping.getNodeMapHC2ToHC1();
 
         // Get all remaining nodes
-        hc1Remaining = NodeGraphElement.getNodes(context.getGraph1(), mapHc1toHc2.keySet());
-        hc2Remaining = NodeGraphElement.getNodes(context.getGraph2(), mapHc2toHc1.keySet());
+        hc1Remaining = NodeGraphElement.getNodes(edgeOverlapping.getContext().getGraph1(), mapHc1toHc2.keySet());
+        hc2Remaining = NodeGraphElement.getNodes(edgeOverlapping.getContext().getGraph2(), mapHc2toHc1.keySet());
 
         // Return the NodeOverlapping
-        return new NodeOverlapping(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
+        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
     }
 
     /**
@@ -128,7 +119,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
      * This is the case if the intersection of nodes does not contain any internal nodes
      */
     public boolean isNodeOverlappingIndependent() {
-        return isNodeOverlappingIndependent;
+        return isIndependent;
     }
 
 
