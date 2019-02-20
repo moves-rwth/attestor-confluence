@@ -518,20 +518,18 @@ public class EdgeOverlappingTest {
         // 1. Setup test
         SelectorLabel selector = hcImplFactory.scene().getSelectorLabel("test");
         Type type = hcImplFactory.scene().getType("node");
-        TIntArrayList nodesHc1 = new TIntArrayList(6);
+        TIntArrayList nodesHc1 = new TIntArrayList(4);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
-                .addNodes(type, 6, nodesHc1)
+                .addNodes(type, 4, nodesHc1)
                 .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
                 .addSelector(nodesHc1.get(2), selector, nodesHc1.get(3))
-                .addSelector(nodesHc1.get(4), selector, nodesHc1.get(5))
                 .build();
         NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
-        TIntArrayList nodesHc2 = new TIntArrayList(4);
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
-                .addNodes(type, 4, nodesHc2)
+                .addNodes(type, 2, nodesHc2)
                 .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
-                .addSelector(nodesHc2.get(2), selector, nodesHc2.get(3))
                 .build();
         NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
 
@@ -539,56 +537,22 @@ public class EdgeOverlappingTest {
         EdgeOverlapping baseOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
         EdgeGraphElement edge0Hc1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
         EdgeGraphElement edge1Hc1 = graphNodesHc1[2].getOutgoingSelectorEdge("test");
-        EdgeGraphElement edge2Hc1 = graphNodesHc1[4].getOutgoingSelectorEdge("test");
         EdgeGraphElement edge0Hc2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
-        EdgeGraphElement edge1Hc2 = graphNodesHc2[2].getOutgoingSelectorEdge("test");
         Pair<EdgeGraphElement, EdgeGraphElement> edgePair00 = new Pair<>(edge0Hc1, edge0Hc2);
         Pair<EdgeGraphElement, EdgeGraphElement> edgePair10 = new Pair<>(edge1Hc1, edge0Hc2);
-        Pair<EdgeGraphElement, EdgeGraphElement> edgePair20 = new Pair<>(edge2Hc1, edge0Hc2);
-        Pair<EdgeGraphElement, EdgeGraphElement> edgePair01 = new Pair<>(edge0Hc1, edge1Hc2);
-        Pair<EdgeGraphElement, EdgeGraphElement> edgePair11 = new Pair<>(edge1Hc1, edge1Hc2);
-        Pair<EdgeGraphElement, EdgeGraphElement> edgePair21 = new Pair<>(edge2Hc1, edge1Hc2);
 
         // 2. Check the immediate successors of the base overlapping
         assertEquals(edgePair00, baseOverlapping.getNextEquivalence(null));
-        assertEquals(edgePair01, baseOverlapping.getNextEquivalence(edgePair00));
-        assertEquals(edgePair10, baseOverlapping.getNextEquivalence(edgePair01));
-        assertEquals(edgePair11, baseOverlapping.getNextEquivalence(edgePair10));
-        assertEquals(edgePair20, baseOverlapping.getNextEquivalence(edgePair11));
-        assertEquals(edgePair21, baseOverlapping.getNextEquivalence(edgePair20));
-        assertEquals(null, baseOverlapping.getNextEquivalence(edgePair21));
+        assertEquals(edgePair10, baseOverlapping.getNextEquivalence(edgePair00));
+        assertEquals(null, baseOverlapping.getNextEquivalence(edgePair10));
 
         // 3. Check the immediate successors of the children of the base overlapping
         // Add edgePair00 first
         EdgeOverlapping childOverlapping = baseOverlapping.getOverlapping(edgePair00);
-        assertEquals(edgePair11, childOverlapping.getNextEquivalence(null));
-        assertEquals(edgePair21, childOverlapping.getNextEquivalence(edgePair11));
-        assertEquals(null, childOverlapping.getNextEquivalence(edgePair21));
-        // Test children of children
-        assertEquals(null, childOverlapping.getOverlapping(edgePair11).getNextEquivalence(null));
-        assertEquals(null, childOverlapping.getOverlapping(edgePair21).getNextEquivalence(null));
-
-        // Add edgePair01 first
-        childOverlapping = baseOverlapping.getOverlapping(edgePair01);
-        assertEquals(edgePair10, childOverlapping.getNextEquivalence(null));
-        assertEquals(edgePair20, childOverlapping.getNextEquivalence(edgePair10));
-        assertEquals(null, childOverlapping.getNextEquivalence(edgePair20));
-        // Test children of children
-        assertEquals(null, childOverlapping.getOverlapping(edgePair10).getNextEquivalence(null));
-        assertEquals(null, childOverlapping.getOverlapping(edgePair20).getNextEquivalence(null));
+        assertEquals(null, childOverlapping.getNextEquivalence(null));
 
         // Add edgePair10 first
         childOverlapping = baseOverlapping.getOverlapping(edgePair10);
-        assertEquals(edgePair21, childOverlapping.getNextEquivalence(null));
-        assertEquals(null, childOverlapping.getNextEquivalence(edgePair21));
-
-        // Add edgePair11 first
-        childOverlapping = baseOverlapping.getOverlapping(edgePair11);
-        assertEquals(edgePair20, childOverlapping.getNextEquivalence(null));
-        assertEquals(null, childOverlapping.getNextEquivalence(edgePair20));
-
-        // Add edgePair20 first
-        childOverlapping = baseOverlapping.getOverlapping(edgePair20);
         assertEquals(null, childOverlapping.getNextEquivalence(null));
     }
 
