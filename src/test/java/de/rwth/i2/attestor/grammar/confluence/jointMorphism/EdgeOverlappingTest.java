@@ -76,12 +76,15 @@ public class EdgeOverlappingTest {
                 .addNodes(type, 2, nodesHc1)
                 .addSelector(nodesHc1.get(0), sel, nodesHc1.get(1))
                 .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
         TIntArrayList nodesHc2 = new TIntArrayList(4);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 4, nodesHc2)
                 .addSelector(nodesHc2.get(2), sel, nodesHc2.get(3))
                 .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
 
@@ -95,18 +98,14 @@ public class EdgeOverlappingTest {
         EdgeOverlapping nextEdgeOverlapping = (EdgeOverlapping) nextOverlapping;
 
         // 4. Test if nodes map correctly
-        NodeGraphElement node0Hc1 = new NodeGraphElement(nodesHc1.get(0));
-        NodeGraphElement node0Hc2 = new NodeGraphElement(nodesHc2.get(2));
-        NodeGraphElement node1Hc1 = new NodeGraphElement(nodesHc1.get(1));
-        NodeGraphElement node1Hc2 = new NodeGraphElement(nodesHc2.get(3));
-        assertEquals(node0Hc1, nextEdgeOverlapping.getHC1Node(node0Hc2));
-        assertEquals(node0Hc2, nextEdgeOverlapping.getHC2Node(node0Hc1));
-        assertEquals(node1Hc1, nextEdgeOverlapping.getHC1Node(node1Hc2));
-        assertEquals(node1Hc2, nextEdgeOverlapping.getHC2Node(node1Hc1));
+        assertEquals(graphNodesHc1[0], nextEdgeOverlapping.getHC1Node(graphNodesHc2[2]));
+        assertEquals(graphNodesHc2[2], nextEdgeOverlapping.getHC2Node(graphNodesHc1[0]));
+        assertEquals(graphNodesHc1[1], nextEdgeOverlapping.getHC1Node(graphNodesHc2[3]));
+        assertEquals(graphNodesHc2[3], nextEdgeOverlapping.getHC2Node(graphNodesHc1[1]));
 
         // 5. Test if edges map correctly
-        EdgeGraphElement edgeHc1 = new EdgeGraphElement(nodesHc1.get(0), "test");
-        EdgeGraphElement edgeHc2 = new EdgeGraphElement(nodesHc2.get(2), "test");
+        EdgeGraphElement edgeHc1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edgeHc2 = graphNodesHc2[2].getOutgoingSelectorEdge("test");
         assertEquals(edgeHc1, nextEdgeOverlapping.getHC1Element(edgeHc2));
         assertEquals(edgeHc2, nextEdgeOverlapping.getHC2Element(edgeHc1));
 
@@ -151,12 +150,14 @@ public class EdgeOverlappingTest {
                 .addNodes(type, 2, nodesHc1)
                 .addNonterminalEdge(nonterminal, nodesHc1)
                 .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
         TIntArrayList nodesHc2 = new TIntArrayList(4);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 4, nodesHc2)
                 .addNonterminalEdge(nonterminal).addTentacle(nodesHc2.get(2)).addTentacle(nodesHc2.get(3)).build()
                 .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
 
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context);
@@ -171,14 +172,10 @@ public class EdgeOverlappingTest {
         EdgeOverlapping nextEdgeOverlapping = (EdgeOverlapping) nextOverlapping;
 
         // 4. Test if nodes map correctly
-        NodeGraphElement node0Hc1 = new NodeGraphElement(nodesHc1.get(0));
-        NodeGraphElement node0Hc2 = new NodeGraphElement(nodesHc2.get(2));
-        NodeGraphElement node1Hc1 = new NodeGraphElement(nodesHc1.get(1));
-        NodeGraphElement node1Hc2 = new NodeGraphElement(nodesHc2.get(3));
-        assertEquals(node0Hc1, nextEdgeOverlapping.getHC1Node(node0Hc2));
-        assertEquals(node0Hc2, nextEdgeOverlapping.getHC2Node(node0Hc1));
-        assertEquals(node1Hc1, nextEdgeOverlapping.getHC1Node(node1Hc2));
-        assertEquals(node1Hc2, nextEdgeOverlapping.getHC2Node(node1Hc1));
+        assertEquals(graphNodesHc1[0], nextEdgeOverlapping.getHC1Node(graphNodesHc2[2]));
+        assertEquals(graphNodesHc2[2], nextEdgeOverlapping.getHC2Node(graphNodesHc1[0]));
+        assertEquals(graphNodesHc1[1], nextEdgeOverlapping.getHC1Node(graphNodesHc2[3]));
+        assertEquals(graphNodesHc2[3], nextEdgeOverlapping.getHC2Node(graphNodesHc1[1]));
 
         // 5. Test if edges map correctly
         EdgeGraphElement edgeHc1 = EdgeGraphElement.getEdgesOfGraph(context.getGraph1()).iterator().next();
@@ -259,6 +256,7 @@ public class EdgeOverlappingTest {
                 .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
                 .addSelector(nodesHc1.get(1), selector, nodesHc1.get(2))
                 .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
         TIntArrayList nodesHc2 = new TIntArrayList(3);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
@@ -266,10 +264,12 @@ public class EdgeOverlappingTest {
                 .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
                 .addSelector(nodesHc2.get(1), selector, nodesHc2.get(2))
                 .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
         // Get the edge overlapping that already contains the equivalence between the edge (2, 0) in hc1 and (1, 2) in hc2
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
-        EdgeGraphElement edge1 = new EdgeGraphElement(nodesHc1.get(0), "test");
-        EdgeGraphElement edge2 = new EdgeGraphElement(nodesHc2.get(1), "test");
+        EdgeGraphElement edge1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge2 = graphNodesHc2[1].getOutgoingSelectorEdge("test");
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge1, edge2));
 
         // 2. Invoke method
@@ -294,6 +294,7 @@ public class EdgeOverlappingTest {
                 .addSelector(nodesHc1.get(2), selector, nodesHc1.get(1))
                 .addSelector(nodesHc1.get(1), selector, nodesHc1.get(0))
                 .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
         TIntArrayList nodesHc2 = new TIntArrayList(3);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
@@ -301,10 +302,11 @@ public class EdgeOverlappingTest {
                 .addSelector(nodesHc2.get(2), selector, nodesHc2.get(1))
                 .addSelector(nodesHc2.get(1), selector, nodesHc2.get(0))
                 .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
         // Get the edge overlapping that already contains the equivalence between the edge (2, 0) in hc1 and (1, 2) in hc2
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
-        EdgeGraphElement edge1 = new EdgeGraphElement(nodesHc1.get(1), "test");
-        EdgeGraphElement edge2 = new EdgeGraphElement(nodesHc2.get(2), "test");
+        EdgeGraphElement edge1 = graphNodesHc1[1].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge2 = graphNodesHc2[2].getOutgoingSelectorEdge("test");
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge1, edge2));
 
         // 2. Invoke method
@@ -388,6 +390,7 @@ public class EdgeOverlappingTest {
                 .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
                 .addSelector(nodesHc1.get(1), selector, nodesHc1.get(0))
                 .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
         TIntArrayList nodesHc2 = new TIntArrayList(2);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
@@ -395,9 +398,12 @@ public class EdgeOverlappingTest {
                 .setExternal(nodesHc2.get(0)).setExternal(nodesHc2.get(1))
                 .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
                 .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
-        EdgeGraphElement edge = new EdgeGraphElement(0, "test");
-        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge, edge));
+        EdgeGraphElement edge1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge1, edge2));
 
         // 2. Check isEdgeOverlappingValid()
         assertTrue(edgeOverlapping.isEdgeOverlappingValid());
@@ -419,6 +425,7 @@ public class EdgeOverlappingTest {
                 .addSelector(nodesHc1.get(0), selector, nodesHc1.get(1))
                 .addSelector(nodesHc1.get(1), selector, nodesHc1.get(0))
                 .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
 
         TIntArrayList nodesHc2 = new TIntArrayList(2);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
@@ -426,9 +433,12 @@ public class EdgeOverlappingTest {
                 .setExternal(nodesHc2.get(0))
                 .addSelector(nodesHc2.get(0), selector, nodesHc2.get(1))
                 .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
-        EdgeGraphElement edge = new EdgeGraphElement(0, "test");
-        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge, edge));
+        EdgeGraphElement edge1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(new Pair<>(edge1, edge2));
 
         // 2. Check isEdgeOverlappingValid()
         assertFalse(edgeOverlapping.isEdgeOverlappingValid());
