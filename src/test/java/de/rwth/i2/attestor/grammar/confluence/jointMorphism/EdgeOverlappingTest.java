@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
  * Cases that are tested:
  *
  * iterator()
- *   - 1 Case: Empty overlapping TODO
+ *   - 1 Case: Empty overlapping
  *   - 2 Case: Non empty overlapping TODO
  *
  * isNextPairCompatible()
@@ -42,8 +42,8 @@ import static org.junit.Assert.*;
  *      - 2.1 Case: The node is external in the other graph
  *      - 2.1 Case: The node is not external in the other graph
  *
- *  TODO: Some kind of self loop test
- *  TODO: I assume that the publicId of nodes is the same as the privateId (if the nodes are added at the beginning)
+ *  TODO: Some kind of test with self loops in the graph
+ *  TODO: Test the getOverlapping method
  */
 public class EdgeOverlappingTest {
 
@@ -55,7 +55,6 @@ public class EdgeOverlappingTest {
         hcImplFactory = new ExampleHcImplFactory(sceneObject);
     }
 
-    /*
     @Test
     public void testIterator_EmptyOverlapping() {
         // Setup an overlapping with empty graphs
@@ -66,7 +65,7 @@ public class EdgeOverlappingTest {
         assertTrue(iterator.hasNext());  // The iterator should return the base overlapping
         iterator.next();
         assertFalse(iterator.hasNext()); // Check that there are no additional overlappings
-    }*/
+    }
 
     @Test
     public void testIsNextPairCompatible_MatchingSelectorEdges() {
@@ -496,7 +495,7 @@ public class EdgeOverlappingTest {
         assertEquals(edgePair11, baseOverlapping.getNextEquivalence(edgePair10));
         assertEquals(null, baseOverlapping.getNextEquivalence(edgePair11));
 
-        // 3. Check the immediate successors of the children of the base overlapping
+        // 3. Check all descendants
         // Add edgePair00 first
         EdgeOverlapping childOverlapping = baseOverlapping.getOverlapping(edgePair00);
         assertEquals(edgePair11, childOverlapping.getNextEquivalence(null));
@@ -518,6 +517,7 @@ public class EdgeOverlappingTest {
         // Add edgePair11 first
         childOverlapping = baseOverlapping.getOverlapping(edgePair11);
         assertEquals(null, childOverlapping.getNextEquivalence(null));
+
     }
 
 
@@ -556,15 +556,6 @@ public class EdgeOverlappingTest {
         assertEquals(edgePair00, baseOverlapping.getNextEquivalence(null));
         assertEquals(edgePair10, baseOverlapping.getNextEquivalence(edgePair00));
         assertEquals(null, baseOverlapping.getNextEquivalence(edgePair10));
-
-        // 3. Check the immediate successors of the children of the base overlapping
-        // Add edgePair00 first
-        EdgeOverlapping childOverlapping = baseOverlapping.getOverlapping(edgePair00);
-        assertEquals(null, childOverlapping.getNextEquivalence(null));
-
-        // Add edgePair10 first
-        childOverlapping = baseOverlapping.getOverlapping(edgePair10);
-        assertEquals(null, childOverlapping.getNextEquivalence(null));
     }
 
 }
