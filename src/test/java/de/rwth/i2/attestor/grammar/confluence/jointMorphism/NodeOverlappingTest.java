@@ -11,8 +11,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.xml.soap.Node;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

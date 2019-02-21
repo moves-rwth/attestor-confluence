@@ -1,6 +1,5 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -9,6 +8,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies that GraphElement realizes a valid total order.
@@ -70,11 +71,13 @@ public class GraphElementTotalOrderTest {
             result = 1;
         }
         assertEquals("compareTo() result is wrong", result, expectedResult);
-        assertEquals("equals() result is wrong", expectedResult == 0, elem1.equals(elem2));
         if (expectedResult == 0) {
             // Check that hashCode() result match for equal entries
             String msg = "Elements are equal, but their hash does not match";
             assertEquals(msg, elem1.hashCode(), elem2.hashCode());
+            assertEquals(elem1, elem2);
+        } else {
+            assertNotEquals(elem1, elem2);
         }
     }
 

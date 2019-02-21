@@ -44,8 +44,8 @@ import static org.junit.Assert.*;
  *
  *  getOverlapping(newPair)
  *    - Just add a pair and check that hc1Remaining, hc2Remaining, ... is correct
- *    - 1. Case: Add one pair
- *    - 1. Case: Add second pair
+ *    - 1. Case: Add one pair TODO
+ *    - 1. Case: Add second pair TODO
  *
  *  TODO: Some kind of test with self loops in the graph
  *  TODO: Test the getOverlapping method
