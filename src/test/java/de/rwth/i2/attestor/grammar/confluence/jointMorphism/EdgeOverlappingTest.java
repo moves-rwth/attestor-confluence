@@ -42,6 +42,11 @@ import static org.junit.Assert.*;
  *      - 2.1 Case: The node is external in the other graph
  *      - 2.1 Case: The node is not external in the other graph
  *
+ *  getOverlapping(newPair)
+ *    - Just add a pair and check that hc1Remaining, hc2Remaining, ... is correct
+ *    - 1. Case: Add one pair
+ *    - 1. Case: Add second pair
+ *
  *  TODO: Some kind of test with self loops in the graph
  *  TODO: Test the getOverlapping method
  */

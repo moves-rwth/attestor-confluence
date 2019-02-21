@@ -52,16 +52,8 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         return new HashMap<>(this.mapNodeHc1ToHc2);
     }
 
-    NodeGraphElement getHC2Node(NodeGraphElement hc1Element) {
-        return mapNodeHc1ToHc2.getOrDefault(hc1Element, null);
-    }
-
     Map<NodeGraphElement, NodeGraphElement> getNodeMapHC2ToHC1() {
         return new HashMap<>(this.mapNodeHc2ToHc1);
-    }
-
-    NodeGraphElement getHC1Node(NodeGraphElement hc2Element) {
-        return mapNodeHc2ToHc1.getOrDefault(hc2Element, null);
     }
 
     @Override
@@ -136,8 +128,8 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
      */
     public boolean isEdgeOverlappingValid() {
         // Check if the edge overlapping is valid for the edges not in the intersection in Hc1 and in Hc2
-        return isEdgeOverlappingValid(getHc1Remaining(), getNodeMapHC1ToHC2(), getContext().getGraph1(), getContext().getGraph2()) &&
-                isEdgeOverlappingValid(getHc2Remaining(), getNodeMapHC2ToHC1(), getContext().getGraph2(), getContext().getGraph1());
+        return isEdgeOverlappingValid(getHc1Remaining(), mapNodeHc1ToHc2, getContext().getGraph1(), getContext().getGraph2()) &&
+                isEdgeOverlappingValid(getHc2Remaining(), mapNodeHc2ToHc1, getContext().getGraph2(), getContext().getGraph1());
     }
 
     /**

@@ -11,13 +11,16 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
 
     private final boolean isIndependent;
 
+    /**
+     * Create a base NodeOverlapping from the data that comes from an EdgeOverlapping
+     */
     private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
                             Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
                             Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1) {
         super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
         // The node overlapping is independent if the already existing node equivalences are only containing external nodes
         isIndependent = areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet())
-                && areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet());
+                && areAllNodesExternal(context.getGraph2(), mapHc2toHc1.keySet());
     }
 
     private boolean areAllNodesExternal(Graph graph, Collection<NodeGraphElement> nodes) {
@@ -29,6 +32,9 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         return true;
     }
 
+    /**
+     * Create a NodeOverlapping based on a previous NodeOverlapping
+     */
     private NodeOverlapping(NodeOverlapping oldNodeOverlapping, Pair<NodeGraphElement, NodeGraphElement> newPair) {
         super(oldNodeOverlapping, newPair);
         if (oldNodeOverlapping.isNodeOverlappingIndependent()) {

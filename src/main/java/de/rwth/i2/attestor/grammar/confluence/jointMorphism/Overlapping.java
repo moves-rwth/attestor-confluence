@@ -157,16 +157,8 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         return new HashMap<>(mapHC1toHC2); // TODO: Maybe don't copy the map here
     }
 
-    Element getHC2Element(Element hc1Element) {
-        return mapHC1toHC2.getOrDefault(hc1Element, null);
-    }
-
     Map<Element, Element> getMapHC2toHC1() {
         return new HashMap<>(mapHC2toHC1);  // TODO: Maybe don't copy the map here
-    }
-
-    Element getHC1Element(Element hc2Element) {
-        return mapHC2toHC1.getOrDefault(hc2Element, null);
     }
 
     /**

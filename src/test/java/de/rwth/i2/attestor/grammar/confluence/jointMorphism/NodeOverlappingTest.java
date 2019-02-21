@@ -50,6 +50,7 @@ public class NodeOverlappingTest {
         // 1. Setup the test
         Type type1 = hcImplFactory.scene().getType("node1");
         Type type2 = hcImplFactory.scene().getType("node2");
+
         TIntArrayList nodesHc1 = new TIntArrayList(1);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type1, 1, nodesHc1)
@@ -67,7 +68,7 @@ public class NodeOverlappingTest {
         NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
         Pair<NodeGraphElement, NodeGraphElement> newPair = new Pair<>(graphNodesHc1[0], graphNodesHc2[0]);
 
-        // 2. Invoke method
+        // 2. Check isNextPairCompatible result
         assertFalse(nodeOverlapping.isNextPairCompatible(newPair));
     }
 
@@ -77,6 +78,7 @@ public class NodeOverlappingTest {
         // 1. Setup the test
         Type type = hcImplFactory.scene().getType("node");
         SelectorLabel selectorLabel = hcImplFactory.scene().getSelectorLabel("test");
+
         TIntArrayList nodesHc1 = new TIntArrayList(2);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 2, nodesHc1)
@@ -87,7 +89,6 @@ public class NodeOverlappingTest {
         TIntArrayList nodesHc2 = new TIntArrayList(2);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 2, nodesHc2)
-                .addSelector(nodesHc2.get(0), selectorLabel, nodesHc2.get(1))
                 .build();
         NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
 
@@ -96,7 +97,9 @@ public class NodeOverlappingTest {
         NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
         Pair<NodeGraphElement, NodeGraphElement> newPair = new Pair<>(graphNodesHc1[0], graphNodesHc2[0]);
 
-        // 2. Invoke method
+        // 2. Check isNextPairCompatible result
+        // The result must be false, because the selector edge is not in the intersection so the connected nodes
+        // cannot be in the intersection (dangling edge condition)
         assertFalse(nodeOverlapping.isNextPairCompatible(newPair));
     }
 
@@ -106,6 +109,7 @@ public class NodeOverlappingTest {
         // 1. Setup the test
         Type type = hcImplFactory.scene().getType("node");
         SelectorLabel selectorLabel = hcImplFactory.scene().getSelectorLabel("test");
+
         TIntArrayList nodesHc1 = new TIntArrayList(2);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 2, nodesHc1)
@@ -127,7 +131,8 @@ public class NodeOverlappingTest {
         NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
         Pair<NodeGraphElement, NodeGraphElement> newPair = new Pair<>(graphNodesHc1[0], graphNodesHc2[0]);
 
-        // 2. Invoke method
+        // 2. Check isNextPairCompatible result
+        // Here the dangling edge condition is not violated, because the nodes are external (don't get removed)
         assertTrue(nodeOverlapping.isNextPairCompatible(newPair));
     }
 
@@ -135,6 +140,7 @@ public class NodeOverlappingTest {
     public void testIsNextPairCompatible_CompatibleNodesInternal() {
         // 1. Setup the test
         Type type = hcImplFactory.scene().getType("node");
+
         TIntArrayList nodesHc1 = new TIntArrayList(1);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 1, nodesHc1)
@@ -152,7 +158,7 @@ public class NodeOverlappingTest {
         NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
         Pair<NodeGraphElement, NodeGraphElement> newPair = new Pair<>(graphNodesHc1[0], graphNodesHc2[0]);
 
-        // 2. Invoke method
+        // 2. Check isNextPairCompatible result
         assertTrue(nodeOverlapping.isNextPairCompatible(newPair));
     }
 
@@ -160,6 +166,7 @@ public class NodeOverlappingTest {
     public void testIsNodeOverlappingIndependent_True() {
         // 1. Setup the test
         Type type = hcImplFactory.scene().getType("node");
+
         TIntArrayList nodesHc1 = new TIntArrayList(1);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 1, nodesHc1)
@@ -180,7 +187,7 @@ public class NodeOverlappingTest {
         Pair<NodeGraphElement, NodeGraphElement> newPair = new Pair<>(graphNodesHc1[0], graphNodesHc2[0]);
         NodeOverlapping newNodeOverlapping = nodeOverlapping.getOverlapping(newPair);
 
-        // 2. Invoke method
+        // 2. Check isNodeOverlappingIndependent result
         assertTrue(newNodeOverlapping.isNodeOverlappingIndependent());
     }
 
@@ -188,7 +195,7 @@ public class NodeOverlappingTest {
     public void testIsNodeOverlappingIndependent_False() {
         // 1. Setup the test
         Type type = hcImplFactory.scene().getType("node");
-        SelectorLabel selectorLabel = hcImplFactory.scene().getSelectorLabel("test");
+
         TIntArrayList nodesHc1 = new TIntArrayList(1);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 1, nodesHc1)
@@ -207,15 +214,16 @@ public class NodeOverlappingTest {
         Pair<NodeGraphElement, NodeGraphElement> newPair = new Pair<>(graphNodesHc1[0], graphNodesHc2[0]);
         NodeOverlapping newNodeOverlapping = nodeOverlapping.getOverlapping(newPair);
 
-        // 2. Invoke method
+        // 2. Check isNodeOverlappingIndependent result
         assertFalse(newNodeOverlapping.isNodeOverlappingIndependent());
     }
 
     @Test
-    public void testIsNodeOverlappingIdependent_ChildOfNotIndependentNodeOverlapping() {
+    public void testIsNodeOverlappingIndependent_ChildOfNotIndependentNodeOverlapping() {
         // 1. Setup the test
         Type type = hcImplFactory.scene().getType("node");
         SelectorLabel selectorLabel = hcImplFactory.scene().getSelectorLabel("test");
+
         TIntArrayList nodesHc1 = new TIntArrayList(2);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 2, nodesHc1)
@@ -243,9 +251,41 @@ public class NodeOverlappingTest {
         Pair<NodeGraphElement, NodeGraphElement> newPair2 = new Pair<>(graphNodesHc1[1], graphNodesHc2[1]);
         NodeOverlapping newNodeOverlapping = nodeOverlapping.getOverlapping(newPair2);
 
-        // 2. Invoke method
-        // The node overlapping should not be independent even though the new pair nodes are external
+        // 2. Check isNodeOverlappingIndependent result
         assertFalse(newNodeOverlapping.isNodeOverlappingIndependent());
+    }
+
+    @Test
+    public void testIsNodeOverlappingIndependent_NodesFromEdgeOverlappingAllExternal() {
+        // 1. Setup the test
+        Type type = hcImplFactory.scene().getType("node");
+        SelectorLabel selectorLabel = hcImplFactory.scene().getSelectorLabel("test");
+
+        TIntArrayList nodesHc1 = new TIntArrayList(2);
+        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc1)
+                .setExternal(nodesHc1.get(0)).setExternal(nodesHc1.get(1))
+                .addSelector(nodesHc1.get(0), selectorLabel, nodesHc1.get(0))
+                .build();
+        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
+
+        TIntArrayList nodesHc2 = new TIntArrayList(2);
+        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
+                .addNodes(type, 2, nodesHc2)
+                .setExternal(nodesHc2.get(0)).setExternal(nodesHc2.get(1))
+                .addSelector(nodesHc2.get(0), selectorLabel, nodesHc2.get(0))
+                .build();
+        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
+
+        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
+        EdgeGraphElement edge1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
+        EdgeGraphElement edge2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
+        Pair<EdgeGraphElement, EdgeGraphElement> newEdgePair = new Pair<>(edge1, edge2);
+        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(newEdgePair);
+        NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
+
+        // 2. Check isNodeOverlappingIndependent result
+        assertTrue(nodeOverlapping.isNodeOverlappingIndependent());
     }
 
 }
