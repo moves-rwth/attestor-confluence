@@ -48,7 +48,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
     }
 
     @Override
-    boolean isNextPairCompatible(Pair<NodeGraphElement, NodeGraphElement> newPair) {
+    boolean isNextPairCompatible(Pair<NodeGraphElement, NodeGraphElement> newPair) { // TODO: Only one outgoing selector of one type in union
         NodeGraphElement node1 = newPair.first();
         NodeGraphElement node2 = newPair.second();
         Graph graph1 = getContext().getGraph1();

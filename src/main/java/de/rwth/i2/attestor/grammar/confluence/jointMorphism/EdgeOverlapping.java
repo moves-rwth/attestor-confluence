@@ -57,7 +57,7 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
     }
 
     @Override
-    boolean isNextPairCompatible(Pair<EdgeGraphElement, EdgeGraphElement> newPair) {
+    boolean isNextPairCompatible(Pair<EdgeGraphElement, EdgeGraphElement> newPair) {  // TODO: Only one outgoing selector of one type in union
         int id1 = newPair.first().getPrivateId();
         int id2 = newPair.second().getPrivateId();
         String labelHc1 = newPair.first().getSelectorLabel();

@@ -16,6 +16,10 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A class to join two HeapConfiguration objects. It computes the joint graph using given edge and node overlappings.
+ * Note that the joint graph does not contain eny external nodes.
+ */
 public class JointHeapConfiguration {
     private final HeapConfiguration jointHeapConfiguration;
     private final Matching matching1, matching2;
@@ -24,9 +28,8 @@ public class JointHeapConfiguration {
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
      * The overlapping is specified by nodeOverlapping and edgeOverlapping.
      */
-    public JointHeapConfiguration(HeapConfigurationContext context,
-                                                         NodeOverlapping nodeOverlapping,
-                                                         EdgeOverlapping edgeOverlapping) {
+    public JointHeapConfiguration(EdgeOverlapping edgeOverlapping, NodeOverlapping nodeOverlapping) {
+        HeapConfigurationContext context = nodeOverlapping.getContext();
         Graph graph1 = context.getGraph1();
         Graph graph2 = context.getGraph2();
         // Create a new HeapConfigurationBuilder (by using getEmpty() on one of the existing heap configurations

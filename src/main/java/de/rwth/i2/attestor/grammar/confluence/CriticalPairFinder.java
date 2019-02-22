@@ -108,7 +108,7 @@ public class CriticalPairFinder {
                     // Check that the rule applications are not independent (They should share at least one internal node)
                     if (nodeOverlapping.isNodeOverlappingIndependent()) {
                         // 1. Compute the joint graph
-                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(context, nodeOverlapping, edgeOverlapping);
+                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping);
                         HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
 
                         // 2. Compute fully abstracted heap configuration (apply r1 first)
