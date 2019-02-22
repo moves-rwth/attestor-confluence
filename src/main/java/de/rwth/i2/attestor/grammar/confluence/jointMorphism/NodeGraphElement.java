@@ -9,7 +9,6 @@ import gnu.trove.list.array.TIntArrayList;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 public class NodeGraphElement extends GraphElement {
     public NodeGraphElement(int privateId) {
@@ -39,14 +38,6 @@ public class NodeGraphElement extends GraphElement {
         }
         return result;
     }
-
-    /**
-     * Returns a collection of all nodes in the given graph excluding the specified nodes.
-     */
-    public static Collection<NodeGraphElement> getNodes(Graph graph) {
-        return getNodes(graph, new HashSet<>());
-    }
-
 
     public static NodeGraphElement[] getGraphElementsFromPublicIds(HeapConfiguration hc, TIntArrayList nodes) {
         NodeGraphElement[] result = new NodeGraphElement[nodes.size()];
