@@ -12,10 +12,12 @@ import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.heap.Matching;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.graph.morphism.checkers.VF2IsomorphismChecker;
 import de.rwth.i2.attestor.util.Pair;
+import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
 
@@ -61,25 +63,25 @@ public class CriticalPairFinder {
         // Add critical pairs for all combinations of rules
 
         // 1. Create a list with all *individual* grammar rules
-        List<Pair<Nonterminal, HeapConfiguration>> individualGrammarRules = new ArrayList<>();
+        List<Pair<Nonterminal, CollapsedHeapConfiguration>> individualGrammarRules = new ArrayList<>();
         for (Nonterminal nonterminal : this.underlyingGrammar.getAllLeftHandSides()) {
             // Add collapsed rules
             for (CollapsedHeapConfiguration collapsedHeapConfiguration : this.underlyingGrammar.getCollapsedRightHandSidesFor(nonterminal)) {
-                individualGrammarRules.add(new Pair<>(nonterminal, collapsedHeapConfiguration.getCollapsed()));
+                individualGrammarRules.add(new Pair<>(nonterminal, collapsedHeapConfiguration));
             }
 
             // Add original rules
             // TODO: Are the original rules never contained in the collapsed rules?
             for (HeapConfiguration heapConfiguration : this.underlyingGrammar.getRightHandSidesFor(nonterminal)) {
-                individualGrammarRules.add(new Pair<>(nonterminal, heapConfiguration));
+                individualGrammarRules.add(new Pair<>(nonterminal, HeapConfigurationContext.convertToCollapsedHeapConfiguration(heapConfiguration)));
             }
         }
 
         // 2. Iterate over all pairs of individual grammar rules and add the critical pairs for each pair
         for (int i = 0; i < individualGrammarRules.size(); i++) {
             for (int j = i; j < individualGrammarRules.size(); j++) {
-                Pair<Nonterminal, HeapConfiguration> r1 = individualGrammarRules.get(i);
-                Pair<Nonterminal, HeapConfiguration> r2 = individualGrammarRules.get(j);
+                Pair<Nonterminal, CollapsedHeapConfiguration> r1 = individualGrammarRules.get(i);
+                Pair<Nonterminal, CollapsedHeapConfiguration> r2 = individualGrammarRules.get(j);
                 addCriticalPairsForCollapsedRule(r1, r2);
             }
         }
@@ -95,12 +97,12 @@ public class CriticalPairFinder {
      * @param r1 The first rule
      * @param r2 The second rule
      */
-    private void addCriticalPairsForCollapsedRule(Pair<Nonterminal, HeapConfiguration> r1,
-                                                  Pair<Nonterminal, HeapConfiguration> r2) {
+    private void addCriticalPairsForCollapsedRule(Pair<Nonterminal, CollapsedHeapConfiguration> r1,
+                                                  Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
         Nonterminal nt1 = r1.first();
         Nonterminal nt2 = r2.first();
-        HeapConfiguration hc1 = r1.second();
-        HeapConfiguration hc2 = r2.second();
+        CollapsedHeapConfiguration hc1 = r1.second();
+        CollapsedHeapConfiguration hc2 = r2.second();
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
 
@@ -119,12 +121,12 @@ public class CriticalPairFinder {
                         HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
 
                         // 2. Compute fully abstracted heap configuration (apply r1 first)
-                        HeapConfiguration hc1Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching1(), nt1).build();
-                        HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(hc1Unabstracted);
+                        TIntArrayList externalIndicesMap1 = context.getCollapsedHc1().getOriginalToCollapsedExternalIndices();
+                        HeapConfiguration fullyAbstracted1 = getFullyAbstractedHC(nt1, hc, jointHeapConfiguration.getMatching1(), externalIndicesMap1);
 
                         // 3. Compute fully abstracted heap configuration (apply r2 first)
-                        HeapConfiguration hc2Unabstracted = hc.clone().builder().replaceMatching(jointHeapConfiguration.getMatching2(), nt2).build();
-                        HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(hc2Unabstracted);
+                        TIntArrayList externalIndicesMap2 = context.getCollapsedHc2().getOriginalToCollapsedExternalIndices();
+                        HeapConfiguration fullyAbstracted2 = getFullyAbstractedHC(nt2, hc, jointHeapConfiguration.getMatching2(), externalIndicesMap2);
 
                         // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
                         CriticalPair.Joinability joinability = null;
@@ -154,6 +156,20 @@ public class CriticalPairFinder {
                     }
                 }
             }
+        }
+    }
+
+    private HeapConfiguration getFullyAbstractedHC(Nonterminal nt, HeapConfiguration hc, Matching matching, TIntArrayList externalIndicesMap) {
+        if (externalIndicesMap == null) {
+            HeapConfiguration unabstracted = hc.clone().builder()
+                    .replaceMatching(matching, nt)
+                    .build();
+            return canonicalizationStrategy.canonicalize(unabstracted);
+        } else {
+            HeapConfiguration unabstracted = hc.clone().builder()
+                    .replaceMatchingWithCollapsedExternals(matching, nt, externalIndicesMap)
+                    .build();
+            return canonicalizationStrategy.canonicalize(unabstracted);
         }
     }
 

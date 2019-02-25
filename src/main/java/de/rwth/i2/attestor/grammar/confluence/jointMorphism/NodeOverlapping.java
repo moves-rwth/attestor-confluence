@@ -1,11 +1,11 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 public class NodeOverlapping extends Overlapping<NodeGraphElement> {
 
@@ -72,10 +72,29 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
                 isNodeViolationPointInGraph(graph2, node2, graph1, node1)) {
             // There is a violation
             return false;
-        } else {
-            // There is no violation
-            return true;
         }
+
+        // 3. Check that join does not create two outgoing selectors at node (outgoing selectors must be disjoint)
+        if (Collections.disjoint(getOutgoingLabels(graph1, node1), getOutgoingLabels(graph2, node2))) {
+            // The outgoing selectors are disjoint -> no violation
+            return true;
+        } else {
+            // Adding this node would introduce two outgoing selectors
+            return false;
+        }
+    }
+
+    private static Set<String> getOutgoingLabels(Graph graph, NodeGraphElement node) {
+        Set<String> result = new HashSet<>();
+        graph.getSuccessorsOf(node.getPrivateId()).forEach(successor -> {
+            for (Object edgeLabel : graph.getEdgeLabel(node.getPrivateId(), successor)) {
+                if (edgeLabel instanceof SelectorLabel) {
+                    result.add(((SelectorLabel) edgeLabel).getLabel());
+                }
+            }
+            return true;
+        });
+        return result;
     }
 
     /**
