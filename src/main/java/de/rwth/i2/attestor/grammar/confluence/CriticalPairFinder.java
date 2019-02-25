@@ -61,9 +61,16 @@ public class CriticalPairFinder {
         // Add critical pairs for all combinations of rules
 
         // 1. Create a list with all *individual* grammar rules
-        List<Pair<Nonterminal, CollapsedHeapConfiguration>> individualGrammarRules = new ArrayList<>();
+        List<Pair<Nonterminal, HeapConfiguration>> individualGrammarRules = new ArrayList<>();
         for (Nonterminal nonterminal : this.underlyingGrammar.getAllLeftHandSides()) {
-            for (CollapsedHeapConfiguration heapConfiguration : this.underlyingGrammar.getCollapsedRightHandSidesFor(nonterminal)) {
+            // Add collapsed rules
+            for (CollapsedHeapConfiguration collapsedHeapConfiguration : this.underlyingGrammar.getCollapsedRightHandSidesFor(nonterminal)) {
+                individualGrammarRules.add(new Pair<>(nonterminal, collapsedHeapConfiguration.getCollapsed()));
+            }
+
+            // Add original rules
+            // TODO: Are the original rules never contained in the collapsed rules?
+            for (HeapConfiguration heapConfiguration : this.underlyingGrammar.getRightHandSidesFor(nonterminal)) {
                 individualGrammarRules.add(new Pair<>(nonterminal, heapConfiguration));
             }
         }
@@ -71,8 +78,8 @@ public class CriticalPairFinder {
         // 2. Iterate over all pairs of individual grammar rules and add the critical pairs for each pair
         for (int i = 0; i < individualGrammarRules.size(); i++) {
             for (int j = i; j < individualGrammarRules.size(); j++) {
-                Pair<Nonterminal, CollapsedHeapConfiguration> r1 = individualGrammarRules.get(i);
-                Pair<Nonterminal, CollapsedHeapConfiguration> r2 = individualGrammarRules.get(j);
+                Pair<Nonterminal, HeapConfiguration> r1 = individualGrammarRules.get(i);
+                Pair<Nonterminal, HeapConfiguration> r2 = individualGrammarRules.get(j);
                 addCriticalPairsForCollapsedRule(r1, r2);
             }
         }
@@ -88,12 +95,12 @@ public class CriticalPairFinder {
      * @param r1 The first rule
      * @param r2 The second rule
      */
-    private void addCriticalPairsForCollapsedRule(Pair<Nonterminal, CollapsedHeapConfiguration> r1,
-                                                  Pair<Nonterminal, CollapsedHeapConfiguration> r2) {
+    private void addCriticalPairsForCollapsedRule(Pair<Nonterminal, HeapConfiguration> r1,
+                                                  Pair<Nonterminal, HeapConfiguration> r2) {
         Nonterminal nt1 = r1.first();
         Nonterminal nt2 = r2.first();
-        HeapConfiguration hc1 = r1.second().getCollapsed();
-        HeapConfiguration hc2 = r2.second().getCollapsed();
+        HeapConfiguration hc1 = r1.second();
+        HeapConfiguration hc2 = r2.second();
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
 
