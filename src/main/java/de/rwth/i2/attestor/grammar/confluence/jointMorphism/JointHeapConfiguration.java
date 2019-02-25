@@ -37,9 +37,8 @@ public class JointHeapConfiguration {
         HeapConfigurationBuilder builder = context.getHc1().getEmpty().builder();
 
         // Create maps to keep track of which GraphElement maps to which public ID in the new HeapConfiguration
-        Map<GraphElement, Integer> hc1PubIdMap, hc2PubIdMap;
-        hc1PubIdMap = new HashMap<>();
-        hc2PubIdMap = new HashMap<>();
+        Map<GraphElement, Integer> hc1PubIdMap = new HashMap<>();
+        Map<GraphElement, Integer> hc2PubIdMap = new HashMap<>();
 
         // 1. Add nodes
         // 1.1 Add all nodes from graph1
@@ -51,6 +50,9 @@ public class JointHeapConfiguration {
         // 1.3 Add remaining nodes that are exclusively in graph2
         addNodes(builder, graph2, hc2PubIdMap);
 
+        // 1.4 Compute corresponding nodes in hc1PubIdMap TODO: Maintain a different hc2PubIdMap object with just the new elements (same below)
+        computeCorrespondingElements(hc2PubIdMap, nodeOverlapping.getMapHC2toHC1(), hc1PubIdMap);
+
 
         // 2. Add edges
         // 2.1 Add all edges from graph1
@@ -61,6 +63,9 @@ public class JointHeapConfiguration {
 
         // 2.3 Add remaining edges from graph2
         addEdges(builder, graph2, hc2PubIdMap);
+
+        // 2.4 Compute corresponding edges
+        computeCorrespondingElements(hc2PubIdMap, edgeOverlapping.getMapHC2toHC1(), hc1PubIdMap);
 
         // 3. Build the completed HeapConfiguration
         jointHeapConfiguration = builder.build();
