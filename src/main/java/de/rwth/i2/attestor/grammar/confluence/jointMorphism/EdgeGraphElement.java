@@ -6,9 +6,7 @@ import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class EdgeGraphElement extends GraphElement {
     EdgeGraphElement(int privateId, String selectorLabel) {

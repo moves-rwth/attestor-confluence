@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.internal.HeapConfigurationIdConverter;
@@ -9,6 +10,8 @@ import gnu.trove.list.array.TIntArrayList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NodeGraphElement extends GraphElement {
     public NodeGraphElement(int privateId) {
@@ -67,5 +70,32 @@ public class NodeGraphElement extends GraphElement {
             // No incoming selector edge was found
             return false;
         }
+    }
+
+    public Set<String> getOutgoingSelectors(Graph graph) {
+        Set<String> result = new HashSet<>();
+        graph.getSuccessorsOf(getPrivateId()).forEach(successor -> {
+            for (Object edgeLabel : graph.getEdgeLabel(getPrivateId(), successor)) {
+                if (edgeLabel instanceof SelectorLabel) {
+                    result.add(((SelectorLabel) edgeLabel).getLabel());
+                }
+            }
+            return true;
+        });
+        return result;
+    }
+
+    public NodeGraphElement getSelectorDestination(Graph graph, String selector) {
+        NodeGraphElement result;
+        TIntArrayList successors = graph.getSuccessorsOf(getPrivateId());
+        for (int i=0; i<successors.size(); i++) {
+            for (Object edgeLabel : graph.getEdgeLabel(getPrivateId(), successors.get(i))) {
+                if (edgeLabel instanceof SelectorLabel && ((SelectorLabel) edgeLabel).hasLabel(selector)) {
+                    // Found the corresponding selector edge
+                    return new NodeGraphElement(successors.get(i));
+                }
+            }
+        }
+        return null;
     }
 }

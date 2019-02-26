@@ -75,26 +75,13 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         }
 
         // 3. Check that join does not create two outgoing selectors at node (outgoing selectors must be disjoint)
-        if (Collections.disjoint(getOutgoingLabels(graph1, node1), getOutgoingLabels(graph2, node2))) {
+        if (Collections.disjoint(node1.getOutgoingSelectors(graph1), node2.getOutgoingSelectors(graph2))) {
             // The outgoing selectors are disjoint -> no violation
             return true;
         } else {
             // Adding this node would introduce two outgoing selectors
             return false;
         }
-    }
-
-    private static Set<String> getOutgoingLabels(Graph graph, NodeGraphElement node) {
-        Set<String> result = new HashSet<>();
-        graph.getSuccessorsOf(node.getPrivateId()).forEach(successor -> {
-            for (Object edgeLabel : graph.getEdgeLabel(node.getPrivateId(), successor)) {
-                if (edgeLabel instanceof SelectorLabel) {
-                    result.add(((SelectorLabel) edgeLabel).getLabel());
-                }
-            }
-            return true;
-        });
-        return result;
     }
 
     /**
