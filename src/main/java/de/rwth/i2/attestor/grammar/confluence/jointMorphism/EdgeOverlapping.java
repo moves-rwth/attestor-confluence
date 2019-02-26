@@ -1,6 +1,5 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
@@ -125,20 +124,24 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
      * This method checks all remaining edges to see if there are any violations.
      * If the method returns true one can start to look for node overlappings based on this edge overlapping.
      *
-     * All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph
+     * Things that are checked:
+     * 1. All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph (dangling edge condition)
+     * 2. All implied node equivalences must lead to compatible outgoing selector edges (same outgoing selectors have same target) TODO: Here might might prune invalid states earlier
+     * 3. If two nodes are in the intersection all selector edges connecting them must also be in the intersection
      */
     public boolean isEdgeOverlappingValid() {
         // Check if the edge overlapping is valid for the edges not in the intersection in Hc1 and in Hc2
         return areRemainingEdgesValid(getHc1Remaining(), mapNodeHc1ToHc2, getContext().getGraph1(), getContext().getGraph2())
                 && areRemainingEdgesValid(getHc2Remaining(), mapNodeHc2ToHc1, getContext().getGraph2(), getContext().getGraph1())
-                && areNodeEquivalencesValid();
+                && validOutgoingSelectors()
+                && containsAllImpliedSelectors();
     }
 
     /**
      * Checks if there are no implied node equivalences that would have two outgoing selectors in the current overlapping
      *
      */
-    private boolean areNodeEquivalencesValid() {
+    private boolean validOutgoingSelectors() {
         for (Map.Entry<NodeGraphElement, NodeGraphElement> entry : mapNodeHc1ToHc2.entrySet()) {
             Graph graph1 = getContext().getGraph1();
             Graph graph2 = getContext().getGraph2();
@@ -161,6 +164,14 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
             }
 
         }
+        return true;
+    }
+
+    /**
+     * Checks if the selectors where both nodes are in the implied intersection are contained in the edge intersection
+     */
+    private boolean containsAllImpliedSelectors() {
+        // TODO
         return true;
     }
 

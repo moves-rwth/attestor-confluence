@@ -1,6 +1,5 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
-import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
@@ -16,20 +15,9 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
      */
     private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
                             Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
-                            Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1) {
+                            Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1, boolean isIndependent) {
         super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
-        // The node overlapping is independent if the already existing node equivalences are only containing external nodes
-        isIndependent = areAllNodesExternal(context.getGraph1(), mapHc1toHc2.keySet())
-                && areAllNodesExternal(context.getGraph2(), mapHc2toHc1.keySet());
-    }
-
-    private boolean areAllNodesExternal(Graph graph, Collection<NodeGraphElement> nodes) {
-        for (NodeGraphElement node : nodes) {
-            if (!graph.isExternal(node.getPrivateId())) {
-                return false;
-            }
-        }
-        return true;
+        this.isIndependent = isIndependent;
     }
 
     /**
@@ -48,7 +36,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
     }
 
     @Override
-    boolean isNextPairCompatible(Pair<NodeGraphElement, NodeGraphElement> newPair) { // TODO: Only one outgoing selector of one type in union
+    boolean isNextPairCompatible(Pair<NodeGraphElement, NodeGraphElement> newPair) {
         NodeGraphElement node1 = newPair.first();
         NodeGraphElement node2 = newPair.second();
         Graph graph1 = getContext().getGraph1();
@@ -121,14 +109,17 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         hc1Remaining = NodeGraphElement.getNodes(edgeOverlapping.getContext().getGraph1(), mapHc1toHc2.keySet());
         hc2Remaining = NodeGraphElement.getNodes(edgeOverlapping.getContext().getGraph2(), mapHc2toHc1.keySet());
 
+        // If the EdgeOverlapping is empty the initial node overlapping is independent
+        boolean isIndependent = edgeOverlapping.isEmpty();
+
         // Return the NodeOverlapping
-        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
+        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, isIndependent);
     }
 
     /**
      * An overlapping is independent if it allows that both rules that the overlapping is based on can be applied
      * directly after the other.
-     * This is the case if the intersection of nodes does not contain any internal nodes
+     * If there are edges in the intersection or there are internal nodes in the intersection the overlapping is not independent.
      */
     public boolean isNodeOverlappingIndependent() {
         return isIndependent;

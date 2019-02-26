@@ -1,9 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeOverlapping;
 import de.rwth.i2.attestor.graph.Nonterminal;
-import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 public class CriticalPair {
     private final Nonterminal nt1, nt2;

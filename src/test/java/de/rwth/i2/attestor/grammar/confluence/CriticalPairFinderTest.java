@@ -27,7 +27,7 @@ public class CriticalPairFinderTest {
     private SceneObject sceneObject;
 
     private Grammar getSimpleDLLGrammar() {
-        Nonterminal list = hcImplFactory.scene().createNonterminal("L", 2, new boolean[]{true, true});
+        Nonterminal list = hcImplFactory.scene().createNonterminal("L", 2, new boolean[]{false, false});
         SelectorLabel nextPointer = hcImplFactory.scene().getSelectorLabel("n");
         SelectorLabel previousPointer = hcImplFactory.scene().getSelectorLabel("p");
         Type listElement = hcImplFactory.scene().getType("element");
@@ -46,7 +46,7 @@ public class CriticalPairFinderTest {
                 .addSelector(nodesHc2.get(0), nextPointer, nodesHc2.get(1))
                 .addSelector(nodesHc2.get(1), previousPointer, nodesHc2.get(0));
 
-        int nonTerminalEdge = hc2Builder.addNonterminalEdgeAndReturnId(list, TIntArrayList.wrap(new int[] {nodesHc2.get(1), nodesHc2.get(1)}));
+        int nonTerminalEdge = hc2Builder.addNonterminalEdgeAndReturnId(list, TIntArrayList.wrap(new int[] {nodesHc2.get(1), nodesHc2.get(2)}));
         HeapConfiguration hc2 = hc2Builder.build();
 
         return new GrammarBuilder()

@@ -162,6 +162,15 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
     }
 
     /**
+     * Checks if there are any elements in the intersection
+     *
+     * @return true if there are no elements in the intersection
+     */
+    public boolean isEmpty() {
+        return mapHC1toHC2.isEmpty();
+    }
+
+    /**
      *
      *
      * @param newPair  A pair of node equivalences
