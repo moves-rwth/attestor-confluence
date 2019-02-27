@@ -8,6 +8,7 @@ import de.rwth.i2.attestor.main.scene.Scene;
 import de.rwth.i2.attestor.phases.communication.InputSettings;
 import de.rwth.i2.attestor.phases.transformers.InputSettingsTransformer;
 import de.rwth.i2.attestor.phases.transformers.InputTransformer;
+import de.rwth.i2.attestor.seplog.SymbolicHeapParser;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -38,13 +39,18 @@ public class ParseInputPhase extends AbstractPhase implements InputTransformer {
 
         inputSettings = getPhase(InputSettingsTransformer.class).getInputSettings();
 
-        if (inputSettings.getInitialHeapFiles().isEmpty()) {
+        if (inputSettings.getInitialHeapFiles().isEmpty()
+                && inputSettings.getInitialSymbolicHeapFiles().isEmpty()) {
             inputs.add(scene().createHeapConfiguration());
             return;
         }
 
         for (String initialHeapFile : inputSettings.getInitialHeapFiles()) {
             addInitialHeap(initialHeapFile);
+        }
+
+        for (String initialSymbolicHeapFile : inputSettings.getInitialSymbolicHeapFiles()) {
+            addInitialSymbolicHeap(initialSymbolicHeapFile);
         }
     }
 
@@ -62,6 +68,19 @@ public class ParseInputPhase extends AbstractPhase implements InputTransformer {
         JsonToHeapConfiguration importer = new JsonToHeapConfiguration(this, inputSettings);
         HeapConfiguration originalInput = importer.parse(jsonObj, addUsedSelectorLabel);
         inputs.add(originalInput);
+    }
+
+    private void addInitialSymbolicHeap(String initialSymbolicHeapFile) {
+
+        SymbolicHeapParser parser = new SymbolicHeapParser(this);
+        HeapConfiguration originalInput;
+        try {
+            originalInput = parser.parseFromFile(initialSymbolicHeapFile, inputSettings);
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+        inputs.add(originalInput);
+
     }
 
     @Override
