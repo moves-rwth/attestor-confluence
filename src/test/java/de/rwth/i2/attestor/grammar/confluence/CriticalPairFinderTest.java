@@ -3,14 +3,19 @@ package de.rwth.i2.attestor.grammar.confluence;
 import de.rwth.i2.attestor.MockupSceneObject;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceCommandLinePhase;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.ExampleHcImplFactory;
 import de.rwth.i2.attestor.main.Attestor;
+import de.rwth.i2.attestor.main.scene.DefaultScene;
 import de.rwth.i2.attestor.main.scene.SceneObject;
+import de.rwth.i2.attestor.phases.commandLineInterface.CommandLinePhase;
 import de.rwth.i2.attestor.phases.parser.ParseGrammarPhase;
+import de.rwth.i2.attestor.phases.parser.ParseProgramPhase;
 import de.rwth.i2.attestor.programState.indexedState.BalancedTreeGrammar;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
@@ -103,10 +108,7 @@ public class CriticalPairFinderTest {
 
 
     public void testConfluentGrammar(String grammarName) {
-        ParseGrammarPhase grammarParser = new ParseGrammarPhase(hcImplFactory.scene());
-        grammarParser.loadGrammarFromURL(Attestor.class.getClassLoader()
-                .getResource("predefinedGrammars/" + grammarName + ".json"));
-        Grammar grammar = grammarParser.getGrammar();
+        Grammar grammar = ConfluenceTool.parseGrammar(grammarName);
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         assertEquals(CriticalPair.Joinability.STRONGLY_JOINABLE, criticalPairFinder.getJoinabilityResult());
     }

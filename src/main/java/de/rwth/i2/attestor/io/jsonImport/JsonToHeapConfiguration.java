@@ -51,8 +51,10 @@ public class JsonToHeapConfiguration extends SceneObject {
         JSONArray externals = obj.getJSONArray("externals");
         parseExternals(builder, nodes, externals);
 
-        JSONArray variables = obj.getJSONArray("variables");
-        parseVariables(builder, nodes, variables);
+        if (obj.has("variables")) {  // TODO: Either add this check here or correct the default grammar files
+            JSONArray variables = obj.getJSONArray("variables");
+            parseVariables(builder, nodes, variables);
+        }
 
         JSONArray selectors = obj.getJSONArray("selectors");
 
