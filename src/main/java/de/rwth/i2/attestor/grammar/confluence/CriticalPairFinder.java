@@ -38,15 +38,17 @@ import java.util.*;
  */
 public class CriticalPairFinder {
 
-    private Set<CriticalPair> criticalPairs;
+    private Collection<CriticalPair> criticalPairs;
+    private CriticalPair.Joinability joinabilityResult;
     final private Grammar underlyingGrammar;
     final private CanonicalizationStrategy canonicalizationStrategy;
     final private VF2IsomorphismChecker checker;
 
     public CriticalPairFinder(Grammar grammar) {
         this.underlyingGrammar = grammar;
-        this.criticalPairs = new HashSet<>();
+        this.criticalPairs = new ArrayList<>();
         this.checker = new VF2IsomorphismChecker();
+        this.joinabilityResult = CriticalPair.Joinability.STRONGLY_JOINABLE;
         MorphismOptions options = new AbstractionOptions()
                 .setAdmissibleAbstraction(false)
                 .setAdmissibleConstants(false)
@@ -117,16 +119,14 @@ public class CriticalPairFinder {
                     // Check that the rule applications are not independent (They should share at least one internal node)
                     if (!nodeOverlapping.isNodeOverlappingIndependent()) {
                         // 1. Compute the joint graph
-                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping);
+                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping, nt1, nt2);
                         HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
 
                         // 2. Compute fully abstracted heap configuration (apply r1 first)
-                        TIntArrayList externalIndicesMap1 = context.getCollapsedHc1().getOriginalToCollapsedExternalIndices();
-                        HeapConfiguration fullyAbstracted1 = getFullyAbstractedHC(nt1, hc, jointHeapConfiguration.getMatching1(), externalIndicesMap1);
+                        HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(jointHeapConfiguration.getRule1Applied());
 
                         // 3. Compute fully abstracted heap configuration (apply r2 first)
-                        TIntArrayList externalIndicesMap2 = context.getCollapsedHc2().getOriginalToCollapsedExternalIndices();
-                        HeapConfiguration fullyAbstracted2 = getFullyAbstractedHC(nt2, hc, jointHeapConfiguration.getMatching2(), externalIndicesMap2);
+                        HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(jointHeapConfiguration.getRule2Applied());
 
                         // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
                         CriticalPair.Joinability joinability = null;
@@ -152,24 +152,11 @@ public class CriticalPairFinder {
                                 joinability = CriticalPair.Joinability.NOT_JOINABLE;
                             }
                         }
-                        criticalPairs.add(new CriticalPair(nt1, nt2, jointHeapConfiguration, joinability));
+                        criticalPairs.add(new CriticalPair(jointHeapConfiguration, joinability));
+                        joinabilityResult = joinabilityResult.getCollectiveJoinability(joinability);
                     }
                 }
             }
-        }
-    }
-
-    private HeapConfiguration getFullyAbstractedHC(Nonterminal nt, HeapConfiguration hc, Matching matching, TIntArrayList externalIndicesMap) {
-        if (externalIndicesMap == null) {
-            HeapConfiguration unabstracted = hc.clone().builder()
-                    .replaceMatching(matching, nt)
-                    .build();
-            return canonicalizationStrategy.canonicalize(unabstracted);
-        } else {
-            HeapConfiguration unabstracted = hc.clone().builder()
-                    .replaceMatchingWithCollapsedExternals(matching, nt, externalIndicesMap)
-                    .build();
-            return canonicalizationStrategy.canonicalize(unabstracted);
         }
     }
 
@@ -184,7 +171,11 @@ public class CriticalPairFinder {
         return builder.build();
     }
 
-    public Set<CriticalPair> getCriticalPairs() {
+    public Collection<CriticalPair> getCriticalPairs() {
         return criticalPairs;
+    }
+
+    public CriticalPair.Joinability getJoinabilityResult() {
+        return joinabilityResult;
     }
 }

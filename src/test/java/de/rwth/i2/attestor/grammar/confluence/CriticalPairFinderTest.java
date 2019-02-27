@@ -15,8 +15,9 @@ import gnu.trove.list.array.TIntArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Set;
+import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
@@ -60,8 +61,9 @@ public class CriticalPairFinderTest {
     public void testSimpleDLLGrammar() {
         Grammar grammar = getSimpleDLLGrammar();
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
-        Set<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
-        assertTrue(true);
+        assertEquals(CriticalPair.Joinability.NOT_JOINABLE, criticalPairFinder.getJoinabilityResult());
+        Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
+        assertEquals(3, criticalPairs.size());
     }
 
 

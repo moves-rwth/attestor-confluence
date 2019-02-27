@@ -75,7 +75,7 @@ public class JointHeapConfigurationTest {
         EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context)
                 .getOverlapping(new Pair<>(nonterminalEdgeHc1, nonterminalEdgeHc2));
         NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
-        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping);
+        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping, null, null);
         HeapConfiguration jointHc = jointHeapConfiguration.getHeapConfiguration();
         Graph jointHcGraph = (Graph) jointHc;
 
@@ -128,7 +128,7 @@ public class JointHeapConfigurationTest {
                 .getOverlapping(new Pair<>(nonterminalEdgeHc1, nonterminalEdgeHc2));
         NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping)
                 .getOverlapping(new Pair<>(graphNodesHc1[0], graphNodesHc2[0]));
-        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping);
+        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping, null, null);
         HeapConfiguration jointHc = jointHeapConfiguration.getHeapConfiguration();
         Graph jointHcGraph = (Graph) jointHc;
 

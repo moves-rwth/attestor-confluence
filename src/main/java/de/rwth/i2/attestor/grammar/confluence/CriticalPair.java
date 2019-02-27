@@ -1,26 +1,14 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
-import de.rwth.i2.attestor.graph.Nonterminal;
 
 public class CriticalPair {
-    private final Nonterminal nt1, nt2;
     private final JointHeapConfiguration jointHeapConfiguration;
     private final Joinability joinability;
 
-    public CriticalPair(Nonterminal nt1, Nonterminal nt2, JointHeapConfiguration jointHeapConfiguration, Joinability joinability) {
-        this.nt1 = nt1;
-        this.nt2 = nt2;
+    public CriticalPair(JointHeapConfiguration jointHeapConfiguration, Joinability joinability) {
         this.jointHeapConfiguration = jointHeapConfiguration;
         this.joinability = joinability;
-    }
-
-    public Nonterminal getNt1() {
-        return nt1;
-    }
-
-    public Nonterminal getNt2() {
-        return nt2;
     }
 
     public JointHeapConfiguration getJointHeapConfiguration() {
@@ -32,6 +20,35 @@ public class CriticalPair {
     }
 
     public enum Joinability {
-        STRONGLY_JOINABLE, WEAKLY_JOINABLE, NOT_JOINABLE
+        STRONGLY_JOINABLE, WEAKLY_JOINABLE, NOT_JOINABLE;
+
+        private int getValue() {
+            switch (this) {
+                case NOT_JOINABLE:
+                    return 0;
+                case WEAKLY_JOINABLE:
+                    return 1;
+                case STRONGLY_JOINABLE:
+                    return 2;
+            }
+            throw new RuntimeException("Unexpected Joinability");
+        }
+
+        private static Joinability getJoinability(int value) {
+            switch (value) {
+                case 0:
+                    return NOT_JOINABLE;
+                case 1:
+                    return WEAKLY_JOINABLE;
+                case 2:
+                    return STRONGLY_JOINABLE;
+                default:
+                    throw new IllegalArgumentException("Unexpected value");
+            }
+        }
+
+        public Joinability getCollectiveJoinability(Joinability otherJoinability) {
+            return getJoinability(Math.min(this.getValue(), otherJoinability.getValue()));
+        }
     }
 }

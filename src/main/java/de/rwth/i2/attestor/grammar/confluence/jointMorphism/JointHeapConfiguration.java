@@ -21,15 +21,19 @@ import java.util.Map;
  * Note that the joint graph does not contain eny external nodes.
  */
 public class JointHeapConfiguration {
+    private final HeapConfigurationContext context;
     private final HeapConfiguration jointHeapConfiguration;
     private final Matching matching1, matching2;
+    private final Nonterminal nt1, nt2;
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
      * The overlapping is specified by nodeOverlapping and edgeOverlapping.
      */
-    public JointHeapConfiguration(EdgeOverlapping edgeOverlapping, NodeOverlapping nodeOverlapping) {
-        HeapConfigurationContext context = nodeOverlapping.getContext();
+    public JointHeapConfiguration(EdgeOverlapping edgeOverlapping, NodeOverlapping nodeOverlapping, Nonterminal nt1, Nonterminal nt2) {
+        context = nodeOverlapping.getContext();
+        this.nt1 = nt1;
+        this.nt2 = nt2;
         Graph graph1 = context.getGraph1();
         Graph graph2 = context.getGraph2();
         // Create a new HeapConfigurationBuilder (by using getEmpty() on one of the existing heap configurations
@@ -197,4 +201,33 @@ public class JointHeapConfiguration {
             valuePubIdMap.put(entry.getValue(), pubId);
         }
     }
+
+    /**
+     * Returns the HeapConfiguration with rule1 applied
+     */
+    public HeapConfiguration getRule1Applied() {
+        TIntArrayList externalIndicesMap = context.getCollapsedHc1().getOriginalToCollapsedExternalIndices();
+        return applyMatching(nt1, matching1, externalIndicesMap);
+    }
+
+    /**
+     * Returns the HeapConfiguration with rule2 applied
+     */
+    public HeapConfiguration getRule2Applied() {
+        TIntArrayList externalIndicesMap = context.getCollapsedHc2().getOriginalToCollapsedExternalIndices();
+        return applyMatching(nt2, matching2, externalIndicesMap);
+    }
+
+    private HeapConfiguration applyMatching(Nonterminal nt, Matching matching, TIntArrayList externalIndicesMap) {
+        if (externalIndicesMap == null) {
+            return jointHeapConfiguration.clone().builder()
+                    .replaceMatching(matching, nt)
+                    .build();
+        } else {
+            return jointHeapConfiguration.clone().builder()
+                    .replaceMatchingWithCollapsedExternals(matching, nt, externalIndicesMap)
+                    .build();
+        }
+    }
+
 }
