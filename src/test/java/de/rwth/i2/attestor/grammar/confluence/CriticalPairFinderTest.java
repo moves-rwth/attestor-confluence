@@ -8,7 +8,9 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.ExampleHcImplFactory;
+import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.main.scene.SceneObject;
+import de.rwth.i2.attestor.phases.parser.ParseGrammarPhase;
 import de.rwth.i2.attestor.programState.indexedState.BalancedTreeGrammar;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
@@ -18,11 +20,15 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
 public class CriticalPairFinderTest {
 
+    @Before
+    public void setUp() {
+        sceneObject = new MockupSceneObject();
+        hcImplFactory = new ExampleHcImplFactory(sceneObject);
+    }
 
     private ExampleHcImplFactory hcImplFactory;
     private SceneObject sceneObject;
@@ -67,18 +73,42 @@ public class CriticalPairFinderTest {
     }
 
 
-    @Before
-    public void setUp() {
-        sceneObject = new MockupSceneObject();
-        hcImplFactory = new ExampleHcImplFactory(sceneObject);
-    }
-
     @Test
     public void testPossibleCriticalPairs() {
-        // TODO
         Grammar balancedTreeGrammar = new BalancedTreeGrammar(sceneObject).getGrammar();
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(balancedTreeGrammar);
         System.err.println(criticalPairFinder.getCriticalPairs().size());
+        // TODO: Add assert
+    }
+
+    @Test
+    public void testDefaultGrammar_BT_conf() {
+        testConfluentGrammar("BT_conf");
+    }
+
+    @Test
+    public void testDefaultGrammar_BT() {
+        testConfluentGrammar("BT");
+    }
+
+    @Test
+    public void testDefaultGrammar_DLList() {
+        testConfluentGrammar("DLList");
+    }
+
+    @Test
+    public void testDefaultGrammar_SLList() {
+        testConfluentGrammar("SLList");
+    }
+
+
+    public void testConfluentGrammar(String grammarName) {
+        ParseGrammarPhase grammarParser = new ParseGrammarPhase(hcImplFactory.scene());
+        grammarParser.loadGrammarFromURL(Attestor.class.getClassLoader()
+                .getResource("predefinedGrammars/" + grammarName + ".json"));
+        Grammar grammar = grammarParser.getGrammar();
+        CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
+        assertEquals(CriticalPair.Joinability.STRONGLY_JOINABLE, criticalPairFinder.getJoinabilityResult());
     }
 
 }
