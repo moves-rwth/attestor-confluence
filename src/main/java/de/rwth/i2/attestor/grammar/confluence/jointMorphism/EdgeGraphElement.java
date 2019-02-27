@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
+import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
 
@@ -72,6 +73,52 @@ public class EdgeGraphElement extends GraphElement {
                     }
                     return true;
                 });
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets all pairs of nodes in the graph where there is at least one selector from the first node to the second node
+     */
+    static Collection<Pair<NodeGraphElement, NodeGraphElement>> getSelectorNodePairs(Graph graph) {
+        Collection<Pair<NodeGraphElement, NodeGraphElement>> result = new ArrayList<>();
+        for (int graphNode = 0; graphNode < graph.size(); graphNode++) {
+            if (graph.getNodeLabel(graphNode) instanceof Type) {
+                // graphNode is a node -> find all successors that are also nodes
+                final int selectorSource = graphNode;
+                graph.getSuccessorsOf(selectorSource).forEach(selectorTarget -> {
+                    if (graph.getNodeLabel(selectorTarget) instanceof Type) {
+                        // Found a selector from selectorSource to selectorTarget
+                        result.add(new Pair<>(new NodeGraphElement(selectorSource), new NodeGraphElement(selectorTarget)));
+                    }
+                    return true; // Search for other selectors
+                });
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets all possible selectors that go from the first node to the second node in the nodePair
+     */
+    static Collection<EdgeGraphElement> getSelectorEdges(Graph graph, Pair<NodeGraphElement, NodeGraphElement> nodePair) {
+        int src = nodePair.first().getPrivateId();
+        int dst = nodePair.second().getPrivateId();
+        Collection<EdgeGraphElement> result = new HashSet<>();
+        for (String label : getSelectorLabels(graph, nodePair)) {
+            result.add(new EdgeGraphElement(src, label));
+        }
+        return result;
+    }
+
+    static Collection<String> getSelectorLabels(Graph graph, Pair<NodeGraphElement, NodeGraphElement> nodePair) {
+        int src = nodePair.first().getPrivateId();
+        int dst = nodePair.second().getPrivateId();
+        Collection<String> result = new HashSet<>();
+        for (Object edgeLabel : graph.getEdgeLabel(src, dst)) {
+            if (edgeLabel instanceof SelectorLabel) {
+                result.add(((SelectorLabel) edgeLabel).getLabel());
             }
         }
         return result;

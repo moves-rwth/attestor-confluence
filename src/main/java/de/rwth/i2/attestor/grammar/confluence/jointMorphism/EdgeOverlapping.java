@@ -125,7 +125,7 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
      * If the method returns true one can start to look for node overlappings based on this edge overlapping.
      *
      * Things that are checked:
-     * 1. All edges not in the intersection must not be connected to a node equivalent to an internal node in the other graph (dangling edge condition)
+     * 1. All edges not in the intersection must NOT be connected to a node equivalent to an internal node in the other graph (dangling edge condition)
      * 2. All implied node equivalences must lead to compatible outgoing selector edges (same outgoing selectors have same target) TODO: Here might might prune invalid states earlier
      * 3. If two nodes are in the intersection all selector edges connecting them must also be in the intersection
      */
@@ -133,45 +133,66 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         // Check if the edge overlapping is valid for the edges not in the intersection in Hc1 and in Hc2
         return areRemainingEdgesValid(getHc1Remaining(), mapNodeHc1ToHc2, getContext().getGraph1(), getContext().getGraph2())
                 && areRemainingEdgesValid(getHc2Remaining(), mapNodeHc2ToHc1, getContext().getGraph2(), getContext().getGraph1())
-                && validOutgoingSelectors()
-                && containsAllImpliedSelectors();
+                && validOutgoingSelectors(getContext().getGraph1(), getContext().getGraph2(), getMapHC1toHC2(), mapNodeHc1ToHc2)
+                && validOutgoingSelectors(getContext().getGraph2(), getContext().getGraph1(), getMapHC2toHC1(), mapNodeHc2ToHc1);
     }
 
     /**
-     * Checks if there are no implied node equivalences that would have two outgoing selectors in the current overlapping
+     * Checks that the current overlapping allows compatible node overlappings with regard to the selectors
      *
+     * This method checks the following:
+     * For all selectors in graph1:
+     *   - 1. Case: Both source and target nodes are in the intersection
+     *      1.1 Case: The current selector edge is in the current node overlapping -> No violation
+     *      1.2 Case: There is no outgoing selector edge (to ANY node) in the other graph of the same type -> No violation
+     *      1.3 Case: Otherwise -> Violation
+     *
+     *   - 2. Case: Only source is in the intersection
+     *      2.1 Case: There is an outgoing selector at the node in the other graph that has the same type -> Violation
+     *           Explanation: Target not in intersection => Selector not in intersection => NodeOverlapping cannot set targets to be equivalent => Selectors are incompatible
+     *      2.2 Case: Otherwise -> No violation
+     *
+     *   - 3. Case: Source is not in the intersection
+     *      -> No violation
+     *
+     * TODO: Does valid selectors in graph1 imply valid selectors in graph2?
+     * TODO: Optimization potential (finding the corresponding selector in case 1.2)
      */
-    private boolean validOutgoingSelectors() {
-        for (Map.Entry<NodeGraphElement, NodeGraphElement> entry : mapNodeHc1ToHc2.entrySet()) {
-            Graph graph1 = getContext().getGraph1();
-            Graph graph2 = getContext().getGraph2();
-            NodeGraphElement hc1Node = entry.getKey();
-            NodeGraphElement hc2Node = entry.getValue();
+    private boolean validOutgoingSelectors(Graph graph1, Graph graph2, Map<EdgeGraphElement, EdgeGraphElement> mapEdge1To2, Map<NodeGraphElement, NodeGraphElement> mapNode1To2) {
 
+        for (Pair<NodeGraphElement, NodeGraphElement> selectorNodePair : EdgeGraphElement.getSelectorNodePairs(graph1)) {
+            NodeGraphElement selectorSourceHc1 = selectorNodePair.first();
+            NodeGraphElement selectorTargetHc1 = selectorNodePair.second();
 
-            // Check intersection of outgoing selectors
-            Collection<String> selectorsHc1 = hc1Node.getOutgoingSelectors(graph1);
-            Collection<String> selectorsHc2 = hc2Node.getOutgoingSelectors(graph2);
-            Collection<String> intersection = new HashSet<>(selectorsHc1);
-            intersection.retainAll(selectorsHc2);
-            for (String sharedSelector : intersection) {
-                NodeGraphElement targetHc1 = hc1Node.getSelectorDestination(graph1, sharedSelector);
-                NodeGraphElement targetHc2 = hc2Node.getSelectorDestination(graph2, sharedSelector);
-                if (!targetHc1.equals(targetHc2)) {
-                    // Found an incompatible outgoing selector edge
-                    return false;
+            // There can only be a violation if at least the source node is in the intersection
+            if (mapNode1To2.containsKey(selectorSourceHc1)) {
+                NodeGraphElement selectorSourceHc2 = mapNode1To2.get(selectorSourceHc1);
+                Collection<String> selectorsHc1 = EdgeGraphElement.getSelectorLabels(graph1, selectorNodePair);  // Selectors between source and target in hc1
+                // TODO: Performance optimization: Keep map of already calculated outgoing selectors of selectorsHc2
+                Collection<String> selectorsHc2 = selectorSourceHc2.getOutgoingSelectors(graph2);  // All outgoing selectors of source in hc2
+
+                if (mapNode1To2.containsKey(selectorTargetHc1)) {
+                    // 1. Case: src and target are in intersection. Check that all labels between those nodes are either
+                    for (String selectorLabel : selectorsHc1) {
+                        EdgeGraphElement selectorEdge = selectorSourceHc1.getOutgoingSelectorEdge(selectorLabel);
+                        if (!mapEdge1To2.containsKey(selectorEdge)) {
+                            // The selectorEdge is not in the intersection -> Check if selectorSourceHc2 has an outgoing selector of the same type
+                            if (selectorsHc2.contains(selectorLabel)) {
+                                // Found a conflict
+                                return false;
+                            }
+                        }
+                    }
+                } else {
+                    // 2. Case: Check that the selectorSource node in the other graph does not share any outgoing selector types
+                    if (!Collections.disjoint(selectorsHc1, selectorsHc2)) {
+                        // There is at least one outgoing selector of the same type in both graphs
+                        return false;
+                    }
                 }
             }
 
         }
-        return true;
-    }
-
-    /**
-     * Checks if the selectors where both nodes are in the implied intersection are contained in the edge intersection
-     */
-    private boolean containsAllImpliedSelectors() {
-        // TODO
         return true;
     }
 

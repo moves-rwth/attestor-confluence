@@ -42,6 +42,10 @@ public class NodeGraphElement extends GraphElement {
         return result;
     }
 
+    public static Collection<NodeGraphElement> getNodes(Graph graph) {
+        return getNodes(graph, new ArrayList<>());
+    }
+
     public static NodeGraphElement[] getGraphElementsFromPublicIds(HeapConfiguration hc, TIntArrayList nodes) {
         NodeGraphElement[] result = new NodeGraphElement[nodes.size()];
         for (int i = 0; i<result.length; i++) {
