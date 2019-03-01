@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.graph.heap.internal;
 
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.jboss.util.NotImplementedException;
 
 /**

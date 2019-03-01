@@ -145,7 +145,7 @@ public class JointHeapConfiguration {
         // Iterate over all elements in the graph
         for (int privId = 0; privId < graph.size(); privId++) {
             NodeLabel nodeLabel = graph.getNodeLabel(privId);
-            if (nodeLabel instanceof Type) {
+            if (nodeLabel instanceof Type) {  // TODO: Use selector iterator
                 // The privId corresponds to a node -> find all outgoing selectors
                 final int selectorSource = privId;  // Lambda expression below needs final variable
                 graph.getSuccessorsOf(selectorSource).forEach(succId -> {
@@ -178,7 +178,13 @@ public class JointHeapConfiguration {
                     // Nonterminal edge not yet present -> Add it
                     Nonterminal nonterminal = (Nonterminal) nodeLabel;
                     TIntArrayList attachedNodes = graph.getSuccessorsOf(privId);
-                    int nonterminalPubId = builder.addNonterminalEdgeAndReturnId(nonterminal, attachedNodes);
+                    // TODO: Cleanup
+                    TIntArrayList attachedNodesPublic = new TIntArrayList(attachedNodes.size());
+                    attachedNodes.forEach(node -> {
+                        attachedNodesPublic.add(pubIdMap.get(new NodeGraphElement(node)));
+                        return true;
+                    });
+                    int nonterminalPubId = builder.addNonterminalEdgeAndReturnId(nonterminal, attachedNodesPublic);
                     pubIdMap.put(edgeElement, nonterminalPubId);
                 }
             } else {

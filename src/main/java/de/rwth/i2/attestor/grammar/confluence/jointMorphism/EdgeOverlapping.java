@@ -87,6 +87,9 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         // Calculate the connected nodes (the lists must have same length because the types match)
         connectedNodesHC1 = newPair.first().getConnectedNodes(getContext().getGraph1());
         connectedNodesHC2 = newPair.second().getConnectedNodes(getContext().getGraph2());
+        // TODO: We need to keep track of the additional node equivalences (in case one of the tentacles connects to the same node and another one does not)
+        Map<NodeGraphElement, NodeGraphElement> newMapNodeHc1ToHc2 = new HashMap<>();
+        Map<NodeGraphElement, NodeGraphElement> newMapNodeHc2ToHc1 = new HashMap<>();
         for (int i = 0; i < connectedNodesHC1.size(); i++) {
             NodeGraphElement connectedNode1, connectedNode2;
             connectedNode1 = connectedNodesHC1.get(i);
