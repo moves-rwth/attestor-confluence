@@ -112,7 +112,7 @@ public class NodeOverlappingTest {
         TIntArrayList nodesHc1 = new TIntArrayList(2);
         HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 2, nodesHc1)
-                .addSelector(nodesHc1.get(0), selectorLabel, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(1), selectorLabel, nodesHc1.get(0))
                 .setExternal(nodesHc1.get(0))
                 .build();
         NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
@@ -120,7 +120,7 @@ public class NodeOverlappingTest {
         TIntArrayList nodesHc2 = new TIntArrayList(2);
         HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
                 .addNodes(type, 2, nodesHc2)
-                .addSelector(nodesHc2.get(0), selectorLabel, nodesHc2.get(1))
+                .addSelector(nodesHc2.get(1), selectorLabel, nodesHc2.get(0))
                 .setExternal(nodesHc2.get(0))
                 .build();
         NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
@@ -252,39 +252,6 @@ public class NodeOverlappingTest {
 
         // 2. Check isNodeOverlappingIndependent result
         assertFalse(newNodeOverlapping.isNodeOverlappingIndependent());
-    }
-
-    @Test
-    public void testIsNodeOverlappingIndependent_NodesFromEdgeOverlappingAllExternal() {
-        // 1. Setup the test
-        Type type = hcImplFactory.scene().getType("node");
-        SelectorLabel selectorLabel = hcImplFactory.scene().getSelectorLabel("test");
-
-        TIntArrayList nodesHc1 = new TIntArrayList(2);
-        HeapConfiguration hc1 = hcImplFactory.getEmptyHc().builder()
-                .addNodes(type, 2, nodesHc1)
-                .setExternal(nodesHc1.get(0)).setExternal(nodesHc1.get(1))
-                .addSelector(nodesHc1.get(0), selectorLabel, nodesHc1.get(0))
-                .build();
-        NodeGraphElement[] graphNodesHc1 = NodeGraphElement.getGraphElementsFromPublicIds(hc1, nodesHc1);
-
-        TIntArrayList nodesHc2 = new TIntArrayList(2);
-        HeapConfiguration hc2 = hcImplFactory.getEmptyHc().builder()
-                .addNodes(type, 2, nodesHc2)
-                .setExternal(nodesHc2.get(0)).setExternal(nodesHc2.get(1))
-                .addSelector(nodesHc2.get(0), selectorLabel, nodesHc2.get(0))
-                .build();
-        NodeGraphElement[] graphNodesHc2 = NodeGraphElement.getGraphElementsFromPublicIds(hc2, nodesHc2);
-
-        HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
-        EdgeGraphElement edge1 = graphNodesHc1[0].getOutgoingSelectorEdge("test");
-        EdgeGraphElement edge2 = graphNodesHc2[0].getOutgoingSelectorEdge("test");
-        Pair<EdgeGraphElement, EdgeGraphElement> newEdgePair = new Pair<>(edge1, edge2);
-        EdgeOverlapping edgeOverlapping = EdgeOverlapping.getEdgeOverlapping(context).getOverlapping(newEdgePair);
-        NodeOverlapping nodeOverlapping = NodeOverlapping.getNodeOverlapping(edgeOverlapping);
-
-        // 2. Check isNodeOverlappingIndependent result
-        assertTrue(nodeOverlapping.isNodeOverlappingIndependent());
     }
 
 }
