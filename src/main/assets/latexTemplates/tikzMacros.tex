@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{tikz}
-%\usetikzlibrary{graphs}
+\usetikzlibrary{graphs, graphdrawing}
 \usepgflibrary{graphdrawing}
 \usegdlibrary{force}
 
@@ -21,25 +21,26 @@ Strongly joinable  % TODO: Replace with joinability result
     selector edge/.style={red,->},
     selector label/.style={auto},
     hyperedge node/.style={draw,green,rectangle},
-    hyperedge tentacle/.style={blue}
+    hyperedge tentacle/.style={blue},
+    hyperedge tentacle label/.style={auto,violet}
 }
 
 % Graph drawing
-\begin{tikzpicture}
+\begin{tikzpicture}[spring layout]
     % Nodes
-    \node[graph node] (node1) at (0,2) {1};
-    \node[graph node] (node2) at (2,2) {2};
-    \node[graph node] (node3) at (4,2) {3};
-    \node[graph node] (node4) at (6,2)[circle] {4};
-    % Selector edges
-    \draw[selector edge] (node1) -- node[selector label] {sel1} (node2);
-    \draw[selector edge] (node2) -- node[selector label] {sel2} (node3);
+    \node [graph node] (node1) at (0,0) {1};
+    \node [graph node] (node2) at (2,0) {2};
+    \node [graph node] (node3)  at (4,0) {3};
+    \node [graph node] (node4)  at (6,0) {4};
     % Hyperedges
-    \node[hyperedge node] (hyperedgeA) at (0,0) {A};
-    \node[hyperedge node] (hyperedgeB) at (3,0) {B};
+    \node [hyperedge node] (hyperedgeA) at (0,3) {A};
+    \node [hyperedge node] (hyperedgeB) at (6,3) {B};
+    % Selector edges
+    \draw (node1) edge [selector edge] node [selector label] {sel1} (node2);
+    \draw (node2) edge [selector edge] node [selector label] {sel2} (node3);
     % Tentacle-Edges
-    \draw[hyperedge tentacle] (hyperedgeA) -- node[auto] {0} (node1);
-    \draw[hyperedge tentacle] (hyperedgeA) -- node[auto] {1} (node2);
+    \draw (hyperedgeA) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node1);
+    \draw (hyperedgeA) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node2);
 
     % TODO: Add the other abstracted graphs
 \end{tikzpicture}
