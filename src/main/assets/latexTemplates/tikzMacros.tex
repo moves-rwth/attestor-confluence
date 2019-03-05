@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage{tikz}
+
+% TODO: Define macros
+
+
+% TODO: Don't include the document part, because this will be added by the java code
+\begin{document}
+
+\section{1. Critical Pair}  % TODO: Enumerate the cirtical pairs
+
+Strongly joinable  % TODO: Replace with joinability result
+\label{sec:criticalpair:1}
+
+\begin{tikzpicture}
+    % Nodes
+    \node (node1) {1};
+    \node (node2) {2};
+    \node (node3) {3};
+    \node (node4) {4};
+    % Selector edges
+    \draw[->] (node1) -- \node {sel1} (node2);
+    \draw[->] (node1) -- \node {sel2} (node3);
+    % Hyperedges
+    \node (hyperedgeA) {A};
+    \node (hyperedgeB) {B};
+    % Tentacle-Edges
+    \draw (hyperedgeA) -- \node {0} (node1);
+    \draw (hyperedgeA) -- \node {1} (node2);
+
+    % TODO: Add the other abstracted graphs
+
+\end{tikzpicture}
+
+\begin{tabular}{ r | l l | l l }
+    Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
+    1 & NULL  & NULL  & N/A  & False \\
+    2 & type1 & type1 & True & False \\
+    3 & NULL  & type1 & N/A  & False \\
+    4 & type2 & NULL  & N/A  & True  \\
+    5 & NULL  & NULL  & N/A  & False \\
+\end{tabular}
+    
+
+
+\end{document}
