@@ -10,37 +10,54 @@
 % TODO: Don't include the document part, because this will be added by the java code
 \begin{document}
 
-\section{1. Critical Pair}  % TODO: Enumerate the cirtical pairs
+\section{Critical Pair}  % TODO: Enumerate the critical pairs
 
 Strongly joinable  % TODO: Replace with joinability result
 \label{sec:criticalpair:1}
 
 % Global style settings
-\tikzset {
+\tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
     graph node/.style={draw,circle},
+    graph node/external/.style={}, % TODO: Use .prefix style or .append style or .inheris
+    graph node/internal/.style={},
+    graph node/rule1/.style={},
+    graph node/rule2/.style={},
     selector edge/.style={red,->},
+    selector edge/rule1/.style={},
+    selector edge/rule2/.style={},
     selector label/.style={auto},
+    selector label/rule1/.style={auto},
+    selector label/rule2/.style={auto},
     hyperedge node/.style={draw,green,rectangle},
+    hyperedge node/rule1/.style={draw,green,rectangle},
+    hyperedge node/rule2/.style={draw,green,rectangle},
     hyperedge tentacle/.style={blue},
-    hyperedge tentacle label/.style={auto,violet}
+    hyperedge tentacle/rule1/.style={},
+    hyperedge tentacle/rule2/.style={},
+    hyperedge tentacle label/.style={}
+    hyperedge tentacle label/rule1/.style={}
+    hyperedge tentacle label/rule2/.style={}
+    %.style={min}
 }
 
 % Graph drawing
 \begin{tikzpicture}[spring layout]
     % Nodes
-    \node [graph node] (node1) at (0,0) {1};
-    \node [graph node] (node2) at (2,0) {2};
-    \node [graph node] (node3)  at (4,0) {3};
-    \node [graph node] (node4)  at (6,0) {4};
+    \node [graph node] (node0) {0};
+    \node [graph node] (node1) {1};
+    \node [graph node] (node2) {2};
+    \node [graph node] (node3) {3};
     % Hyperedges
-    \node [hyperedge node] (hyperedgeA) at (0,3) {A};
-    \node [hyperedge node] (hyperedgeB) at (6,3) {B};
+    \node [hyperedge node] (hyperedgeRefBT1) {RefBT};
+    \node [hyperedge node] (hyperedgeRefBT2) {RefBT};
     % Selector edges
-    \draw (node1) edge [selector edge] node [selector label] {sel1} (node2);
-    \draw (node2) edge [selector edge] node [selector label] {sel2} (node3);
+    \draw (node1) edge [selector edge] node [selector label] {left} (node2);
+    \draw (node1) edge [selector edge] node [selector label] {right} (node3);
     % Tentacle-Edges
-    \draw (hyperedgeA) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node1);
-    \draw (hyperedgeA) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node2);
+    \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node2);
+    \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
+    \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node3);
+    \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
 
     % TODO: Add the other abstracted graphs
 \end{tikzpicture}
