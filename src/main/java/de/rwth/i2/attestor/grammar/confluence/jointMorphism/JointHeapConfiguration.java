@@ -224,6 +224,16 @@ public class JointHeapConfiguration {
         return applyMatching(nt2, matching2, externalIndicesMap);
     }
 
+    public HeapConfiguration getCanonical1() {
+        // TODO
+        return null;
+    }
+
+    public HeapConfiguration getCanonical2() {
+        // TODO
+        return null;
+    }
+
     private HeapConfiguration applyMatching(Nonterminal nt, Matching matching, TIntArrayList externalIndicesMap) {
         if (externalIndicesMap == null) {
             return jointHeapConfiguration.clone().builder()

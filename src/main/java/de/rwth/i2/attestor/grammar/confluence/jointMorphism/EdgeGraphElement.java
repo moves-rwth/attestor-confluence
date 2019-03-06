@@ -53,7 +53,11 @@ public class EdgeGraphElement extends GraphElement {
         return result;
     }
 
-    static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
+    public boolean isSelector() {
+        return getSelectorLabel() == null;
+    }
+
+    public static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
         Collection<EdgeGraphElement> result = new ArrayList<>();
         for (int privateId = 0; privateId < graph.size(); privateId++) {
             NodeLabel label = graph.getNodeLabel(privateId);
