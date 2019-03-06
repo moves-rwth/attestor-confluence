@@ -59,6 +59,9 @@ public class TikzExport {
             writer.newLine();
             line = reader.readLine();
         }
+        writer.newLine();
+        writer.write("\\begin{document}");
+        writer.newLine();
     }
 
     /**
@@ -111,7 +114,7 @@ public class TikzExport {
 
 
     private StringBuilder getStandaloneHeapConfigurationMacro(HeapConfiguration heapConfiguration) {
-        final String macroCommand = "\\StandaloneHeapConfiguration";
+        final String macroCommand = "standalone heap configuration";
         indentLevel++;
         String reportElementId = String.valueOf(currentReportElementId);
         StringBuilder heapConfigurationMacro = getHeapConfigurationMacro(heapConfiguration);
@@ -120,7 +123,7 @@ public class TikzExport {
     }
 
     private StringBuilder getGrammarRuleMacro(Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) { // TODO: Maye simple HeapConfiguration instead of CollapsedHeapConfiguration is enough
-        final String macroCommand = "\\GrammarRule";
+        final String macroCommand = "grammar rule";
         indentLevel++;
         String reportElementId = String.valueOf(currentReportElementId);
         StringBuilder leftHandSideMacro = getLeftHandSideMacro(leftHandSide);
@@ -130,7 +133,7 @@ public class TikzExport {
     }
 
     private StringBuilder getLeftHandSideMacro(Nonterminal nonterminal) {
-        final String macroCommand = "\\LeftHandSide";
+        final String macroCommand = "left hand side";
         HeapConfiguration handle = new InternalHeapConfiguration();
         // TODO: Create handle
         indentLevel++;
@@ -140,7 +143,7 @@ public class TikzExport {
     }
 
     private StringBuilder getRightHandSideMacro(CollapsedHeapConfiguration rightHandSide) {
-        final String macroCommand = "\\RightHandSide";
+        final String macroCommand = "right hand side";
         indentLevel++;
         StringBuilder rightHandSideMacro = getHeapConfigurationMacro(rightHandSide.getCollapsed());
         indentLevel--;
@@ -149,7 +152,7 @@ public class TikzExport {
 
 
     private StringBuilder getCriticalPairMacro(CriticalPair criticalPair) {
-        final String macroCommand = "\\CriticalPair";
+        final String macroCommand = "critical pair";
         indentLevel++;
         String reportElementId = String.valueOf(currentReportElementId);
         String joinabilityResult = criticalPair.getJoinability().toString();
@@ -167,7 +170,7 @@ public class TikzExport {
 
     private StringBuilder getCriticalPairDebugTableMacro(CriticalPair criticalPair) {
         Graph jointHeapConfiguration = getGraph(criticalPair.getJointHeapConfiguration().getHeapConfiguration());
-        final String macroCommand = "\\CriticalPairDebugTable";
+        final String macroCommand = "critical pair debug table";
         indentLevel++;
         StringBuilder criticalPairDebugTableEntryMacros = new StringBuilder();
         for (NodeGraphElement currentNode : NodeGraphElement.getNodes(jointHeapConfiguration)) {
@@ -178,7 +181,7 @@ public class TikzExport {
     }
 
     private StringBuilder getCriticalPairDebugTableEntryMacro(JointHeapConfiguration jointHeapConfiguration, NodeGraphElement nodeJointGraph) {
-        final String macroCommand = "\\CriticalPairDebugTableEntry";
+        final String macroCommand = "critical pair debug table entry";
         String nodeId = String.valueOf(nodeJointGraph.getPrivateId());
         String typeHC1 = "TODO";
         String typeHC2 = "TODO";
@@ -194,7 +197,7 @@ public class TikzExport {
      * Draws a HeapConfiguration (must already be inside a tikzpicture environment)
      */
     private StringBuilder getHeapConfigurationMacro(HeapConfiguration hc) {
-        final String macroCommand = "\\HeapConfiguration";
+        final String macroCommand = "heap configuration";
         Graph graph = getGraph(hc);
         indentLevel++;
         StringBuilder nodes = new StringBuilder();
@@ -222,14 +225,14 @@ public class TikzExport {
     }
 
     private StringBuilder getSelectorEdgeMacro(Graph graph, EdgeGraphElement selectorEdge) {
-        final String macroCommand = "\\SelectorEdge";
+        final String macroCommand = "selector edge";
         String sourceNode = String.valueOf(selectorEdge.getPrivateId());
         String selectorLabel = selectorEdge.getSelectorLabel();  // TODO: Remove invalid characters. Only a-zA-Z0-9 allowed
         return macroBuilder(macroCommand, sourceNode, selectorLabel);
     }
 
     private StringBuilder getTentacleEdgeMacro(Graph graph, EdgeGraphElement nonterminal, int tentacleIdx) {
-        final String macroCommand = "\\TentacleEdge";
+        final String macroCommand = "tentacle edge";
         String nonterminalId = String.valueOf(nonterminal.getPrivateId());
         String tentacleIdxString = String.valueOf(tentacleIdx);
         return macroBuilder(macroCommand, nonterminalId, tentacleIdxString);
@@ -244,14 +247,14 @@ public class TikzExport {
     }
 
     private StringBuilder getExternalNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
-        final String macroCommand = "\\ExternalNode";
+        final String macroCommand = "external node";
         String externalIndex = String.valueOf(graph.getExternalIndex(nodeGraphElement.getPrivateId()));
         String nodeId = String.valueOf(nodeGraphElement.getPrivateId());
         return macroBuilder(macroCommand, nodeId, externalIndex);
     }
 
     private StringBuilder getInternalNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
-        final String macroCommand = "\\InternalNode";
+        final String macroCommand = "internal node";
         String nodeId = String.valueOf(nodeGraphElement.getPrivateId());
         return macroBuilder(macroCommand, nodeId);
     }
@@ -259,9 +262,9 @@ public class TikzExport {
     private StringBuilder getNonterminalMacro(Graph graph, EdgeGraphElement nonterminal, boolean isNew) {
         String macroCommand;
         if (isNew) {
-            macroCommand = "\\NewNonterminal";
+            macroCommand = "new nonterminal";
         } else {
-            macroCommand = "\\OldNonterminal";
+            macroCommand = "old nonterminal";
         }
         String nonterminalId = String.valueOf(nonterminal.getPrivateId());
         Nonterminal nonterminalLabel = (Nonterminal) graph.getNodeLabel(nonterminal.getPrivateId());
@@ -275,7 +278,7 @@ public class TikzExport {
         // TODO: No new line for simple String arguments. If only strings put whole macro in one line
         char[] indentationSpaces = new char[indentLevel*indentSpaces];
         Arrays.fill(indentationSpaces, ' ');
-        StringBuilder result = new StringBuilder().append(indentationSpaces).append(macroCommand);
+        StringBuilder result = new StringBuilder().append(indentationSpaces).append("\\pgfkeys{/attestor export/").append(macroCommand).append('=');
         int i=0;
         for (CharSequence arg : arguments) {
             i++;
@@ -285,13 +288,13 @@ public class TikzExport {
             } else {
                 // All other CharSequences are probably longer and are therefore printed in new lines
                 result.append(System.lineSeparator()).append(indentationSpaces).append('{')
-                        .append(" % ").append(macroCommand).append('#').append(i).append(System.lineSeparator())
+                        .append(" % ").append(macroCommand).append(" arg #").append(i).append(System.lineSeparator())
                         .append(arg)
                         .append(indentationSpaces).append('}');
             }
 
         }
-        return result.append(System.lineSeparator());
+        return result.append('}').append(System.lineSeparator());
     }
 
     private Graph getGraph(HeapConfiguration hc) {
