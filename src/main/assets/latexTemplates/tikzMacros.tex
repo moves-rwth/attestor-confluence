@@ -1,8 +1,39 @@
 \documentclass{article}
 \usepackage{tikz}
-\usetikzlibrary{graphs, graphdrawing}
-\usepgflibrary{graphdrawing}
+\usetikzlibrary{graphdrawing}
 \usegdlibrary{force}
+
+% NAMING CONVENTIONS
+% graph element: [external node, internal node, selector edge, selector label, hyperedge node, hyperedge tentacle, hyperedge tentacle label]
+%
+% graph element involvement: [rule1, rule2, both, new]
+%                Note: Specifies in which rule application a graph element is involved; only applies to critical pair reports
+%
+% critical pair step: [joint graph, applied rule 1, applied rule 2, canonical 1, canonical 2]
+%                Note: only applies to critical pair reports
+% grammar part: [left side, right side]
+%                Note: only applies to grammar reports
+%
+% report element id: [report element 1, report element 2, ...]
+%                        Note: A report element can be a critical pair, a grammar rule or a heap configuration report
+%
+% identifier: node identifier, hyperedge identifier, tentacle identifier, selector identifier
+% node identifier: <graph id of the node>
+% hyperedge identifier: <graph id of the hyperedge>
+% tentacle identifier: <graph id of the hyperedge> <tentacle index>
+% selector identifier: <graph id of the source node> <label of selector>
+%
+% concrete id: [1/rule1/node/1, 1/left side/hyperedge/2, 1/selector edge/1 right, 1/selector label/1 right, 1/hyperedge tentacle/1 2, 1/hyperedge tentacle label/1 2, ...]
+%                     Note: Identifies exactly one graph element;
+%             Format: "[report element id]/[critical pair step]/[graph element]/[identifier]"   for critical pair report element
+%             Format: "[report element id]/[grammar part]/[graph element]/[identifier]"   for grammar report element
+%             Format: "[report element id]/[graph element]/[identifier]"   for heap configuration report element
+%            Important: [graph element] references nodes just by the word "node" and NOT "external node" or "internal node"
+
+%
+% Show "graph id": TODO
+% Show "report element id": TODO
+
 
 % TODO: Define macros
 
@@ -17,60 +48,49 @@ Strongly joinable  % TODO: Replace with joinability result
 
 % Global style settings
 \tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
-    graph node/.style={draw,circle},
-    graph node/external/.style={}, % TODO: Use .prefix style or .append style or .inheris
-    graph node/internal/.style={},
-    graph node/rule1/.style={},
-    graph node/rule2/.style={},
-    selector edge/.style={red,->},
-    selector edge/rule1/.style={},
-    selector edge/rule2/.style={},
+    external node/.style={draw,circle,double},
+    internal node/.style={draw,circle},
+    selector edge/.style={red,->,thick},
     selector label/.style={auto},
-    selector label/rule1/.style={auto},
-    selector label/rule2/.style={auto},
     hyperedge node/.style={draw,green,rectangle},
-    hyperedge node/rule1/.style={draw,green,rectangle},
-    hyperedge node/rule2/.style={draw,green,rectangle},
-    hyperedge tentacle/.style={blue},
-    hyperedge tentacle/rule1/.style={},
-    hyperedge tentacle/rule2/.style={},
-    hyperedge tentacle label/.style={}
-    hyperedge tentacle label/rule1/.style={}
-    hyperedge tentacle label/rule2/.style={}
-    %.style={min}
+    hyperedge tentacle/.style={blue,thick},
+    hyperedge tentacle label/.style={auto}
 }
 
 % Graph drawing
 \begin{tikzpicture}[spring layout]
-    % Nodes
-    \node [graph node] (node0) {0};
-    \node [graph node] (node1) {1};
-    \node [graph node] (node2) {2};
-    \node [graph node] (node3) {3};
-    % Hyperedges
-    \node [hyperedge node] (hyperedgeRefBT1) {RefBT};
-    \node [hyperedge node] (hyperedgeRefBT2) {RefBT};
-    % Selector edges
-    \draw (node1) edge [selector edge] node [selector label] {left} (node2);
-    \draw (node1) edge [selector edge] node [selector label] {right} (node3);
-    % Tentacle-Edges
-    \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node2);
-    \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
-    \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node3);
-    \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
-
+    \begin{scope}[]
+        % Nodes
+        \node [external node] (node0) {0};
+        \node [internal node] (node1) {1};
+        \node [internal node] (node2) {2};
+        \node [internal node] (node3) {3};
+        % Hyperedges
+        \node [hyperedge node] (hyperedgeRefBT1) {RefBT};
+        \node [hyperedge node] (hyperedgeRefBT2) {RefBT};
+        % Selector edges
+        \draw (node1) edge [selector edge] node [selector label] {left} (node2);
+        \draw (node1) edge [selector edge] node [selector label] {right} (node3);
+        % Tentacle-Edges
+        \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node2);
+        \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
+        \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node3);
+        \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
+    \end{scope}
     % TODO: Add the other abstracted graphs
 \end{tikzpicture}
 
 % Table with debug information
 \begin{tabular}{ r | l l | l l }
     Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
+    \hline
     1 & NULL  & NULL  & N/A  & False \\
     2 & type1 & type1 & True & False \\
     3 & NULL  & type1 & N/A  & False \\
     4 & type2 & NULL  & N/A  & True  \\
     5 & NULL  & NULL  & N/A  & False \\
 \end{tabular}
+
     
 
 
