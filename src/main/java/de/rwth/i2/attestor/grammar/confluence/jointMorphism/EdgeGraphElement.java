@@ -54,7 +54,7 @@ public class EdgeGraphElement extends GraphElement {
     }
 
     public boolean isSelector() {
-        return getSelectorLabel() == null;
+        return getSelectorLabel() != null;
     }
 
     public static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
@@ -72,6 +72,10 @@ public class EdgeGraphElement extends GraphElement {
                         if (edgeLabel instanceof SelectorLabel) {
                             // There is a selector from privateId to successor
                             String selectorLabel = ((SelectorLabel) edgeLabel).getLabel();
+                            if (selectorLabel == null) {
+                                // selectorLabel must not be null
+                                throw new IllegalArgumentException();
+                            }
                             result.add(new EdgeGraphElement(finalPrivateId, selectorLabel));
                         }
                     }

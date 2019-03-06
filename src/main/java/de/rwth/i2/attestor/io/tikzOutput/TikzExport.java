@@ -1,13 +1,12 @@
 package de.rwth.i2.attestor.io.tikzOutput;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.NodeCounterGenerator;
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeGraphElement;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.GraphElement;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeGraphElement;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
@@ -15,11 +14,8 @@ import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.main.Attestor;
 import jdk.nashorn.api.scripting.URLReader;
 
-import javax.naming.Context;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -31,6 +27,8 @@ import java.util.Collection;
  *   - At the end call finishExport(). After this no other operation is allowed.
  *   - It should be ensured that finishExport() is called at the end by using
  *
+ * TODO: Add comments with the name & id of report elements
+ *
  */
 public class TikzExport {
     private BufferedWriter writer;
@@ -39,11 +37,28 @@ public class TikzExport {
     private int currentReportElementId = 0;
     // TODO: Chat that character encoding works on every platform
 
+    // TODO: Remove this test method
+    public static void main(String args[]) {
+        Grammar grammar = ConfluenceTool.parseGrammar("BT");
+        try {
+            TikzExport exporter = new TikzExport("test.tex");
+            exporter.exportGrammar(grammar, true);
+            exporter.finishExport();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
     public TikzExport(String destinationLocation) throws IOException {
         writer = new BufferedWriter(new FileWriter(destinationLocation));
-        URL tikzMacrosFile = Attestor.class.getClassLoader().getResource("latexTemplates/tikzMacros.pdf");
+        URL tikzMacrosFile = Attestor.class.getClassLoader().getResource("latexTemplates/tikzMacros.tex");
         BufferedReader reader = new BufferedReader(new URLReader(tikzMacrosFile));
-        writer.append(reader.toString());  // TODO: This is not very nice, because it creates a very long String -> Maybe read in chunks (buffer or line by line)
+        String line = reader.readLine();
+        while (line != null) {
+            writer.write(line);
+            writer.newLine();
+            line = reader.readLine();
+        }
     }
 
     /**
@@ -57,7 +72,8 @@ public class TikzExport {
     }
 
     public void createPageBreak() throws IOException {
-        writer.append("\\pagebreak\n");
+        writer.append("\\pagebreak");
+        writer.newLine();
     }
 
     public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
@@ -91,21 +107,26 @@ public class TikzExport {
     }
 
 
+
+
+
     private StringBuilder getStandaloneHeapConfigurationMacro(HeapConfiguration heapConfiguration) {
         final String macroCommand = "\\StandaloneHeapConfiguration";
         indentLevel++;
+        String reportElementId = String.valueOf(currentReportElementId);
         StringBuilder heapConfigurationMacro = getHeapConfigurationMacro(heapConfiguration);
         indentLevel--;
-        return macroBuilder(macroCommand, heapConfigurationMacro);
+        return macroBuilder(macroCommand, reportElementId, heapConfigurationMacro);
     }
 
     private StringBuilder getGrammarRuleMacro(Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) { // TODO: Maye simple HeapConfiguration instead of CollapsedHeapConfiguration is enough
         final String macroCommand = "\\GrammarRule";
         indentLevel++;
+        String reportElementId = String.valueOf(currentReportElementId);
         StringBuilder leftHandSideMacro = getLeftHandSideMacro(leftHandSide);
         StringBuilder rightHandSideMacro = getRightHandSideMacro(rightHandSide);
         indentLevel--;
-        return macroBuilder(macroCommand, leftHandSideMacro, rightHandSideMacro);
+        return macroBuilder(macroCommand, reportElementId, leftHandSideMacro, rightHandSideMacro);
     }
 
     private StringBuilder getLeftHandSideMacro(Nonterminal nonterminal) {
@@ -130,6 +151,7 @@ public class TikzExport {
     private StringBuilder getCriticalPairMacro(CriticalPair criticalPair) {
         final String macroCommand = "\\CriticalPair";
         indentLevel++;
+        String reportElementId = String.valueOf(currentReportElementId);
         String joinabilityResult = criticalPair.getJoinability().toString();
         StringBuilder criticalPairDebugTable = getCriticalPairDebugTableMacro(criticalPair);
         StringBuilder jointGraph = getHeapConfigurationMacro(criticalPair.getJointHeapConfiguration().getHeapConfiguration());
@@ -140,7 +162,7 @@ public class TikzExport {
         String rule1ID = "TODO";
         String rule2ID = "TODO";
         indentLevel--;
-        return macroBuilder(macroCommand, joinabilityResult, rule1ID, rule2ID, jointGraph, appliedRule1, appliedRule2, canonical1, canonical2, criticalPairDebugTable);
+        return macroBuilder(macroCommand, reportElementId, joinabilityResult, rule1ID, rule2ID, jointGraph, appliedRule1, appliedRule2, canonical1, canonical2, criticalPairDebugTable);
     }
 
     private StringBuilder getCriticalPairDebugTableMacro(CriticalPair criticalPair) {
@@ -165,6 +187,9 @@ public class TikzExport {
         return macroBuilder(macroCommand, nodeId, typeHC1, typeHC2, reductionTentacle1, reductionTentacle2);
     }
 
+
+
+
     /**
      * Draws a HeapConfiguration (must already be inside a tikzpicture environment)
      */
@@ -184,8 +209,8 @@ public class TikzExport {
                 // Selector edge
                 selectorEdgeMacros.append(getSelectorEdgeMacro(graph, currentEdge));
             } else {
-                // Nonterminal edge
-                hyperedgeMacros.append(getNonterminalMacro(graph, currentEdge));
+                // Nonterminal edge TODO: set "isNew" argument correctly
+                hyperedgeMacros.append(getNonterminalMacro(graph, currentEdge, false));
                 int rank = graph.getSuccessorsOf(currentEdge.getPrivateId()).size();
                 for (int i=0; i<rank; i++) {
                     hyperedgeTentacleMacros.append(getTentacleEdgeMacro(graph, currentEdge, i));
@@ -198,19 +223,16 @@ public class TikzExport {
 
     private StringBuilder getSelectorEdgeMacro(Graph graph, EdgeGraphElement selectorEdge) {
         final String macroCommand = "\\SelectorEdge";
-        indentLevel++;
-        String sourceNode = "0";
-        String selectorLabel = "sel";  // TODO: Remove invalid characters. Only a-zA-Z0-9 allowed
-        // TODO
-        indentLevel--;
+        String sourceNode = String.valueOf(selectorEdge.getPrivateId());
+        String selectorLabel = selectorEdge.getSelectorLabel();  // TODO: Remove invalid characters. Only a-zA-Z0-9 allowed
         return macroBuilder(macroCommand, sourceNode, selectorLabel);
     }
 
     private StringBuilder getTentacleEdgeMacro(Graph graph, EdgeGraphElement nonterminal, int tentacleIdx) {
         final String macroCommand = "\\TentacleEdge";
-        indentLevel++;
-        indentLevel--;
-        return macroBuilder(macroCommand);
+        String nonterminalId = String.valueOf(nonterminal.getPrivateId());
+        String tentacleIdxString = String.valueOf(tentacleIdx);
+        return macroBuilder(macroCommand, nonterminalId, tentacleIdxString);
     }
 
     private StringBuilder getNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
@@ -230,47 +252,46 @@ public class TikzExport {
 
     private StringBuilder getInternalNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
         final String macroCommand = "\\InternalNode";
-        indentLevel++;
-        String nodeId = "-1";
-        String isExternal = "true";
-        // TODO
-        indentLevel--;
+        String nodeId = String.valueOf(nodeGraphElement.getPrivateId());
         return macroBuilder(macroCommand, nodeId);
     }
 
-
-    private StringBuilder getNonterminalMacro(Graph graph, EdgeGraphElement nonterminal) {
-        final String macroCommand = "\\TODO";
-        indentLevel++;
-        indentLevel--;
-        return macroBuilder(macroCommand);
+    private StringBuilder getNonterminalMacro(Graph graph, EdgeGraphElement nonterminal, boolean isNew) {
+        String macroCommand;
+        if (isNew) {
+            macroCommand = "\\NewNonterminal";
+        } else {
+            macroCommand = "\\OldNonterminal";
+        }
+        String nonterminalId = String.valueOf(nonterminal.getPrivateId());
+        Nonterminal nonterminalLabel = (Nonterminal) graph.getNodeLabel(nonterminal.getPrivateId());
+        String nonterminalName = nonterminalLabel.getLabel();
+        return macroBuilder(macroCommand, nonterminalId, nonterminalName);
     }
 
-    private StringBuilder getOldNonterminalMacro(Graph graph, EdgeGraphElement nonterminal) {
-        final String macroCommand = "\\TODO";
-        indentLevel++;
-        indentLevel--;
-        return macroBuilder(macroCommand);
-    }
 
-    private StringBuilder getNewNonterminalMacro(Graph graph, EdgeGraphElement nonterminal) {
-        final String macroCommand = "\\TODO";
-        indentLevel++;
-        indentLevel--;
-        return macroBuilder(macroCommand);
-    }
 
     private StringBuilder macroBuilder(String macroCommand, CharSequence... arguments) {
         // TODO: No new line for simple String arguments. If only strings put whole macro in one line
         char[] indentationSpaces = new char[indentLevel*indentSpaces];
         Arrays.fill(indentationSpaces, ' ');
-        StringBuilder result = new StringBuilder().append(indentationSpaces).append(macroCommand).append('\n');
+        StringBuilder result = new StringBuilder().append(indentationSpaces).append(macroCommand);
+        int i=0;
         for (CharSequence arg : arguments) {
-            result.append(indentationSpaces).append("{\n")
-                    .append(arg)
-                    .append(indentationSpaces).append("}\n");
+            i++;
+            if (arg instanceof String || arg.length() == 0) {
+                // We assume that Strings are small enough to be printed in one line
+                result.append('{').append(arg).append('}');
+            } else {
+                // All other CharSequences are probably longer and are therefore printed in new lines
+                result.append(System.lineSeparator()).append(indentationSpaces).append('{')
+                        .append(" % ").append(macroCommand).append('#').append(i).append(System.lineSeparator())
+                        .append(arg)
+                        .append(indentationSpaces).append('}');
+            }
+
         }
-        return result;
+        return result.append(System.lineSeparator());
     }
 
     private Graph getGraph(HeapConfiguration hc) {
