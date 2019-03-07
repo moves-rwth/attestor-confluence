@@ -96,11 +96,13 @@
     \begin{tikzpicture}
         \AttestorDrawHeapConfiguration{/right hand side}
     \end{tikzpicture}
+
     TODO
 }
 
 \newcommand{\AttestorHeapConfigurationReport}{
     \section{Heap Configuration}
+
     TODO
 }
 
@@ -120,29 +122,39 @@
 
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
 \newcommand{\AttestorDrawHeapConfiguration}[1] {
-    \pgfkeys{#1/num selectors/.get=\NumSelectors}
+    \pgfkeys{#1/nodes/.get=\nodelist}
     % 1. Rendering pass: Only draw nodes correctly for the node placement algorithm (otherwise there is an issue with the edges)
     \begin{scope}[spring layout]
         % 1. draw nodes
-        \pgfkeys{#1/nodes/.get=\nodelist}
         \foreach \n in \nodelist {
             \node (node\n) {\n};  % TODO: Change internal / external
         }
         % 2. draw selector edges
-        \ForLoop{\i}{\NumSelectors}{
-            \pgfkeys{#1/selectors/\i/from/.get=\from}
-            \pgfkeys{#1/selectors/\i/to/.get=\to}
-            \draw (node\from) edge [draw=none] (node\to);
+        \foreach \source in \nodelist {
+            \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
+            \foreach \target in \targets {
+                \pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
+                \foreach \selectorLabel in \labels {
+                    \draw (node\source) edge [draw=none] (node\target);
+                }
+            }
         }
+        % 3. draw nonterminal edges
+        
+
+
         % 3. draw nonterminals
     \end{scope}
-    % 2. Edges with edge labels
+    % 2. Rendering pass: This time we draw the selectors with edge labels
 
-    \ForLoop{\i}{\NumSelectors}{
-        \pgfkeys{#1/selectors/\i/from/.get=\from}
-        \pgfkeys{#1/selectors/\i/to/.get=\to}
-        \pgfkeys{#1/selectors/\i/label/.get=\sel}
-        \draw (node\from) edge [selector edge] node [selector label] {\sel} (node\to);
+    \foreach \source in \nodelist {
+        \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
+        \foreach \target in \targets {
+            \pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
+            \foreach \selectorLabel in \labels {
+                \draw (node\source) edge [selector edge] node [selector label] {\selectorLabel} (node\target);
+            }
+        }
     }
 
 }

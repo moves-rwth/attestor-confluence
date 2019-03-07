@@ -176,6 +176,7 @@ public class TikzExport {
     private void addHeapConfiguration(String pgfPath, HeapConfiguration hc, String reportStep) {
         addNodesAndSelectorEdges(pgfPath, hc);
         addNonterminals(pgfPath, hc);
+        // TODO: addVariables
     }
 
     private void addNodesAndSelectorEdges(String pgfPath, HeapConfiguration hc) {
