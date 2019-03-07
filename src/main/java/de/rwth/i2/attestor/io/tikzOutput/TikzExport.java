@@ -196,12 +196,12 @@ public class TikzExport {
         Collection<String> nonterminals = new ArrayList<>();
         for (EdgeGraphElement currentEdge : EdgeGraphElement.getEdgesOfGraph(graph)) {
             if (currentEdge.isSelector()) {
-                selectorNumber++;
                 String currentPath = pgfPath + "/selectors/" + selectorNumber;
                 pgfSingleValues.add(new Pair<>(currentPath + "/from", String.valueOf(currentEdge.getPrivateId())));
                 String selectorDestination = String.valueOf(currentEdge.getConnectedNodes(graph).get(1).getPrivateId());
                 pgfSingleValues.add(new Pair<>(currentPath + "/to", selectorDestination));
                 pgfSingleValues.add(new Pair<>(currentPath + "/label", currentEdge.getSelectorLabel()));
+                selectorNumber++;
             } else {
                 // Nonterminal edge TODO: set "isNew" argument correctly
                 int privateId = currentEdge.getPrivateId();

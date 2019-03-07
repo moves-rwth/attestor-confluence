@@ -93,7 +93,7 @@
 
 \newcommand{\AttestorGrammarReport}{
     \section{Grammar Rule}
-    \begin{tikzpicture}[spring layout]
+    \begin{tikzpicture}
         \AttestorDrawHeapConfiguration{/right hand side}
     \end{tikzpicture}
     TODO
@@ -106,22 +106,44 @@
 
 % HELPER MACROS
 
+% A for loop equivalen to the Java code: "for (int #1=0; #1<#2; #1++) {#3}"
+\newcommand{\ForLoop}[3]{
+    \edef\End{#2}
+    \foreach #1 in {0,...,\End} {
+        \edef\Current{#1}
+        \ifx \Current \End
+        \else
+            #3
+        \fi
+    }
+}
 
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
 \newcommand{\AttestorDrawHeapConfiguration}[1] {
-    % 1. draw nodes
-    \pgfkeys{#1/nodes/.get=\nodelist}
-    \foreach \n in \nodelist {
-        \node [internal node] (node\n) {\n};  % TODO: Change internal / external
-    }
-    % 2. draw selector edges
     \pgfkeys{#1/num selectors/.get=\NumSelectors}
-    \foreach \i in {1,...,\NumSelectors} {
+    % 1. Rendering pass: Only draw nodes correctly for the node placement algorithm (otherwise there is an issue with the edges)
+    \begin{scope}[spring layout]
+        % 1. draw nodes
+        \pgfkeys{#1/nodes/.get=\nodelist}
+        \foreach \n in \nodelist {
+            \node (node\n) {\n};  % TODO: Change internal / external
+        }
+        % 2. draw selector edges
+        \ForLoop{\i}{\NumSelectors}{
+            \pgfkeys{#1/selectors/\i/from/.get=\from}
+            \pgfkeys{#1/selectors/\i/to/.get=\to}
+            \draw (node\from) edge [draw=none] (node\to);
+        }
+        % 3. draw nonterminals
+    \end{scope}
+    % 2. Edges with edge labels
+
+    \ForLoop{\i}{\NumSelectors}{
         \pgfkeys{#1/selectors/\i/from/.get=\from}
         \pgfkeys{#1/selectors/\i/to/.get=\to}
-        \pgfkeys{#1/selectors/\i/label/.get=\label}
-        \draw (node\from) edge [selector edge] node [selector label] {X} (node\to);
+        \pgfkeys{#1/selectors/\i/label/.get=\sel}
+        \draw (node\from) edge [selector edge] node [selector label] {\sel} (node\to);
     }
-    % 3. draw nonterminals
+
 }
 
