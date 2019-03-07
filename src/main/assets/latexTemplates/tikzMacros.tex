@@ -39,6 +39,28 @@
 % Show "report element id": TODO
 
 
+% Tikz parameters to investigate
+%
+% weight (give nodes & edges an "importance" -> meaning depends on drawing algorithm)
+% length (set length of edge)
+% radius (of circular objects)
+
+% Global options: node distance=1cm
+
+% Section 32.1 Controlling and Configuring Force-Based Algorithms
+% iterations=500  (global)
+% spring constant=0.01 (per edge or global?)
+% electric charge=1  (per node or global -> attraction / repulsion between nodes)
+% electric force order=1 (global -> reduce long range forces)
+% approximate remote forces=true (global -> dont calculate every interaction)
+% coarsen=true  (global -> Joins nodes to a coarse graph initially and then refines) -> Other options to configure this further
+
+% Force based Layout algorithms
+% spring layout, spring Hu 2006 layout, spring electrical layout, spring electrical layout', spring electrical Hu 2006 layout, spring electrical Walshaw 2000 layout
+
+
+
+
 % TODO: Define macros
 
 % Global style settings
@@ -46,39 +68,20 @@
     external node/.style={draw,circle,double},
     internal node/.style={draw,circle},
     selector edge/.style={red,->,thick},
-    selector label/.style={auto},
+    selector label/.style={auto,sloped},
     hyperedge node/.style={draw,green,rectangle},
     hyperedge tentacle/.style={blue,thick},
-    hyperedge tentacle label/.style={auto}
+    hyperedge tentacle label/.style={auto,sloped},
+    global heap drawing settings/.style={spring layout,node distance=1.5cm},
+    grammar derivation arrow/.style={}
 }
 
 
 \newcommand{\AttestorCriticalPairReport}{
     \section{Critical Pair}  % TODO: Enumerate the critical pairs
     Strongly joinable  % TODO: Replace with joinability result
-    \label{sec:criticalpair:1}
-    % Graph drawing
-    \begin{tikzpicture}[spring layout]
-        \begin{scope}
-            % Nodes
-            \node [external node] (node0) {0};
-            \node [internal node] (node1) {1};
-            \node [internal node] (node2) {2};
-            \node [internal node] (node3) {3};
-            % Hyperedges
-            \node [hyperedge node] (hyperedgeRefBT1) {RefBT};
-            \node [hyperedge node] (hyperedgeRefBT2) {RefBT};
-            % Selector edges
-            \draw (node1) edge [selector edge] node [selector label] {left} (node2);
-            \draw (node1) edge [selector edge] node [selector label] {right} (node3);
-            % Tentacle-Edges
-            \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node2);
-            \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
-            \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node3);
-            \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
-        \end{scope}
-        % TODO: Add the other abstracted graphs
-    \end{tikzpicture}
+
+    % TODO: Add the other abstracted graphs
     % Table with debug information
     \begin{tabular}{ r | l l | l l }
         Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
@@ -93,11 +96,16 @@
 
 \newcommand{\AttestorGrammarReport}{
     \section{Grammar Rule}
-    \begin{tikzpicture}
-        \AttestorDrawHeapConfiguration{/right hand side}
-    \end{tikzpicture}
 
-    TODO
+    \begin{tikzpicture}
+        \begin{scope}[local bounding box=scope1]
+            \AttestorDrawHeapConfiguration{/left hand side}
+        \end{scope}
+        \node
+        \begin{scope}%[shift={($(scope1.east)+(1cm,0)$)}]
+            \AttestorDrawHeapConfiguration{/right hand side}
+        \end{scope}
+    \end{tikzpicture}
 }
 
 \newcommand{\AttestorHeapConfigurationReport}{
@@ -123,30 +131,33 @@
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
 \newcommand{\AttestorDrawHeapConfiguration}[1] {
     \pgfkeys{#1/nodes/.get=\nodelist}
+    \pgfkeys{#1/nonterminals/.get=\nonterminalList}
     % 1. Rendering pass: Only draw nodes correctly for the node placement algorithm (otherwise there is an issue with the edges)
-    \begin{scope}[spring layout]
+    \begin{scope}[global heap drawing settings]
         % 1. draw nodes
         \foreach \n in \nodelist {
-            \node (node\n) {\n};  % TODO: Change internal / external
+            \node [internal node] (node\n) {\n};  % TODO: Change internal / external
         }
         % 2. draw selector edges
         \foreach \source in \nodelist {
             \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
             \foreach \target in \targets {
-                \pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
-                \foreach \selectorLabel in \labels {
-                    \draw (node\source) edge [draw=none] (node\target);
-                }
+                \draw (node\source) edge [draw=none] (node\target);
             }
         }
-        % 3. draw nonterminal edges
-        
-
-
         % 3. draw nonterminals
+        \foreach \nonterminal in \nonterminalList {
+            \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
+            \node [hyperedge node] (nonterminal\nonterminal) {\nonterminalLabel};
+            \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
+            \foreach \target in \targets {
+                \draw (nonterminal\nonterminal) edge [draw=none] (node\target);
+            }
+        }
     \end{scope}
     % 2. Rendering pass: This time we draw the selectors with edge labels
 
+    % Draw selector edges
     \foreach \source in \nodelist {
         \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
         \foreach \target in \targets {
@@ -156,6 +167,15 @@
             }
         }
     }
+    % Draw nonterminal tentacles
+    \foreach \nonterminal in \nonterminalList {
+        \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
+        \foreach \target in \targets {
+            \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
+            \foreach \tentacle in \labels {
+                \draw (nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\tentacle} (node\target);
+            }
+        }
+    }
 
 }
-

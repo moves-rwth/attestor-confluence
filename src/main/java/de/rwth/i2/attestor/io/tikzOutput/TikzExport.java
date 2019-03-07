@@ -9,9 +9,12 @@ import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.main.Attestor;
+import de.rwth.i2.attestor.main.scene.SceneObject;
+import de.rwth.i2.attestor.types.GeneralType;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
@@ -133,9 +136,33 @@ public class TikzExport {
 
 
     private void addGrammarRule(String pgfPath, Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) { // TODO: Maye simple HeapConfiguration instead of CollapsedHeapConfiguration is enough
-        HeapConfiguration handle = new InternalHeapConfiguration();
-        // TODO: Create handle
-        addHeapConfiguration(pgfPath+"/left hand side", handle, "left hand side");
+
+        // Create a handle (Graph containing just the nonterminal from the lefthandside with the external edges)
+        HeapConfiguration heapConfiguration = new InternalHeapConfiguration();
+        HeapConfigurationBuilder handleBuilder = heapConfiguration.builder();
+        HeapConfiguration rhs = rightHandSide.getCollapsed();
+        TIntArrayList originalToCollapsedExternalIndices = rightHandSide.getOriginalToCollapsedExternalIndices();
+        TIntArrayList externalNodesCollapsedHC = rightHandSide.getCollapsed().externalNodes();
+        TIntArrayList handleNodes = new TIntArrayList(externalNodesCollapsedHC.size());
+        for (int handleExternalIdx = 0; handleExternalIdx < externalNodesCollapsedHC.size(); handleExternalIdx++) {
+            Type nodeType = rhs.nodeTypeOf(externalNodesCollapsedHC.get(handleExternalIdx));
+            // Add new external node to handle
+            handleBuilder.addNodes(nodeType, 1, handleNodes).setExternal(handleNodes.get(handleExternalIdx));
+        }
+        // Find all tentacles that go to this node
+        TIntArrayList attachedNodes = new TIntArrayList(leftHandSide.getRank());
+        for (int tentacleIdx = 0; tentacleIdx < leftHandSide.getRank(); tentacleIdx++) {
+            int collapsedExternalIdx;
+            if (originalToCollapsedExternalIndices == null) {
+                collapsedExternalIdx = tentacleIdx;
+            } else {
+                collapsedExternalIdx = originalToCollapsedExternalIndices.get(tentacleIdx);  // Note: External index of collapsed HC and handle is identical
+            }
+            attachedNodes.add(heapConfiguration.externalNodeAt(collapsedExternalIdx));
+        }
+        handleBuilder.addNonterminalEdge(leftHandSide, attachedNodes);
+
+        addHeapConfiguration(pgfPath+"/left hand side", handleBuilder.build(), "left hand side");
         addHeapConfiguration(pgfPath+"/right hand side", rightHandSide.getCollapsed(), "right hand side");
     }
 
@@ -155,20 +182,20 @@ public class TikzExport {
     }
 
     private void addCriticalPairDebugTable(String pgfPath, CriticalPair criticalPair) {
-        Graph jointHeapConfiguration = getGraph(criticalPair.getJointHeapConfiguration().getHeapConfiguration());
+        HeapConfiguration hc = criticalPair.getJointHeapConfiguration().getHeapConfiguration();
         StringBuilder criticalPairDebugTableEntryMacros = new StringBuilder();
-        int i = 0;
-        for (NodeGraphElement currentNode : NodeGraphElement.getNodes(jointHeapConfiguration)) {
-            i++;
-            String currentPath = pgfPath + "/entry " + String.valueOf(i);
-            pgfSingleValues.add(new Pair<>(currentPath + "/node id", String.valueOf(currentNode.getPrivateId())));
+        TIntArrayList nodes = hc.nodes();
+        pgfSingleValues.add(new Pair<>(pgfPath + "/num table entries", Integer.toString(nodes.size())));
+        for (int idx=0; idx<nodes.size(); idx++) {
+            int publicId = nodes.get(idx);
+            String currentPath = pgfPath + "/entries/" + Integer.toString(idx);
+            pgfSingleValues.add(new Pair<>(currentPath + "/node id", Integer.toString(publicId)));
             pgfSingleValues.add(new Pair<>(currentPath + "/type hc1", "TODO"));
             pgfSingleValues.add(new Pair<>(currentPath + "/type hc2", "TODO"));
             pgfSingleValues.add(new Pair<>(currentPath + "/reduc tent 1", "TODO"));
             pgfSingleValues.add(new Pair<>(currentPath + "/reduc tent 2", "TODO"));
         }
     }
-
 
     /**
      * Draws a HeapConfiguration (must already be inside a tikzpicture environment)
@@ -184,38 +211,28 @@ public class TikzExport {
         hc.nodes().forEach(publicId -> {
             Type type = hc.nodeTypeOf(publicId);
             // Add node to pgf keys
-            nodes.add(String.valueOf(publicId));
+            nodes.add(Integer.toString(publicId));
             String currentNodePath = pgfPath + "/nodes/" + publicId;
             pgfSingleValues.add(new Pair<>(currentNodePath + "/type", type.toString()));
             boolean isExternal = hc.isExternalNode(publicId);
             pgfSingleValues.add(new Pair<>(currentNodePath + "/is external", isExternal?"true":"false"));
             if (isExternal) {
-                String externalIndex = String.valueOf(hc.externalIndexOf(publicId));
+                String externalIndex = Integer.toString(hc.externalIndexOf(publicId));
                 pgfSingleValues.add(new Pair<>(currentNodePath + "/external index", externalIndex));
             }
 
             // Find all selector edges (Restructure them for easier processing)
-            Map<Integer, Collection<SelectorLabel>> targetToSelectorsMap = new HashMap<>();
+            Map<Integer, Collection<String>> targetToSelectorsMap = new HashMap<>();
             for (SelectorLabel selectorLabel : hc.selectorLabelsOf(publicId)) {
                 int selectorTarget = hc.selectorTargetOf(publicId, selectorLabel);
-                Collection<SelectorLabel> selectorsOfTarget;
-                if (targetToSelectorsMap.containsKey(selectorTarget)) {
-                    selectorsOfTarget = targetToSelectorsMap.get(selectorTarget);
-                } else {
-                    selectorsOfTarget = new ArrayList<>();
-                    targetToSelectorsMap.put(selectorTarget, selectorsOfTarget);
-                }
-                selectorsOfTarget.add(selectorLabel);
+                Collection<String> selectorsOfTarget = getFromMapDefaultEmptyCollection(targetToSelectorsMap, selectorTarget);
+                selectorsOfTarget.add(selectorLabel.getLabel());
             }
             // Add the neccessary keys for the selector edges
             Collection<String> selectorTargets = new ArrayList<>();
-            for (Integer target : targetToSelectorsMap.keySet()) {
-                selectorTargets.add(String.valueOf(target));
-                Collection<String> selectorLabels = new ArrayList<>();
-                for (SelectorLabel label : targetToSelectorsMap.get(target)) {
-                    selectorLabels.add(label.getLabel());
-                }
-                pgfListValues.add(new Pair<>(currentNodePath + "/selector/" + target, selectorLabels));
+            for (Map.Entry<Integer, Collection<String>> entry : targetToSelectorsMap.entrySet()) {
+                selectorTargets.add(Integer.toString(entry.getKey()));
+                pgfListValues.add(new Pair<>(currentNodePath + "/selector/" + entry.getKey(), entry.getValue()));
             }
             pgfListValues.add(new Pair<>(currentNodePath + "/selector targets", selectorTargets));
             // Continue with the other nodes
@@ -230,19 +247,39 @@ public class TikzExport {
             Nonterminal nonterminal = hc.labelOf(publicId);
             int rank = nonterminal.getRank();
             // Add nonterminal to pgf keys
-            nonterminals.add(String.valueOf(publicId));
-            String currentNodePath = pgfPath + "/nonterminals/" + publicId;
-            pgfSingleValues.add(new Pair<>(currentNodePath + "/label", nonterminal.getLabel()));
-            pgfSingleValues.add(new Pair<>(currentNodePath + "/rank", String.valueOf(rank)));
+            nonterminals.add(Integer.toString(publicId));
+            String currentNonterminalPath = pgfPath + "/nonterminals/" + publicId;
+            pgfSingleValues.add(new Pair<>(currentNonterminalPath + "/label", nonterminal.getLabel()));
+            pgfSingleValues.add(new Pair<>(currentNonterminalPath + "/rank", Integer.toString(rank)));
             // Add tentacle edges
+            Map<Integer, Collection<String>> attachedNodeToTentacleList = new HashMap<>();
             TIntArrayList attachedNodes = hc.attachedNodesOf(publicId);
-            for (int i=0; i<rank; i++) {
-                String tentacleDestination = String.valueOf(attachedNodes.get(i));
-                pgfSingleValues.add(new Pair<>(currentNodePath + "/tentacles/" + i, tentacleDestination));
+            for (int idx=0; idx<rank; idx++) {
+                int attachedNode = attachedNodes.get(idx);
+                Collection<String> tentacleList = getFromMapDefaultEmptyCollection(attachedNodeToTentacleList, attachedNode);
+                tentacleList.add(Integer.toString(idx));
             }
+            Collection<String> tentacleTargets = new ArrayList<>();
+            for (Map.Entry<Integer, Collection<String>> entry : attachedNodeToTentacleList.entrySet()) {
+                tentacleTargets.add(Integer.toString(entry.getKey()));
+                pgfListValues.add(new Pair<>(currentNonterminalPath + "/tentacles/" + entry.getKey(), entry.getValue()));
+            }
+            pgfListValues.add(new Pair<>(currentNonterminalPath + "/tentacle targets", tentacleTargets));
+            // Continue with the other nonterminals
             return true;
         });
         pgfListValues.add(new Pair<>(pgfPath + "/nonterminals", nonterminals));
+    }
+
+    private Collection<String> getFromMapDefaultEmptyCollection(Map<Integer, Collection<String>> map, Integer key) {
+        Collection<String> selectorsOfTarget;
+        if (map.containsKey(key)) {
+            selectorsOfTarget = map.get(key);
+        } else {
+            selectorsOfTarget = new ArrayList<>();
+            map.put(key, selectorsOfTarget);
+        }
+        return selectorsOfTarget;
     }
 
 
