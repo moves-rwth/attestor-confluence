@@ -58,7 +58,7 @@ public class EdgeGraphElement extends GraphElement {
     }
 
     public static Collection<EdgeGraphElement> getEdgesOfGraph(Graph graph) {
-        Collection<EdgeGraphElement> result = new ArrayList<>();
+        Collection<EdgeGraphElement> result = new HashSet<>();
         for (int privateId = 0; privateId < graph.size(); privateId++) {
             NodeLabel label = graph.getNodeLabel(privateId);
             if (label instanceof Nonterminal) {
@@ -67,7 +67,7 @@ public class EdgeGraphElement extends GraphElement {
             } else if (label instanceof Type) {
                 // The current privateId is a node. Check if there are any outgoing selectors
                 final int finalPrivateId = privateId; // variable must be final to be used in lambda expression later
-                graph.getSuccessorsOf(privateId).forEach(successor -> {
+                graph.getSuccessorsOf(privateId).forEach(successor -> {  // TODO: The successors must not be unique (if multiple outgoin edges)
                     for (Object edgeLabel : graph.getEdgeLabel(finalPrivateId, successor)) {
                         if (edgeLabel instanceof SelectorLabel) {
                             // There is a selector from privateId to successor

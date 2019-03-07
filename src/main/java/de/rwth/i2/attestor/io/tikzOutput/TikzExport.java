@@ -180,7 +180,7 @@ public class TikzExport {
         for (NodeGraphElement nodeGraphElement : NodeGraphElement.getNodes(graph)) {
             int privateId = nodeGraphElement.getPrivateId();
             nodes.add(String.valueOf(privateId));
-            String currentPath = pgfPath + "/nodes/" + String.valueOf(privateId);
+            String currentPath = pgfPath + "/nodes/" + privateId;
             Type nodeType = (Type) graph.getNodeLabel(nodeGraphElement.getPrivateId());
             pgfSingleValues.add(new Pair<>(currentPath + "/type", nodeType.toString()));
             boolean isExternal = graph.isExternal(nodeGraphElement.getPrivateId());
@@ -194,7 +194,7 @@ public class TikzExport {
 
         int selectorNumber = 0;
         Collection<String> nonterminals = new ArrayList<>();
-        for (EdgeGraphElement currentEdge : EdgeGraphElement.getEdgesOfGraph(getGraph(hc))) {
+        for (EdgeGraphElement currentEdge : EdgeGraphElement.getEdgesOfGraph(graph)) {
             if (currentEdge.isSelector()) {
                 selectorNumber++;
                 String currentPath = pgfPath + "/selectors/" + selectorNumber;
@@ -223,23 +223,24 @@ public class TikzExport {
     }
 
     private void writeCurrentReportToFile(String reportCommand) throws IOException {
-        String indent = "  \\pgfkeyssetvalue{/test key/}{test}";
+        String indent = "    ";
+        String lineSeparator = "%" + System.lineSeparator();
         StringBuilder result = new StringBuilder();
         // Start new scope
-        result.append('{').append(System.lineSeparator());
+        result.append('{').append(lineSeparator);
 
         for (Pair<String, String> pgfKeyPair : pgfSingleValues) {
-            result.append("  \\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
-                    .append(pgfKeyPair.second()).append('}').append(System.lineSeparator());
+            result.append(indent).append("\\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
+                    .append(pgfKeyPair.second()).append('}').append(lineSeparator);
         }
 
         for (Pair<String, Collection<String>> pgfKeyPair : pgfListValues) {
-            result.append("  \\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
-                    .append(String.join(",", pgfKeyPair.second())).append('}').append(System.lineSeparator());
+            result.append(indent).append("\\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
+                    .append(String.join(",", pgfKeyPair.second())).append('}').append(lineSeparator);
         }
 
-        result.append("  ").append(reportCommand).append(System.lineSeparator())
-                .append('}').append(System.lineSeparator());
+        result.append(indent).append(reportCommand).append(lineSeparator)
+                .append('}').append(lineSeparator);
         writer.append(result);
     }
 

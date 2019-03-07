@@ -41,14 +41,87 @@
 
 % TODO: Define macros
 
-\newcommand{\AttestorCriticalPairReport}{
+% Global style settings
+\tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
+    external node/.style={draw,circle,double},
+    internal node/.style={draw,circle},
+    selector edge/.style={red,->,thick},
+    selector label/.style={auto},
+    hyperedge node/.style={draw,green,rectangle},
+    hyperedge tentacle/.style={blue,thick},
+    hyperedge tentacle label/.style={auto}
+}
 
+
+\newcommand{\AttestorCriticalPairReport}{
+    \section{Critical Pair}  % TODO: Enumerate the critical pairs
+    Strongly joinable  % TODO: Replace with joinability result
+    \label{sec:criticalpair:1}
+    % Graph drawing
+    \begin{tikzpicture}[spring layout]
+        \begin{scope}
+            % Nodes
+            \node [external node] (node0) {0};
+            \node [internal node] (node1) {1};
+            \node [internal node] (node2) {2};
+            \node [internal node] (node3) {3};
+            % Hyperedges
+            \node [hyperedge node] (hyperedgeRefBT1) {RefBT};
+            \node [hyperedge node] (hyperedgeRefBT2) {RefBT};
+            % Selector edges
+            \draw (node1) edge [selector edge] node [selector label] {left} (node2);
+            \draw (node1) edge [selector edge] node [selector label] {right} (node3);
+            % Tentacle-Edges
+            \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node2);
+            \draw (hyperedgeRefBT1) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
+            \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {0} (node3);
+            \draw (hyperedgeRefBT2) edge [hyperedge tentacle] node [hyperedge tentacle label] {1} (node0);
+        \end{scope}
+        % TODO: Add the other abstracted graphs
+    \end{tikzpicture}
+    % Table with debug information
+    \begin{tabular}{ r | l l | l l }
+        Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
+        \hline
+        1 & NULL  & NULL  & N/A  & False \\
+        2 & type1 & type1 & True & False \\
+        3 & NULL  & type1 & N/A  & False \\
+        4 & type2 & NULL  & N/A  & True  \\
+        5 & NULL  & NULL  & N/A  & False \\
+    \end{tabular}
 }
 
 \newcommand{\AttestorGrammarReport}{
-
+    \section{Grammar Rule}
+    \begin{tikzpicture}[spring layout]
+        \AttestorDrawHeapConfiguration{/right hand side}
+    \end{tikzpicture}
+    TODO
 }
 
 \newcommand{\AttestorHeapConfigurationReport}{
-
+    \section{Heap Configuration}
+    TODO
 }
+
+% HELPER MACROS
+
+
+% #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
+\newcommand{\AttestorDrawHeapConfiguration}[1] {
+    % 1. draw nodes
+    \pgfkeys{#1/nodes/.get=\nodelist}
+    \foreach \n in \nodelist {
+        \node [internal node] (node\n) {\n};  % TODO: Change internal / external
+    }
+    % 2. draw selector edges
+    \pgfkeys{#1/num selectors/.get=\NumSelectors}
+    \foreach \i in {1,...,\NumSelectors} {
+        \pgfkeys{#1/selectors/\i/from/.get=\from}
+        \pgfkeys{#1/selectors/\i/to/.get=\to}
+        \pgfkeys{#1/selectors/\i/label/.get=\label}
+        \draw (node\from) edge [selector edge] node [selector label] {X} (node\to);
+    }
+    % 3. draw nonterminals
+}
+
