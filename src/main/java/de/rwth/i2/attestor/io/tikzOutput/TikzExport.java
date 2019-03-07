@@ -12,12 +12,14 @@ import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.main.Attestor;
+import de.rwth.i2.attestor.types.Type;
+import de.rwth.i2.attestor.util.Pair;
+import gnu.trove.list.array.TIntArrayList;
 import jdk.nashorn.api.scripting.URLReader;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * All public methods should be inside a try / catch block and call finishExport() in a finally block
@@ -32,10 +34,11 @@ import java.util.Collection;
  */
 public class TikzExport {
     private BufferedWriter writer;
-    private int indentLevel = 0;  // The current indentation level
-    private int indentSpaces = 2; // The number of spaces per indentation level
     private int currentReportElementId = 0;
     // TODO: Chat that character encoding works on every platform
+    private Collection<Pair<String, String>> pgfSingleValues;
+    private Collection<Pair<String, Collection<String>>> pgfListValues;
+    private final String BASE_PATH = "";
 
     // TODO: Remove this test method
     public static void main(String args[]) {
@@ -80,221 +83,164 @@ public class TikzExport {
     }
 
     public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
+        // Start new scope
         for (CriticalPair criticalPair : criticalPairs) {
             currentReportElementId++;
-            writer.append(getCriticalPairMacro(criticalPair));
+            pgfSingleValues = new ArrayList<>();
+            pgfListValues = new ArrayList<>();
+            addCriticalPair(BASE_PATH, criticalPair);
+            writeCurrentReportToFile("\\AttestorCriticalPairReport");
         }
+        pgfSingleValues = null;
+        pgfListValues = null;
     }
 
     public void exportGrammar(Grammar grammar, boolean exportCollapsedRules) throws IOException {
         for (Nonterminal nonterminal : grammar.getAllLeftHandSides()) {
             for (HeapConfiguration heapConfiguration : grammar.getRightHandSidesFor(nonterminal)) {
                 currentReportElementId++;
+                pgfSingleValues = new ArrayList<>();
+                pgfListValues = new ArrayList<>();
                 CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(heapConfiguration, heapConfiguration, null);
-                writer.append(getGrammarRuleMacro(nonterminal, collapsedHeapConfiguration));
+                addGrammarRule(BASE_PATH, nonterminal, collapsedHeapConfiguration);
+                writeCurrentReportToFile("\\AttestorGrammarReport");
             }
             if (exportCollapsedRules) {
                 for (CollapsedHeapConfiguration collapsedHeapConfiguration : grammar.getCollapsedRightHandSidesFor(nonterminal)) {
                     currentReportElementId++;
-                    writer.append(getGrammarRuleMacro(nonterminal, collapsedHeapConfiguration));
+                    pgfSingleValues = new ArrayList<>();
+                    pgfListValues = new ArrayList<>();
+                    addGrammarRule(BASE_PATH, nonterminal, collapsedHeapConfiguration);
+                    writeCurrentReportToFile("\\AttestorGrammarReport");
                 }
             }
         }
+        pgfSingleValues = null;
+        pgfListValues = null;
     }
 
     public void exportHeapConfigurations(Collection<HeapConfiguration> heapConfigurations) throws IOException {
         for (HeapConfiguration hc : heapConfigurations) {
             currentReportElementId++;
-            writer.append(getStandaloneHeapConfigurationMacro(hc));
+            pgfSingleValues = new ArrayList<>();
+            pgfListValues = new ArrayList<>();
+            addHeapConfiguration(BASE_PATH, hc, "standalone");
+            writeCurrentReportToFile("\\AttestorHeapConfigurationReport");
         }
+        pgfSingleValues = null;
+        pgfListValues = null;
     }
 
 
-
-
-
-    private StringBuilder getStandaloneHeapConfigurationMacro(HeapConfiguration heapConfiguration) {
-        final String macroCommand = "standalone heap configuration";
-        indentLevel++;
-        String reportElementId = String.valueOf(currentReportElementId);
-        StringBuilder heapConfigurationMacro = getHeapConfigurationMacro(heapConfiguration);
-        indentLevel--;
-        return macroBuilder(macroCommand, reportElementId, heapConfigurationMacro);
-    }
-
-    private StringBuilder getGrammarRuleMacro(Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) { // TODO: Maye simple HeapConfiguration instead of CollapsedHeapConfiguration is enough
-        final String macroCommand = "grammar rule";
-        indentLevel++;
-        String reportElementId = String.valueOf(currentReportElementId);
-        StringBuilder leftHandSideMacro = getLeftHandSideMacro(leftHandSide);
-        StringBuilder rightHandSideMacro = getRightHandSideMacro(rightHandSide);
-        indentLevel--;
-        return macroBuilder(macroCommand, reportElementId, leftHandSideMacro, rightHandSideMacro);
-    }
-
-    private StringBuilder getLeftHandSideMacro(Nonterminal nonterminal) {
-        final String macroCommand = "left hand side";
+    private void addGrammarRule(String pgfPath, Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) { // TODO: Maye simple HeapConfiguration instead of CollapsedHeapConfiguration is enough
         HeapConfiguration handle = new InternalHeapConfiguration();
         // TODO: Create handle
-        indentLevel++;
-        StringBuilder handleMacro = getHeapConfigurationMacro(handle);
-        indentLevel--;
-        return macroBuilder(macroCommand, handleMacro);
+        addHeapConfiguration(pgfPath+"/left hand side", handle, "left hand side");
+        addHeapConfiguration(pgfPath+"/right hand side", rightHandSide.getCollapsed(), "right hand side");
     }
 
-    private StringBuilder getRightHandSideMacro(CollapsedHeapConfiguration rightHandSide) {
-        final String macroCommand = "right hand side";
-        indentLevel++;
-        StringBuilder rightHandSideMacro = getHeapConfigurationMacro(rightHandSide.getCollapsed());
-        indentLevel--;
-        return macroBuilder(macroCommand, rightHandSideMacro);
+    private void addCriticalPair(String pgfPath, CriticalPair criticalPair) {
+        pgfSingleValues.add(new Pair<>(pgfPath + "/joinability result", criticalPair.getJoinability().toString()));
+        // TODO: Set ruleId
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1 id", "TODO"));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2 id", "TODO"));
+        addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
+
+        JointHeapConfiguration jointHeapConfiguration = criticalPair.getJointHeapConfiguration();
+        addHeapConfiguration(pgfPath + "/joint graph", jointHeapConfiguration.getHeapConfiguration(), "joint graph");
+        addHeapConfiguration(pgfPath + "/applied rule 1", jointHeapConfiguration.getRule1Applied(), "applied rule 1");
+        addHeapConfiguration(pgfPath + "/applied rule 2", jointHeapConfiguration.getRule2Applied(), "applied rule 1");
+        addHeapConfiguration(pgfPath + "/canonical 1", jointHeapConfiguration.getCanonical1(), "canonical 1");
+        addHeapConfiguration(pgfPath + "/canonical 2", jointHeapConfiguration.getCanonical2(), "canonical 2");
     }
 
-
-    private StringBuilder getCriticalPairMacro(CriticalPair criticalPair) {
-        final String macroCommand = "critical pair";
-        indentLevel++;
-        String reportElementId = String.valueOf(currentReportElementId);
-        String joinabilityResult = criticalPair.getJoinability().toString();
-        StringBuilder criticalPairDebugTable = getCriticalPairDebugTableMacro(criticalPair);
-        StringBuilder jointGraph = getHeapConfigurationMacro(criticalPair.getJointHeapConfiguration().getHeapConfiguration());
-        StringBuilder appliedRule1 = getHeapConfigurationMacro(criticalPair.getJointHeapConfiguration().getRule1Applied());
-        StringBuilder appliedRule2 = getHeapConfigurationMacro(criticalPair.getJointHeapConfiguration().getRule2Applied());
-        StringBuilder canonical1 = getHeapConfigurationMacro(criticalPair.getJointHeapConfiguration().getCanonical1());
-        StringBuilder canonical2 = getHeapConfigurationMacro(criticalPair.getJointHeapConfiguration().getCanonical2());
-        String rule1ID = "TODO";
-        String rule2ID = "TODO";
-        indentLevel--;
-        return macroBuilder(macroCommand, reportElementId, joinabilityResult, rule1ID, rule2ID, jointGraph, appliedRule1, appliedRule2, canonical1, canonical2, criticalPairDebugTable);
-    }
-
-    private StringBuilder getCriticalPairDebugTableMacro(CriticalPair criticalPair) {
+    private void addCriticalPairDebugTable(String pgfPath, CriticalPair criticalPair) {
         Graph jointHeapConfiguration = getGraph(criticalPair.getJointHeapConfiguration().getHeapConfiguration());
-        final String macroCommand = "critical pair debug table";
-        indentLevel++;
         StringBuilder criticalPairDebugTableEntryMacros = new StringBuilder();
+        int i = 0;
         for (NodeGraphElement currentNode : NodeGraphElement.getNodes(jointHeapConfiguration)) {
-            criticalPairDebugTableEntryMacros.append(getCriticalPairDebugTableEntryMacro(criticalPair.getJointHeapConfiguration(), currentNode));
+            i++;
+            String currentPath = pgfPath + "/entry " + String.valueOf(i);
+            pgfSingleValues.add(new Pair<>(currentPath + "/node id", String.valueOf(currentNode.getPrivateId())));
+            pgfSingleValues.add(new Pair<>(currentPath + "/type hc1", "TODO"));
+            pgfSingleValues.add(new Pair<>(currentPath + "/type hc2", "TODO"));
+            pgfSingleValues.add(new Pair<>(currentPath + "/reduc tent 1", "TODO"));
+            pgfSingleValues.add(new Pair<>(currentPath + "/reduc tent 2", "TODO"));
         }
-        indentLevel--;
-        return macroBuilder(macroCommand, criticalPairDebugTableEntryMacros);
     }
-
-    private StringBuilder getCriticalPairDebugTableEntryMacro(JointHeapConfiguration jointHeapConfiguration, NodeGraphElement nodeJointGraph) {
-        final String macroCommand = "critical pair debug table entry";
-        String nodeId = String.valueOf(nodeJointGraph.getPrivateId());
-        String typeHC1 = "TODO";
-        String typeHC2 = "TODO";
-        String reductionTentacle1 = "TODO";
-        String reductionTentacle2 = "TODO";
-        return macroBuilder(macroCommand, nodeId, typeHC1, typeHC2, reductionTentacle1, reductionTentacle2);
-    }
-
-
 
 
     /**
      * Draws a HeapConfiguration (must already be inside a tikzpicture environment)
      */
-    private StringBuilder getHeapConfigurationMacro(HeapConfiguration hc) {
-        final String macroCommand = "heap configuration";
+    private void addHeapConfiguration(String pgfPath, HeapConfiguration hc, String reportStep) {
         Graph graph = getGraph(hc);
-        indentLevel++;
-        StringBuilder nodes = new StringBuilder();
-        for (NodeGraphElement currentNode : NodeGraphElement.getNodes(getGraph(hc))) {
-            nodes.append(getNodeMacro(graph, currentNode));
+
+        Collection<String> nodes = new ArrayList<>();
+        for (NodeGraphElement nodeGraphElement : NodeGraphElement.getNodes(graph)) {
+            int privateId = nodeGraphElement.getPrivateId();
+            nodes.add(String.valueOf(privateId));
+            String currentPath = pgfPath + "/nodes/" + String.valueOf(privateId);
+            Type nodeType = (Type) graph.getNodeLabel(nodeGraphElement.getPrivateId());
+            pgfSingleValues.add(new Pair<>(currentPath + "/type", nodeType.toString()));
+            boolean isExternal = graph.isExternal(nodeGraphElement.getPrivateId());
+            pgfSingleValues.add(new Pair<>(currentPath + "/is external", isExternal?"true":"false"));
+            if (isExternal) {
+                pgfSingleValues.add(new Pair<>(currentPath + "/external index", String.valueOf(graph.getExternalIndex(privateId))));
+            }
         }
-        StringBuilder selectorEdgeMacros = new StringBuilder();
-        StringBuilder hyperedgeMacros = new StringBuilder();
-        StringBuilder hyperedgeTentacleMacros = new StringBuilder();
+        pgfListValues.add(new Pair<>(pgfPath+ "/nodes", nodes));
+
+
+        int selectorNumber = 0;
+        Collection<String> nonterminals = new ArrayList<>();
         for (EdgeGraphElement currentEdge : EdgeGraphElement.getEdgesOfGraph(getGraph(hc))) {
             if (currentEdge.isSelector()) {
-                // Selector edge
-                selectorEdgeMacros.append(getSelectorEdgeMacro(graph, currentEdge));
+                selectorNumber++;
+                String currentPath = pgfPath + "/selectors/" + selectorNumber;
+                pgfSingleValues.add(new Pair<>(currentPath + "/from", String.valueOf(currentEdge.getPrivateId())));
+                String selectorDestination = String.valueOf(currentEdge.getConnectedNodes(graph).get(1).getPrivateId());
+                pgfSingleValues.add(new Pair<>(currentPath + "/to", selectorDestination));
+                pgfSingleValues.add(new Pair<>(currentPath + "/label", currentEdge.getSelectorLabel()));
             } else {
                 // Nonterminal edge TODO: set "isNew" argument correctly
-                hyperedgeMacros.append(getNonterminalMacro(graph, currentEdge, false));
-                int rank = graph.getSuccessorsOf(currentEdge.getPrivateId()).size();
+                int privateId = currentEdge.getPrivateId();
+                String currentPath = pgfPath + "/nonterminals/" + privateId;
+                nonterminals.add(String.valueOf(privateId));
+                int rank = graph.getSuccessorsOf(privateId).size();
+                pgfSingleValues.add(new Pair<>(currentPath + "/rank", String.valueOf(rank)));
+                Nonterminal nonterminal = (Nonterminal) graph.getNodeLabel(privateId);
+                pgfSingleValues.add(new Pair<>(currentPath + "/label", nonterminal.getLabel()));
+                TIntArrayList successors = graph.getSuccessorsOf(privateId);
                 for (int i=0; i<rank; i++) {
-                    hyperedgeTentacleMacros.append(getTentacleEdgeMacro(graph, currentEdge, i));
+                    String successor = String.valueOf(successors.get(i));
+                    pgfSingleValues.add(new Pair<>(currentPath + "/tentacle/" + i, successor));
                 }
             }
         }
-        indentLevel--;
-        return macroBuilder(macroCommand, nodes, selectorEdgeMacros, hyperedgeMacros, hyperedgeTentacleMacros);
+        pgfSingleValues.add(new Pair<>(pgfPath + "/num selectors", String.valueOf(selectorNumber)));
+        pgfListValues.add(new Pair<>(pgfPath + "/nonterminals", nonterminals));
     }
 
-    private StringBuilder getSelectorEdgeMacro(Graph graph, EdgeGraphElement selectorEdge) {
-        final String macroCommand = "selector edge";
-        String sourceNode = String.valueOf(selectorEdge.getPrivateId());
-        String selectorLabel = selectorEdge.getSelectorLabel();  // TODO: Remove invalid characters. Only a-zA-Z0-9 allowed
-        return macroBuilder(macroCommand, sourceNode, selectorLabel);
-    }
+    private void writeCurrentReportToFile(String reportCommand) throws IOException {
+        String indent = "  \\pgfkeyssetvalue{/test key/}{test}";
+        StringBuilder result = new StringBuilder();
+        // Start new scope
+        result.append('{').append(System.lineSeparator());
 
-    private StringBuilder getTentacleEdgeMacro(Graph graph, EdgeGraphElement nonterminal, int tentacleIdx) {
-        final String macroCommand = "tentacle edge";
-        String nonterminalId = String.valueOf(nonterminal.getPrivateId());
-        String tentacleIdxString = String.valueOf(tentacleIdx);
-        return macroBuilder(macroCommand, nonterminalId, tentacleIdxString);
-    }
-
-    private StringBuilder getNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
-        if (graph.isExternal(nodeGraphElement.getPrivateId())) {
-            return getExternalNodeMacro(graph, nodeGraphElement);
-        } else {
-            return getInternalNodeMacro(graph, nodeGraphElement);
+        for (Pair<String, String> pgfKeyPair : pgfSingleValues) {
+            result.append("  \\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
+                    .append(pgfKeyPair.second()).append('}').append(System.lineSeparator());
         }
-    }
 
-    private StringBuilder getExternalNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
-        final String macroCommand = "external node";
-        String externalIndex = String.valueOf(graph.getExternalIndex(nodeGraphElement.getPrivateId()));
-        String nodeId = String.valueOf(nodeGraphElement.getPrivateId());
-        return macroBuilder(macroCommand, nodeId, externalIndex);
-    }
-
-    private StringBuilder getInternalNodeMacro(Graph graph, NodeGraphElement nodeGraphElement) {
-        final String macroCommand = "internal node";
-        String nodeId = String.valueOf(nodeGraphElement.getPrivateId());
-        return macroBuilder(macroCommand, nodeId);
-    }
-
-    private StringBuilder getNonterminalMacro(Graph graph, EdgeGraphElement nonterminal, boolean isNew) {
-        String macroCommand;
-        if (isNew) {
-            macroCommand = "new nonterminal";
-        } else {
-            macroCommand = "old nonterminal";
+        for (Pair<String, Collection<String>> pgfKeyPair : pgfListValues) {
+            result.append("  \\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
+                    .append(String.join(",", pgfKeyPair.second())).append('}').append(System.lineSeparator());
         }
-        String nonterminalId = String.valueOf(nonterminal.getPrivateId());
-        Nonterminal nonterminalLabel = (Nonterminal) graph.getNodeLabel(nonterminal.getPrivateId());
-        String nonterminalName = nonterminalLabel.getLabel();
-        return macroBuilder(macroCommand, nonterminalId, nonterminalName);
-    }
 
-
-
-    private StringBuilder macroBuilder(String macroCommand, CharSequence... arguments) {
-        // TODO: No new line for simple String arguments. If only strings put whole macro in one line
-        char[] indentationSpaces = new char[indentLevel*indentSpaces];
-        Arrays.fill(indentationSpaces, ' ');
-        StringBuilder result = new StringBuilder().append(indentationSpaces).append("\\pgfkeys{/attestor export/").append(macroCommand).append('=');
-        int i=0;
-        for (CharSequence arg : arguments) {
-            i++;
-            if (arg instanceof String || arg.length() == 0) {
-                // We assume that Strings are small enough to be printed in one line
-                result.append('{').append(arg).append('}');
-            } else {
-                // All other CharSequences are probably longer and are therefore printed in new lines
-                result.append(System.lineSeparator()).append(indentationSpaces).append('{')
-                        .append(" % ").append(macroCommand).append(" arg #").append(i).append(System.lineSeparator())
-                        .append(arg)
-                        .append(indentationSpaces).append('}');
-            }
-
-        }
-        return result.append('}').append(System.lineSeparator());
+        result.append("  ").append(reportCommand).append(System.lineSeparator())
+                .append('}').append(System.lineSeparator());
+        writer.append(result);
     }
 
     private Graph getGraph(HeapConfiguration hc) {

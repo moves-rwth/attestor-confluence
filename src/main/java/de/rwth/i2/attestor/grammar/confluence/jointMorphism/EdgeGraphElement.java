@@ -20,7 +20,7 @@ public class EdgeGraphElement extends GraphElement {
      *
      * @param graph  A graph in which this object must be an edge.
      */
-    List<NodeGraphElement> getConnectedNodes(Graph graph) {
+    public List<NodeGraphElement> getConnectedNodes(Graph graph) {
         List<NodeGraphElement> result = new ArrayList<>();
         String selectorLabel = getSelectorLabel();
         int privateId = getPrivateId();

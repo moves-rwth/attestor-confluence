@@ -41,63 +41,14 @@
 
 % TODO: Define macros
 
-% #1=reportElementId, #2=leftHandSide, #3=rightHandSide
-\pgfkeys{/attestor export/grammar rule/.code n args={3}{
-    Test
-}}
+\newcommand{\AttestorCriticalPairReport}{
 
-% #1=reportElementId, #2=heapConfiguration
-\pgfkeys{/attestor export/standalone heap configuration/.code n args={2}{
+}
 
-}}
+\newcommand{\AttestorGrammarReport}{
 
-% #1=handle
-\pgfkeys{/attestor export/left hand side/.code n args={1}{
+}
 
-}}
+\newcommand{\AttestorHeapConfigurationReport}{
 
-% #1=rightHandSide
-\pgfkeys{/attestor export/right hand side/.code n args={1}{
-
-}}
-
-% #1=reportElementId, #2=joinabilityResult, #3=rule1ID, #4=rule2ID, #5=jointGraph, #6=appliedRule1, #7=appliedRule2, #8=canonical1, #9=canonical2, #10=criticalPairDebugTable
-\pgfkeys{/attestor export/critical pair/.code n args={10}{
-
-}}
-
-% #1=criticalPairDebugTableEntries
-\pgfkeys{/attestor export/critical pair debug table/.code n args={1}{
-
-}}
-
-% #1=nodeId, #2=typeHC1, #3=typeHC2, #4=reductionTentacle1, #5=reductionTentacle2
-\pgfkeys{/attestor export/critical pair debug table entry/.code n args={5}{
-
-}}
-
-% #1=nodes, #2=selectorEdgeMacros, #3=hyperedgeMacros, #4=hyperedgeTentacleMacros
-\pgfkeys{/attestor export/heap configuration/.code n args={4}{
-
-}}
-
-% #1=sourceNode, #2=selectorLabel
-\pgfkeys{/attestor export/selector edge/.code n args={2}{
-
-}}
-
-% #1=nonterminalId, #2=tentacleIdxString
-\pgfkeys{/attestor export/tentacle edge/.code n args={2}{
-
-}}
-
-% #1=nodeId, #2=externalIndex
-\pgfkeys{/attestor export/external node/.code n args={2}{
-
-}}
-
-% #1=nodeId
-\pgfkeys{/attestor export/internal node/.code n args={1}{
-
-}}
-
+}
