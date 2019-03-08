@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationStrategy;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.digraph.NodeLabel;
@@ -25,17 +26,19 @@ public class JointHeapConfiguration {
     private final HeapConfiguration jointHeapConfiguration;
     private final Matching matching1, matching2;
     private final Nonterminal nt1, nt2;
+    private final CanonicalizationStrategy canonicalizationStrategy;
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
      * The overlapping is specified by nodeOverlapping and edgeOverlapping.
      */
-    public JointHeapConfiguration(EdgeOverlapping edgeOverlapping, NodeOverlapping nodeOverlapping, Nonterminal nt1, Nonterminal nt2) {
+    public JointHeapConfiguration(EdgeOverlapping edgeOverlapping, NodeOverlapping nodeOverlapping, Nonterminal nt1, Nonterminal nt2, CanonicalizationStrategy canonicalizationStrategy) {
         context = nodeOverlapping.getContext();
         this.nt1 = nt1;
         this.nt2 = nt2;
         Graph graph1 = context.getGraph1();
         Graph graph2 = context.getGraph2();
+        this.canonicalizationStrategy = canonicalizationStrategy;
         // Create a new HeapConfigurationBuilder (by using getEmpty() on one of the existing heap configurations
         //     we are independent of the InternalHeapConfiguration class)
         HeapConfigurationBuilder builder = context.getHc1().getEmpty().builder();
@@ -225,13 +228,11 @@ public class JointHeapConfiguration {
     }
 
     public HeapConfiguration getCanonical1() {
-        // TODO
-        return null;
+        return canonicalizationStrategy.canonicalize(this.getRule1Applied());
     }
 
     public HeapConfiguration getCanonical2() {
-        // TODO
-        return null;
+        return canonicalizationStrategy.canonicalize(this.getRule2Applied());
     }
 
     private HeapConfiguration applyMatching(Nonterminal nt, Matching matching, TIntArrayList externalIndicesMap) {
@@ -245,5 +246,4 @@ public class JointHeapConfiguration {
                     .build();
         }
     }
-
 }

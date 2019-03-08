@@ -118,14 +118,14 @@ public class CriticalPairFinder {
                     // Check that the rule applications are not independent (They should share at least one internal node)
                     if (!nodeOverlapping.isNodeOverlappingIndependent()) {
                         // 1. Compute the joint graph
-                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping, nt1, nt2);
+                        JointHeapConfiguration jointHeapConfiguration = new JointHeapConfiguration(edgeOverlapping, nodeOverlapping, nt1, nt2, canonicalizationStrategy);
                         HeapConfiguration hc = jointHeapConfiguration.getHeapConfiguration();
 
                         // 2. Compute fully abstracted heap configuration (apply r1 first)
-                        HeapConfiguration fullyAbstracted1 = canonicalizationStrategy.canonicalize(jointHeapConfiguration.getRule1Applied());
+                        HeapConfiguration fullyAbstracted1 = jointHeapConfiguration.getCanonical1();
 
                         // 3. Compute fully abstracted heap configuration (apply r2 first)
-                        HeapConfiguration fullyAbstracted2 = canonicalizationStrategy.canonicalize(jointHeapConfiguration.getRule2Applied());
+                        HeapConfiguration fullyAbstracted2 = jointHeapConfiguration.getCanonical2();
 
                         // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
                         CriticalPair.Joinability joinability = null;

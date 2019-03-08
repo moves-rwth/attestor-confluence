@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.io.tikzOutput;
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
+import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeGraphElement;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
@@ -42,18 +43,6 @@ public class TikzExport {
     private Collection<Pair<String, String>> pgfSingleValues;
     private Collection<Pair<String, Collection<String>>> pgfListValues;
     private final String BASE_PATH = "";
-
-    // TODO: Remove this test method
-    public static void main(String args[]) {
-        Grammar grammar = ConfluenceTool.parseGrammar("BT");
-        try {
-            TikzExport exporter = new TikzExport("test.tex");
-            exporter.exportGrammar(grammar, true);
-            exporter.finishExport();
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-    }
 
     public TikzExport(String destinationLocation) throws IOException {
         writer = new BufferedWriter(new FileWriter(destinationLocation));

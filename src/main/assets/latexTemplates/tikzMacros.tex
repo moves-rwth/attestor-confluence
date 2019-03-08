@@ -81,17 +81,23 @@
     \section{Critical Pair}  % TODO: Enumerate the critical pairs
     Strongly joinable  % TODO: Replace with joinability result
 
+    \begin{tabular}{cc}
+        \multicolumn{2}{c}{\AttestorDrawHeapConfiguration{/joint graph}}\\
+        \AttestorDrawHeapConfiguration{/applied rule 1} & \AttestorDrawHeapConfiguration{/applied rule 2}\\
+        \AttestorDrawHeapConfiguration{/canonical 1} & \AttestorDrawHeapConfiguration{/canonical 2}\\
+    \end{tabular}
+
     % TODO: Add the other abstracted graphs
     % Table with debug information
-    \begin{tabular}{ r | l l | l l }
-        Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
-        \hline
-        1 & NULL  & NULL  & N/A  & False \\
-        2 & type1 & type1 & True & False \\
-        3 & NULL  & type1 & N/A  & False \\
-        4 & type2 & NULL  & N/A  & True  \\
-        5 & NULL  & NULL  & N/A  & False \\
-    \end{tabular}
+    %\begin{tabular}{ r | l l | l l }
+    %    Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
+    %    \hline
+    %    1 & NULL  & NULL  & N/A  & False \\
+    %    2 & type1 & type1 & True & False \\
+    %    3 & NULL  & type1 & N/A  & False \\
+    %    4 & type2 & NULL  & N/A  & True  \\
+    %    5 & NULL  & NULL  & N/A  & False \\
+    %\end{tabular}
 }
 
 \newcommand{\AttestorGrammarReport}{
