@@ -27,8 +27,8 @@ public class Temp {
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         try {
             TikzExport exporter = new TikzExport("test.tex");
-            //exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs());
-            //exporter.createPageBreak();
+            exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs());
+            exporter.createPageBreak();
             exporter.exportGrammar(grammar, true);
             exporter.finishExport();
         } catch (IOException exception) {

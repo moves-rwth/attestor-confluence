@@ -82,9 +82,9 @@
     Strongly joinable  % TODO: Replace with joinability result
 
     \begin{tabular}{cc}
-        \multicolumn{2}{c}{\AttestorDrawHeapConfiguration{/joint graph}}\\
-        \AttestorDrawHeapConfiguration{/applied rule 1} & \AttestorDrawHeapConfiguration{/applied rule 2}\\
-        \AttestorDrawHeapConfiguration{/canonical 1} & \AttestorDrawHeapConfiguration{/canonical 2}\\
+        \multicolumn{2}{c}{\tikz{\AttestorDrawHeapConfiguration{/joint graph}}}\\
+        \tikz{\AttestorDrawHeapConfiguration{/applied rule 1}} & \tikz{\AttestorDrawHeapConfiguration{/applied rule 2}}\\
+        \tikz{\AttestorDrawHeapConfiguration{/canonical 1}} & \tikz{\AttestorDrawHeapConfiguration{/canonical 2}}\\
     \end{tabular}
 
     % TODO: Add the other abstracted graphs
@@ -107,8 +107,7 @@
         \begin{scope}[local bounding box=scope1]
             \AttestorDrawHeapConfiguration{/left hand side}
         \end{scope}
-        \node
-        \begin{scope}%[shift={($(scope1.east)+(1cm,0)$)}]
+        \begin{scope}[shift={(5cm,0)}]
             \AttestorDrawHeapConfiguration{/right hand side}
         \end{scope}
     \end{tikzpicture}
