@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.main;
 
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.main.AbstractAttestor;
 import de.rwth.i2.attestor.phases.parser.ParseGrammarPhase;
 
@@ -13,10 +14,10 @@ public class ConfluenceTool extends AbstractAttestor {
                 .execute();
     }
 
-    public static Grammar parseGrammar(String defaultGrammar) {
+    public static NamedGrammar parseGrammar(String defaultGrammar) {
         ConfluenceTool confluenceTool = new ConfluenceTool();
         confluenceTool.run(new String[]{defaultGrammar});
         ParseGrammarPhase parseGrammarPhase = (ParseGrammarPhase) confluenceTool.registry.getPhases().get(1);
-        return parseGrammarPhase.getGrammar();
+        return new NamedGrammar(parseGrammarPhase.getGrammar());
     }
 }

@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.io.tikzOutput;
 
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
+import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
@@ -16,6 +17,7 @@ import de.rwth.i2.attestor.types.GeneralType;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
 
+import javax.naming.Name;
 import java.io.IOException;
 
 
@@ -23,8 +25,8 @@ import java.io.IOException;
 public class Temp {
 
     public static void main(String args[]) {
-        Grammar grammar = getSimpleDLLGrammar();
-        Grammar grammar2 = ConfluenceTool.parseGrammar("DLList");
+        NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar());
+        NamedGrammar grammar2 = ConfluenceTool.parseGrammar("DLList");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         try {
             TikzExport exporter = new TikzExport("test.tex");

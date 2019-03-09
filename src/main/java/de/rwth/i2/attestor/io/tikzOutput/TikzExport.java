@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.io.tikzOutput;
 
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
@@ -32,17 +33,70 @@ import java.util.*;
  *   - Call exportCriticalPairs(...), exportGrammar(...),  exportHeapConfigurations(...) for all reports that should be included
  *   - At the end call finishExport(). After this no other operation is allowed.
  *   - It should be ensured that finishExport() is called at the end by using
+ *   
+ * Notes regarding types: Everything is technically a string.
+ *
+ * Grammar Report:
+ *
+ * /attestor/grammar name  : (String)  Name of the grammar that is used in the heading
+ * /attestor/original rule idx  : (Int) Number used in the heading to distinguish the rules
+ * /attestor/is original rule  : (Bool)
+ * /attestor/collapsed rule idx : (Int) Only given if .../is original rule = false
+ * /attestor/left hand side/<heap configuration>  : A handle for the nonterminal
+ * /attestor/right hand side/<heap configuration> : The right hand side of the rule
+ *
+ * Critical Pair Report:
+ *
+ * /attestor/joinability result  : (String)   // TODO
+ * /attestor/grammar name  : (String)   // TODO
+ * /attestor/rule 1/original rule idx  : (Int)   // TODO
+ * /attestor/rule 1/is original rule  : (Bool)   // TODO
+ * /attestor/rule 1/collapsed rule idx  : (Int)   // TODO
+ * /attestor/rule 2/original rule idx  : (Int)   // TODO
+ * /attestor/rule 2/is original rule : (Bool)   // TODO
+ * /attestor/rule 2/collapsed rule idx  : (Int)   // TODO
+ *
+ * /attestor/debug table/num table entries  : (Int)
+ * /attestor/debug table/<idx>/node id : (Int) The Id of the node of this entry
+ * /attestor/debug table/<idx>/type hc1 : (String) The node type of the node in hc1   // TODO
+ * /attestor/debug table/<idx>/type hc2 : (String) The node type of the node in hc2   // TODO
+ * /attestor/debug table/<idx>/reduc tent 1 : (Bool) The node is a reduction tentacle in hc1   // TODO
+ * /attestor/debug table/<idx>/reduc tent 2 : (Bool) The node is a reduction tentacle in hc2   // TODO
+ *
+ * /attestor/joint graph/<heap configuration> : The overlapping heap configurations
+ * /attestor/applied rule 1/<heap configuration> : Rule 1 applied in reverse to "joint graph"
+ * /attestor/applied rule 2/<heap configuration> : Rule 2 applied in reverse to "joint graph"
+ * /attestor/canonical 1/<heap configuration>  : Canonicalization of "applied rule 1"
+ * /attestor/canonical 2/<heap configuration>  : Canonicalization of "applied rule 2"
+ *
+ * Heap Configuration Report:
+ * /attestor/<heap configuration>
+ *
+ *
+ * <heap configuration>:  // TODO: Add graph element involvement
+ * nodes : (List[Int])  A list of the Ids of all nodes
+ * nodes/<id>/type : (String) The type of the node
+ * nodes/<id>/is external : (Bool)
+ * nodes/<id>/external index : (Int) Only given for external nodes
+ * nodes/<id>/selector targets : (List[Int]) A list of all nodes that are selector targets of node <id>
+ * nodes/<id1>/selector/<id2>  : (List[String]) A list of all selector labels from node <id1> to <id2>
+ *
+ * nonterminals : (List[Int]) A list of the IDs of all nonterminals
+ * nonterminals/<id>/label : (String)
+ * nonterminals/<id>/rank : (Int)
+ * nonterminals/<nterm-id>/tentacle targets : (List[Int]) A list of all nodes that are connected to the nonterminal <nterm-id>
+ * nonterminals/<nterm-id>/tentacles/<node-id> : (List[Int]) A list of all tentacle edges between <nterm-id> and <node-id>
+ *
  *
  * TODO: Add comments with the name & id of report elements
  *
  */
 public class TikzExport {
     private BufferedWriter writer;
-    private int currentReportElementId = 0;
     // TODO: Chat that character encoding works on every platform
     private Collection<Pair<String, String>> pgfSingleValues;
     private Collection<Pair<String, Collection<String>>> pgfListValues;
-    private final String BASE_PATH = "";
+    private final String BASE_PATH = "/attestor";
 
     public TikzExport(String destinationLocation) throws IOException {
         writer = new BufferedWriter(new FileWriter(destinationLocation));
@@ -77,7 +131,6 @@ public class TikzExport {
     public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
         // Start new scope
         for (CriticalPair criticalPair : criticalPairs) {
-            currentReportElementId++;
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
             addCriticalPair(BASE_PATH, criticalPair);
@@ -87,36 +140,47 @@ public class TikzExport {
         pgfListValues = null;
     }
 
-    public void exportGrammar(Grammar grammar, boolean exportCollapsedRules) throws IOException {
-        for (Nonterminal nonterminal : grammar.getAllLeftHandSides()) {
-            for (HeapConfiguration heapConfiguration : grammar.getRightHandSidesFor(nonterminal)) {
-                currentReportElementId++;
-                pgfSingleValues = new ArrayList<>();
-                pgfListValues = new ArrayList<>();
-                CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(heapConfiguration, heapConfiguration, null);
-                addGrammarRule(BASE_PATH, nonterminal, collapsedHeapConfiguration);
-                writeCurrentReportToFile("\\AttestorGrammarReport");
-            }
+    public void exportGrammar(Grammar grammar, String name, boolean exportCollapsedRules) throws IOException {
+        exportGrammar(new NamedGrammar(grammar, name), exportCollapsedRules);
+    }
+
+    public void exportGrammar(NamedGrammar grammar, boolean exportCollapsedRules) throws IOException {
+        String grammarName = grammar.getGrammarName();
+        for (int originalRuleIdx=0; originalRuleIdx<grammar.numberOriginalRules(); originalRuleIdx++) {
+            Pair<Nonterminal, HeapConfiguration> originalRule = grammar.getOriginalRule(originalRuleIdx);
+            Nonterminal nonterminal = originalRule.first();
+            HeapConfiguration originalRhs = originalRule.second();
+            // Create new report element
+            pgfSingleValues = new ArrayList<>();
+            pgfListValues = new ArrayList<>();
+            CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(originalRhs, originalRhs, null);
+            pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
+            pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "true"));
+            pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx)));
+            addGrammarRule(BASE_PATH, nonterminal, collapsedHeapConfiguration);
+            writeCurrentReportToFile("\\AttestorGrammarReport");
             if (exportCollapsedRules) {
-                for (CollapsedHeapConfiguration collapsedHeapConfiguration : grammar.getCollapsedRightHandSidesFor(nonterminal)) {
-                    currentReportElementId++;
+                // Export collapsed rules
+                int numberCollapsedRules = grammar.numberCollapsedRules(originalRuleIdx);
+                for (int collapsedRuleIdx=0; collapsedRuleIdx < numberCollapsedRules; collapsedRuleIdx++) {
                     pgfSingleValues = new ArrayList<>();
                     pgfListValues = new ArrayList<>();
-                    addGrammarRule(BASE_PATH, nonterminal, collapsedHeapConfiguration);
+                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
+                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
+                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx)));
+                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/collapsed rule idx", Integer.toString(collapsedRuleIdx)));
+                    addGrammarRule(BASE_PATH, nonterminal, grammar.getCollapsedRhs(originalRuleIdx, collapsedRuleIdx));
                     writeCurrentReportToFile("\\AttestorGrammarReport");
                 }
             }
         }
-        pgfSingleValues = null;
-        pgfListValues = null;
     }
 
     public void exportHeapConfigurations(Collection<HeapConfiguration> heapConfigurations) throws IOException {
         for (HeapConfiguration hc : heapConfigurations) {
-            currentReportElementId++;
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
-            addHeapConfiguration(BASE_PATH, hc, "standalone");
+            addHeapConfiguration(BASE_PATH, hc);
             writeCurrentReportToFile("\\AttestorHeapConfigurationReport");
         }
         pgfSingleValues = null;
@@ -151,8 +215,8 @@ public class TikzExport {
         }
         handleBuilder.addNonterminalEdge(leftHandSide, attachedNodes);
 
-        addHeapConfiguration(pgfPath+"/left hand side", handleBuilder.build(), "left hand side");
-        addHeapConfiguration(pgfPath+"/right hand side", rightHandSide.getCollapsed(), "right hand side");
+        addHeapConfiguration(pgfPath+"/left hand side", handleBuilder.build());
+        addHeapConfiguration(pgfPath+"/right hand side", rightHandSide.getCollapsed());
     }
 
     private void addCriticalPair(String pgfPath, CriticalPair criticalPair) {
@@ -163,11 +227,11 @@ public class TikzExport {
         addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
 
         JointHeapConfiguration jointHeapConfiguration = criticalPair.getJointHeapConfiguration();
-        addHeapConfiguration(pgfPath + "/joint graph", jointHeapConfiguration.getHeapConfiguration(), "joint graph");
-        addHeapConfiguration(pgfPath + "/applied rule 1", jointHeapConfiguration.getRule1Applied(), "applied rule 1");
-        addHeapConfiguration(pgfPath + "/applied rule 2", jointHeapConfiguration.getRule2Applied(), "applied rule 1");
-        addHeapConfiguration(pgfPath + "/canonical 1", jointHeapConfiguration.getCanonical1(), "canonical 1");
-        addHeapConfiguration(pgfPath + "/canonical 2", jointHeapConfiguration.getCanonical2(), "canonical 2");
+        addHeapConfiguration(pgfPath + "/joint graph", jointHeapConfiguration.getHeapConfiguration());
+        addHeapConfiguration(pgfPath + "/applied rule 1", jointHeapConfiguration.getRule1Applied());
+        addHeapConfiguration(pgfPath + "/applied rule 2", jointHeapConfiguration.getRule2Applied());
+        addHeapConfiguration(pgfPath + "/canonical 1", jointHeapConfiguration.getCanonical1());
+        addHeapConfiguration(pgfPath + "/canonical 2", jointHeapConfiguration.getCanonical2());
     }
 
     private void addCriticalPairDebugTable(String pgfPath, CriticalPair criticalPair) {
@@ -177,7 +241,7 @@ public class TikzExport {
         pgfSingleValues.add(new Pair<>(pgfPath + "/num table entries", Integer.toString(nodes.size())));
         for (int idx=0; idx<nodes.size(); idx++) {
             int publicId = nodes.get(idx);
-            String currentPath = pgfPath + "/entries/" + Integer.toString(idx);
+            String currentPath = pgfPath + "/" + Integer.toString(idx);
             pgfSingleValues.add(new Pair<>(currentPath + "/node id", Integer.toString(publicId)));
             pgfSingleValues.add(new Pair<>(currentPath + "/type hc1", "TODO"));
             pgfSingleValues.add(new Pair<>(currentPath + "/type hc2", "TODO"));
@@ -189,7 +253,7 @@ public class TikzExport {
     /**
      * Draws a HeapConfiguration (must already be inside a tikzpicture environment)
      */
-    private void addHeapConfiguration(String pgfPath, HeapConfiguration hc, String reportStep) {
+    private void addHeapConfiguration(String pgfPath, HeapConfiguration hc) {
         addNodesAndSelectorEdges(pgfPath, hc);
         addNonterminals(pgfPath, hc);
         // TODO: addVariables
@@ -294,10 +358,9 @@ public class TikzExport {
         result.append(indent).append(reportCommand).append(lineSeparator)
                 .append('}').append(lineSeparator);
         writer.append(result);
-    }
-
-    private Graph getGraph(HeapConfiguration hc) {
-        return (Graph) hc;
+        // Note: We set those to null and not a new initialized list so an error is thrown if this method is called too early
+        pgfSingleValues = null;
+        pgfListValues = null;
     }
 
 }
