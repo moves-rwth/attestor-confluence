@@ -6,6 +6,7 @@
 \usetikzlibrary{calc}
 \usetikzlibrary{graphdrawing}
 \usetikzlibrary{intersections}
+\usetikzlibrary{positioning}
 
 \usegdlibrary{force}
 
@@ -86,21 +87,23 @@
     Strongly joinable  % TODO: Replace with joinability result
 
     \begin{tikzpicture}
-        \matrix[ampersand replacement=\&, anchor=south west, column sep=1cm, row sep=1.5cm] (matrix) {
+        \matrix[ampersand replacement=\&, anchor=south west, column sep=1cm, row sep=1mm] (matrix) {
             \node[anchor=north] (appliedR1) {\tikz{\AttestorDrawHeapConfiguration{/applied rule 1}}}; \&
             \node[anchor=north] (appliedR2) {\tikz{\AttestorDrawHeapConfiguration{/applied rule 2}}}; \\
+            \node[anchor=center,rotate=90] {\LARGE $\Rightarrow$}; \&
+            \node[anchor=center,rotate=90] {\LARGE $\Rightarrow$}; \\
             \node[anchor=center] (canonical1) {\tikz{\AttestorDrawHeapConfiguration{/canonical 1}}}; \&
             \node[anchor=center] (canonical2) {\tikz{\AttestorDrawHeapConfiguration{/canonical 2}}}; \\
         };
-        \node[anchor=south] (jointGraph) at ($ (appliedR1.north)!.5!(appliedR2.north) + (0,1.5)$) {\tikz{\AttestorDrawHeapConfiguration{/joint graph}}};
+        \node[anchor=south] (jointGraph) at ($ (appliedR1.north)!.5!(appliedR2.north) + (0,1.5cm)$) {\tikz{\AttestorDrawHeapConfiguration{/joint graph}}};
         \path (appliedR1.north) -- node[sloped, allow upside down] {\LARGE $\Rightarrow$} (jointGraph.south west);
         \path (appliedR2.north) -- node[sloped, allow upside down] {\LARGE $\Rightarrow$} (jointGraph.south east);
         \path (canonical1) -- node[sloped, allow upside down] {\LARGE $=$} (canonical2);
-        \path [name path=p1] (canonical1.north) -- (appliedR2.south);
-        \path [name path=p2] (appliedR1.south) -- (canonical2.north);
-        \path [name intersections={of=p1 and p2,by=E}]
-                    node[rotate=90] at (appliedR1.south |- E) {\LARGE $\Rightarrow$}
-                    node[rotate=90] at (appliedR2.south |- E) {\LARGE $\Rightarrow$};
+        %\path [name path=p1] (canonical1.north) -- (appliedR2.south);
+        %\path [name path=p2] (appliedR1.south) -- (canonical2.north);
+        %\path [name intersections={of=p1 and p2,by=E}]
+        %            node[rotate=90] at (appliedR1.south |- E) {\LARGE $\Rightarrow$}
+        %            node[rotate=90] at (appliedR2.south |- E) {\LARGE $\Rightarrow$};
     \end{tikzpicture}
 
     % TODO: Add the other abstracted graphs
@@ -119,9 +122,12 @@
 \newcommand{\AttestorGrammarReport}{
     \section{Grammar Rule}
 
-    \SetBaselineCenter{\tikz{\AttestorDrawHeapConfiguration{/left hand side}}}
-    \hspace{2cm}
-    \SetBaselineCenter{\tikz{\AttestorDrawHeapConfiguration{/right hand side}}}
+    \begin{tikzpicture}
+        \node (lhs) {\tikz{\AttestorDrawHeapConfiguration{/left hand side}}};
+        \node[right=0cm of lhs] (arrow) {\LARGE $\Rightarrow$};
+        \node[right=0cm of arrow] (rhs) {\tikz{\AttestorDrawHeapConfiguration{/right hand side}}};
+    \end{tikzpicture}
+
 }
 
 \newcommand{\AttestorHeapConfigurationReport}{
@@ -154,18 +160,8 @@
         \foreach \n in \nodelist {
             \node [internal node] (node\n) {\n};  % TODO: Change internal / external
         }
-        % 2. draw selector edges
-        \foreach \source in \nodelist {
-      		\pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
-        	\foreach \target in \targets {
-            	\pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
-            	\foreach \selectorLabel in \labels {
-            		\edef\DrawLine{(node\source) edge [selector edge] node [selector label] {\selectorLabel} (node\target);}
-                	\draw \DrawLine
-            	}
-        	}
-	    }
-        % 3. draw nonterminals
+
+        % 2. draw nonterminals
         \foreach \nonterminal in \nonterminalList {
 	        \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
             \node [hyperedge node] (nonterminal\nonterminal) {\nonterminalLabel};
@@ -178,6 +174,18 @@
     	        }
 	        }
 	    }
+
+        % 3. draw selector edges
+        \foreach \source in \nodelist {
+            \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
+            \foreach \target in \targets {
+                \pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
+                \foreach \selectorLabel in \labels {
+                    \edef\DrawLine{(node\source) edge [selector edge] node [selector label] {\selectorLabel} (node\target);}
+                    \draw \DrawLine
+                }
+            }
+        }
     \end{scope}
 
 }
