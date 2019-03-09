@@ -124,7 +124,7 @@ public class TikzExport {
     }
 
 
-    private void addGrammarRule(String pgfPath, Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) { // TODO: Maye simple HeapConfiguration instead of CollapsedHeapConfiguration is enough
+    private void addGrammarRule(String pgfPath, Nonterminal leftHandSide, CollapsedHeapConfiguration rightHandSide) {
 
         // Create a handle (Graph containing just the nonterminal from the lefthandside with the external edges)
         HeapConfiguration heapConfiguration = new InternalHeapConfiguration();
