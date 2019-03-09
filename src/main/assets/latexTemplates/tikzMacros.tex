@@ -156,42 +156,28 @@
         }
         % 2. draw selector edges
         \foreach \source in \nodelist {
-            \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
-            \foreach \target in \targets {
-                \draw (node\source) edge [draw=none] (node\target);
-            }
-        }
+      		\pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
+        	\foreach \target in \targets {
+            	\pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
+            	\foreach \selectorLabel in \labels {
+            		\edef\DrawLine{(node\source) edge [selector edge] node [selector label] {\selectorLabel} (node\target);}
+                	\draw \DrawLine
+            	}
+        	}
+	    }
         % 3. draw nonterminals
         \foreach \nonterminal in \nonterminalList {
-            \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
+	        \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
             \node [hyperedge node] (nonterminal\nonterminal) {\nonterminalLabel};
-            \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
-            \foreach \target in \targets {
-                \draw (nonterminal\nonterminal) edge [draw=none] (node\target);
-            }
-        }
+    	    \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
+	        \foreach \target in \targets {
+            	\pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
+            	\foreach \tentacle in \labels {
+            		\edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\tentacle} (node\target);}
+        	        \draw \DrawLine
+    	        }
+	        }
+	    }
     \end{scope}
-    % 2. Rendering pass: This time we draw the selectors with edge labels
-
-    % Draw selector edges
-    \foreach \source in \nodelist {
-        \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
-        \foreach \target in \targets {
-            \pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
-            \foreach \selectorLabel in \labels {
-                \draw (node\source) edge [selector edge] node [selector label] {\selectorLabel} (node\target);
-            }
-        }
-    }
-    % Draw nonterminal tentacles
-    \foreach \nonterminal in \nonterminalList {
-        \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
-        \foreach \target in \targets {
-            \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
-            \foreach \tentacle in \labels {
-                \draw (nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\tentacle} (node\target);
-            }
-        }
-    }
 
 }
