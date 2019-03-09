@@ -24,12 +24,15 @@ public class Temp {
 
     public static void main(String args[]) {
         Grammar grammar = getSimpleDLLGrammar();
+        Grammar grammar2 = ConfluenceTool.parseGrammar("DLList");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         try {
             TikzExport exporter = new TikzExport("test.tex");
             exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs());
             exporter.createPageBreak();
-            exporter.exportGrammar(grammar, true);
+            //exporter.exportGrammar(grammar, true);
+            //exporter.createPageBreak();
+            exporter.exportGrammar(grammar2, true);
             exporter.finishExport();
         } catch (IOException exception) {
             exception.printStackTrace();

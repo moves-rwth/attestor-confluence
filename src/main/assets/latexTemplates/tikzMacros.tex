@@ -3,7 +3,9 @@
 \usepackage{pgfkeys}
 \usepackage{tikz}
 
+\usetikzlibrary{calc}
 \usetikzlibrary{graphdrawing}
+\usetikzlibrary{intersections}
 
 \usegdlibrary{force}
 
@@ -72,7 +74,7 @@
     hyperedge node/.style={draw,green,rectangle},
     hyperedge tentacle/.style={blue,thick},
     hyperedge tentacle label/.style={auto,sloped},
-    global heap drawing settings/.style={spring layout,node distance=1.5cm},
+    global heap drawing settings/.style={spring electrical layout,node distance=1.5cm},
     grammar derivation arrow/.style={}
 }
 
@@ -83,11 +85,23 @@
     \section{Critical Pair}  % TODO: Enumerate the critical pairs
     Strongly joinable  % TODO: Replace with joinability result
 
-    \begin{tabular}{cc}
-        \multicolumn{2}{c}{\tikz{\AttestorDrawHeapConfiguration{/joint graph}}}\\
-        \SetBaselineTop{\tikz{\AttestorDrawHeapConfiguration{/applied rule 1}}} & \SetBaselineTop{\tikz{\AttestorDrawHeapConfiguration{/applied rule 2}}}\\
-        \SetBaselineCenter{\tikz{\AttestorDrawHeapConfiguration{/canonical 1}}} & \SetBaselineCenter{\tikz{\AttestorDrawHeapConfiguration{/canonical 2}}}\\
-    \end{tabular}
+    \begin{tikzpicture}
+        \matrix[ampersand replacement=\&, anchor=south west, column sep=1cm, row sep=1.5cm] (matrix) {
+            \node[anchor=north] (appliedR1) {\tikz{\AttestorDrawHeapConfiguration{/applied rule 1}}}; \&
+            \node[anchor=north] (appliedR2) {\tikz{\AttestorDrawHeapConfiguration{/applied rule 2}}}; \\
+            \node[anchor=center] (canonical1) {\tikz{\AttestorDrawHeapConfiguration{/canonical 1}}}; \&
+            \node[anchor=center] (canonical2) {\tikz{\AttestorDrawHeapConfiguration{/canonical 2}}}; \\
+        };
+        \node[anchor=south] (jointGraph) at ($ (appliedR1.north)!.5!(appliedR2.north) + (0,1.5)$) {\tikz{\AttestorDrawHeapConfiguration{/joint graph}}};
+        \path (appliedR1.north) -- node[sloped, allow upside down] {\LARGE $\Rightarrow$} (jointGraph.south west);
+        \path (appliedR2.north) -- node[sloped, allow upside down] {\LARGE $\Rightarrow$} (jointGraph.south east);
+        \path (canonical1) -- node[sloped, allow upside down] {\LARGE $=$} (canonical2);
+        \path [name path=p1] (canonical1.north) -- (appliedR2.south);
+        \path [name path=p2] (appliedR1.south) -- (canonical2.north);
+        \path [name intersections={of=p1 and p2,by=E}]
+                    node[rotate=90] at (appliedR1.south |- E) {\LARGE $\Rightarrow$}
+                    node[rotate=90] at (appliedR2.south |- E) {\LARGE $\Rightarrow$};
+    \end{tikzpicture}
 
     % TODO: Add the other abstracted graphs
     % Table with debug information
