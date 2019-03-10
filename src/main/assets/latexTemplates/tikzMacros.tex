@@ -118,15 +118,20 @@
         \matrix[ampersand replacement=\&, anchor=south west, column sep=1cm, row sep=1mm] (matrix) {
             \node[anchor=north] (appliedR1) {\tikz{\AttestorDrawHeapConfiguration{/attestor/applied rule 1}}}; \&
             \node[anchor=north] (appliedR2) {\tikz{\AttestorDrawHeapConfiguration{/attestor/applied rule 2}}}; \\
-            \node[anchor=center,rotate=90] {\LARGE $\Rightarrow$}; \&
-            \node[anchor=center,rotate=90] {\LARGE $\Rightarrow$}; \\
+            \node[anchor=center,rotate=90,inner sep=2pt] (arrow1) {\LARGE $\Rightarrow$}; \&
+            \node[anchor=center,rotate=270,inner sep=2pt] (arrow2) {\LARGE $\Leftarrow$}; \\
             \node[anchor=center] (canonical1) {\tikz{\AttestorDrawHeapConfiguration{/attestor/canonical 1}}}; \&
             \node[anchor=center] (canonical2) {\tikz{\AttestorDrawHeapConfiguration{/attestor/canonical 2}}}; \\
         };
         \node[anchor=south] (jointGraph) at ($ (appliedR1.north)!.5!(appliedR2.north) + (0,1.5cm)$) {\tikz{\AttestorDrawHeapConfiguration{/attestor/joint graph}}};
-        \path (appliedR1.north) -- node[sloped] {\LARGE $\Rightarrow$} (jointGraph.south);
-        \path (appliedR2.north) -- node[sloped] {\LARGE $\Leftarrow$} (jointGraph.south);
+        \path (appliedR1.north) -- node[sloped] (arrow3) {\LARGE $\Rightarrow$} (jointGraph.south);
+        \path (appliedR2.north) -- node[sloped] (arrow4) {\LARGE $\Leftarrow$} (jointGraph.south);
         \path (canonical1) -- node[sloped, allow upside down] {\LARGE \AttestorJoinabilityResultSymbol} (canonical2);
+        \node[inner sep=0pt,anchor=north east] at (arrow1.north east)  {\large $*$};
+        \node[inner sep=0pt,anchor=north west] at (arrow2.north west)  {\large $*$};
+        \node[inner sep=1pt,anchor=south east] at (arrow3.north)  {R X.X};
+        \node[inner sep=1pt,anchor=south west] at (arrow4.north)  {R X};
+        
     \end{tikzpicture}
 
     % TODO Table with debug information
