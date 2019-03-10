@@ -51,7 +51,7 @@ import java.util.*;
  *
  * Critical Pair Report:
  *
- * /attestor/joinability result  : (String)   // TODO
+ * /attestor/joinability result  : (String)
  * /attestor/grammar name  : (String)   // TODO
  * /attestor/rule 1/original rule idx  : (Int)   // TODO
  * /attestor/rule 1/is original rule  : (Bool)   // TODO
@@ -77,14 +77,14 @@ import java.util.*;
  * /attestor/<heap configuration>
  *
  *
- * <heap configuration>:  // TODO: Add graph element involvement
+ * <heap configuration>:
  * nodes : (List[Int])  A list of the Ids of all nodes
  * nodes/<id>/type : (String) The type of the node
  * nodes/<id>/is external : (Bool)
- * nodes/<id>/external index : (Int) Only given for external nodes
+ * nodes/<id>/external indices : (List[Int]) Only given for external nodes (Multiple values in case of a collapsed heap)
  * nodes/<id>/selector targets : (List[Int]) A list of all nodes that are selector targets of node <id>
  * nodes/<id1>/selectors/<id2>/labels  : (List[String]) A list of all selector labels from node <id1> to <id2>
- * nodes/<id1>/selectors/<id2>/has reverse  : (Bool) If true there is also a selector edge in the other direction TODO
+ * nodes/<id1>/selectors/<id2>/has reverse  : (Bool) If true there is also a selector edge in the other direction
  *
  * nonterminals : (List[Int]) A list of the IDs of all nonterminals
  * nonterminals/<id>/label : (String)
@@ -92,13 +92,18 @@ import java.util.*;
  * nonterminals/<nterm-id>/tentacle targets : (List[Int]) A list of all nodes that are connected to the nonterminal <nterm-id>
  * nonterminals/<nterm-id>/tentacles/<node-id> : (List[Int]) A list of all tentacle edges between <nterm-id> and <node-id>
  *
+ * <heap configuration>: (only for heap configurations of a critical pair)  TODO
+ * nodes/<id>/critical pair involvement : (String) one of "hc1", "hc2", "both", "new"
+ * nodes/<id>/is rule1 external : (Bool) If set to true this node is external in rule 1 (only applies for critical pair joint heap configuration)
+ * nodes/<id>/rule1 external indices: (List[Int])
+ * nodes/<id>/is rule2 external : (Bool) If set to true this node is external in rule 1 (only applies for critical pair joint heap configuration)
+ * nodes/<id>/rule2 external indices: (List[Int])
  *
- * TODO: Add comments with the name & id of report elements
  *
  */
 public class TikzExport {
     private BufferedWriter writer;
-    // TODO: Chat that character encoding works on every platform
+    // TODO: Check that character encoding works on every platform
     private Collection<Pair<String, String>> pgfSingleValues;
     private Collection<Pair<String, Collection<String>>> pgfListValues;
     private final String BASE_PATH = "/attestor";

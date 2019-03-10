@@ -67,14 +67,15 @@
 
 % Global style settings
 \tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
-    external node/.style={draw,circle,double},
-    internal node/.style={draw,circle},
+    external node/.style={draw,double,rectangle,rounded corners=5pt},
+    internal node/.style={draw,circle,electric charge=1},
+    handle node/.style={fill,circle,inner sep=2pt,electric charge=1},
     selector edge/.style={->,thick},
-    selector label/.style={auto,sloped},
-    hyperedge node/.style={draw,rectangle},
+    selector label/.style={midway,sloped,auto=left},
+    hyperedge node/.style={draw,rectangle,electric charge=1},
     hyperedge tentacle/.style={black!40},
-    hyperedge tentacle label/.style={black,rectangle,rounded corners=4pt,fill=white,inner sep=1pt},
-    global heap drawing settings/.style={spring electrical layout,node distance=1.5cm},
+    hyperedge tentacle label/.style={black,anchor=center,rectangle,rounded corners=4pt,fill=white,inner sep=1pt},
+    global heap drawing settings/.style={spring electrical layout,node distance=1.5cm,electric force order=3},
     grammar derivation arrow/.style={}
 }
 
@@ -173,6 +174,21 @@
     \tikz{\AttestorDrawHeapConfiguration{/attestor}}
 }
 
+\newcommand{\AttestorDrawNode}[2] {
+    % TODO: Select correct case and get the values of \id, \externalHC1, \externalHC2, \external and apply correct styles
+    % Joint Heap Configuration, external in both rules
+    \node[external node] (node\id) {${\id}^{(\externalHC1)}_{(\externalHC2)}$};
+    % Joint Heap Configuration, external in rule 1
+    \node[external node] (node\id) {${\id}^{(\externalHC1)}$};
+    % Joint Heap Configuration, external in rule 2
+    \node[external node] (node\id) {${\id}_{(\externalHC2)}$};
+    % Normal external node
+    \node[external node] (node\id) {$\id(\external)$};
+    % External node in handle
+    \node[handle node] (n3) {};
+    % Internal Node
+    \node [internal node] (node\n) {\n};
+}
 
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
 \newcommand{\AttestorDrawHeapConfiguration}[1] {
@@ -189,7 +205,7 @@
         % 2. draw nonterminals
         \foreach \nonterminal in \nonterminalList {
             \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
-            \node [hyperedge node] (nonterminal\nonterminal) {\nonterminalLabel};
+            \node [hyperedge node] (nonterminal\nonterminal) {$^\nonterminal$\nonterminalLabel};
             \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
             \foreach \target in \targets {
                 \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
