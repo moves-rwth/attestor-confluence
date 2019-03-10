@@ -27,14 +27,18 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * All public methods should be inside a try / catch block and call finishExport() in a finally block
  * Usage:
  *   - Constructor creates a new file at destinationLocation
  *   - Call exportCriticalPairs(...), exportGrammar(...),  exportHeapConfigurations(...) for all reports that should be included
  *   - At the end call finishExport(). After this no other operation is allowed.
- *   - It should be ensured that finishExport() is called at the end by using
- *   
- * Notes regarding types: Everything is technically a string.
+ *   - It should be ensured that finishExport() is called at the end by using try / catch
+ *
+ * PGF Keys:
+ * The data from every report entry is passed to LaTeX in form of PGF Keys.
+ * Every value is technically a string, but the following documentation uses types to hint what values are expected.
+ *
+ * Global Keys:
+ * /attestor/node type table  : (Bool) If set to true a table is printed for every report that shows the type of each node and whether it is a reduction tentacle. // TODO
  *
  * Grammar Report:
  *
@@ -98,7 +102,7 @@ public class TikzExport {
     private Collection<Pair<String, Collection<String>>> pgfListValues;
     private final String BASE_PATH = "/attestor";
 
-    public TikzExport(String destinationLocation) throws IOException {
+    public TikzExport(String destinationLocation, boolean printTableOfContents) throws IOException {
         writer = new BufferedWriter(new FileWriter(destinationLocation));
         URL tikzMacrosFile = Attestor.class.getClassLoader().getResource("latexTemplates/tikzMacros.tex");
         BufferedReader reader = new BufferedReader(new URLReader(tikzMacrosFile));
@@ -111,6 +115,14 @@ public class TikzExport {
         writer.newLine();
         writer.write("\\begin{document}");
         writer.newLine();
+        if (printTableOfContents) {
+            writer.write("\\title{Attestor Report}");
+            writer.newLine();
+            writer.write("\\maketitle");
+            writer.newLine();
+            writer.write("\\tableofcontents");
+            writer.newLine();
+        }
     }
 
     /**
@@ -129,10 +141,16 @@ public class TikzExport {
     }
 
     public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
+        writer.write("\\section{Critical Pair Report}");
+        writer.newLine();
+        int i = 0;
         // Start new scope
         for (CriticalPair criticalPair : criticalPairs) {
+            i++;
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
+            writer.write("% Critical Pair: " + i);
+            writer.newLine();
             addCriticalPair(BASE_PATH, criticalPair);
             writeCurrentReportToFile("\\AttestorCriticalPairReport");
         }
@@ -146,6 +164,8 @@ public class TikzExport {
 
     public void exportGrammar(NamedGrammar grammar, boolean exportCollapsedRules) throws IOException {
         String grammarName = grammar.getGrammarName();
+        writer.write(String.format("\\section{Grammar Report (%s)}", grammarName));
+        writer.newLine();
         for (int originalRuleIdx=0; originalRuleIdx<grammar.numberOriginalRules(); originalRuleIdx++) {
             Pair<Nonterminal, HeapConfiguration> originalRule = grammar.getOriginalRule(originalRuleIdx);
             Nonterminal nonterminal = originalRule.first();
@@ -153,10 +173,12 @@ public class TikzExport {
             // Create new report element
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
+            writer.write(String.format("%% Grammar %s Rule %d", grammarName, originalRuleIdx+1));
+            writer.newLine();
             CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(originalRhs, originalRhs, null);
             pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
             pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "true"));
-            pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx)));
+            pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx+1)));
             addGrammarRule(BASE_PATH, nonterminal, collapsedHeapConfiguration);
             writeCurrentReportToFile("\\AttestorGrammarReport");
             if (exportCollapsedRules) {
@@ -165,10 +187,12 @@ public class TikzExport {
                 for (int collapsedRuleIdx=0; collapsedRuleIdx < numberCollapsedRules; collapsedRuleIdx++) {
                     pgfSingleValues = new ArrayList<>();
                     pgfListValues = new ArrayList<>();
+                    writer.write(String.format("%% Grammar %s Rule %d.%d", grammarName, originalRuleIdx+1, collapsedRuleIdx+1));
+                    writer.newLine();
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
-                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx)));
-                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/collapsed rule idx", Integer.toString(collapsedRuleIdx)));
+                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx+1)));
+                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/collapsed rule idx", Integer.toString(collapsedRuleIdx+1)));
                     addGrammarRule(BASE_PATH, nonterminal, grammar.getCollapsedRhs(originalRuleIdx, collapsedRuleIdx));
                     writeCurrentReportToFile("\\AttestorGrammarReport");
                 }
@@ -278,7 +302,7 @@ public class TikzExport {
             Map<Integer, Collection<String>> targetToSelectorsMap = new HashMap<>();
             for (SelectorLabel selectorLabel : hc.selectorLabelsOf(publicId)) {
                 int selectorTarget = hc.selectorTargetOf(publicId, selectorLabel);
-                Collection<String> selectorsOfTarget = getFromMapDefaultEmptyCollection(targetToSelectorsMap, selectorTarget);
+                Collection<String> selectorsOfTarget = targetToSelectorsMap.computeIfAbsent(selectorTarget, ArrayList::new);
                 selectorsOfTarget.add(selectorLabel.getLabel());
             }
             // Add the neccessary keys for the selector edges
@@ -309,7 +333,7 @@ public class TikzExport {
             TIntArrayList attachedNodes = hc.attachedNodesOf(publicId);
             for (int idx=0; idx<rank; idx++) {
                 int attachedNode = attachedNodes.get(idx);
-                Collection<String> tentacleList = getFromMapDefaultEmptyCollection(attachedNodeToTentacleList, attachedNode);
+                Collection<String> tentacleList = attachedNodeToTentacleList.computeIfAbsent(attachedNode, ArrayList::new);
                 tentacleList.add(Integer.toString(idx));
             }
             Collection<String> tentacleTargets = new ArrayList<>();
@@ -323,19 +347,6 @@ public class TikzExport {
         });
         pgfListValues.add(new Pair<>(pgfPath + "/nonterminals", nonterminals));
     }
-
-    private Collection<String> getFromMapDefaultEmptyCollection(Map<Integer, Collection<String>> map, Integer key) {
-        Collection<String> selectorsOfTarget;
-        if (map.containsKey(key)) {
-            selectorsOfTarget = map.get(key);
-        } else {
-            selectorsOfTarget = new ArrayList<>();
-            map.put(key, selectorsOfTarget);
-        }
-        return selectorsOfTarget;
-    }
-
-
 
     private void writeCurrentReportToFile(String reportCommand) throws IOException {
         // TODO: Escape characters (allow only spaces and A-Za-z0-9 and in paths allow "/")

@@ -25,11 +25,11 @@ import java.io.IOException;
 public class Temp {
 
     public static void main(String args[]) {
-        NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar());
+        NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar(), "Simple DLL");
         NamedGrammar grammar2 = ConfluenceTool.parseGrammar("DLList");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         try {
-            TikzExport exporter = new TikzExport("test.tex");
+            TikzExport exporter = new TikzExport("test.tex", true);
             exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs());
             exporter.createPageBreak();
             //exporter.exportGrammar(grammar, true);

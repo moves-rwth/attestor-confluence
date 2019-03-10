@@ -1,14 +1,13 @@
 \documentclass{article}
 
-\usepackage{pgfkeys}
-\usepackage{tikz}
+\usepackage{tikz}  % For drawing
+\usepackage{hyperref}  % For a clickable table of contents
 
-\usetikzlibrary{calc}
-\usetikzlibrary{graphdrawing}
-\usetikzlibrary{intersections}
-\usetikzlibrary{positioning}
+\usetikzlibrary{calc}  % To compute complex tikz node positions
+\usetikzlibrary{graphdrawing}  % To use tikz automatic node placements
+\usetikzlibrary{positioning}  % For easier notation of node placements (Used for the layout of the different critcal pair steps)
 
-\usegdlibrary{force}
+\usegdlibrary{force}  % To use force based tikz node placement algoritms (spring layout)
 
 % NAMING CONVENTIONS
 % graph element: [external node, internal node, selector edge, selector label, hyperedge node, hyperedge tentacle, hyperedge tentacle label]
@@ -79,32 +78,58 @@
     grammar derivation arrow/.style={}
 }
 
-\newcommand{\AttestorCriticalPairReport}{
-    \section{Critical Pair}  % TODO: Enumerate the critical pairs
-    Strongly joinable  % TODO: Replace with joinability result
+\def\AttestorStronglyJoinable{STRONGLY_JOINABLE}
+\def\AttestorWeaklyJoinable{WEAKLY_JOINABLE}
 
+\newcommand{\AttestorJoinabilityResultString}[1]{%
+    \ifx#1\AttestorStronglyJoinable
+        Strongly Joinable%
+    \else
+        \ifx#1\AttestorWeaklyJoinable
+            Weakly Joinable%
+        \else
+            Not Joinable%
+        \fi
+    \fi
+}
+
+\newcommand{\AttestorJoinabilityResultSymbol}{%
+    \def\stronglyJoinable{STRONGLY_JOINABLE}%
+    \def\weaklyJoinable{WEAKLY_JOINABLE}%
+    \def\notJoinable{NOT_JOINABLE}%
+    \pgfkeys{/attestor/joinability result/.get=\joinabilityResult}%
+    \ifx\joinabilityResult\stronglyJoinable
+        $=$%
+    \else
+        \ifx\joinabilityResult\weaklyJoinable
+            $\cong$%
+        \else
+            $\neq$%
+        \fi
+    \fi
+}
+
+\newcommand{\AttestorCriticalPairReport}{
+    \pgfkeys{/attestor/joinability result/.get=\joinabilityResult}
+    \edef\criticalPairTitle{Critical Pair (\AttestorJoinabilityResultString{\joinabilityResult})}
+    \subsection{\criticalPairTitle}
+    
     \begin{tikzpicture}
         \matrix[ampersand replacement=\&, anchor=south west, column sep=1cm, row sep=1mm] (matrix) {
-            \node[anchor=north] (appliedR1) {\tikz{\AttestorDrawHeapConfiguration{/applied rule 1}}}; \&
-            \node[anchor=north] (appliedR2) {\tikz{\AttestorDrawHeapConfiguration{/applied rule 2}}}; \\
+            \node[anchor=north] (appliedR1) {\tikz{\AttestorDrawHeapConfiguration{/attestor/applied rule 1}}}; \&
+            \node[anchor=north] (appliedR2) {\tikz{\AttestorDrawHeapConfiguration{/attestor/applied rule 2}}}; \\
             \node[anchor=center,rotate=90] {\LARGE $\Rightarrow$}; \&
             \node[anchor=center,rotate=90] {\LARGE $\Rightarrow$}; \\
-            \node[anchor=center] (canonical1) {\tikz{\AttestorDrawHeapConfiguration{/canonical 1}}}; \&
-            \node[anchor=center] (canonical2) {\tikz{\AttestorDrawHeapConfiguration{/canonical 2}}}; \\
+            \node[anchor=center] (canonical1) {\tikz{\AttestorDrawHeapConfiguration{/attestor/canonical 1}}}; \&
+            \node[anchor=center] (canonical2) {\tikz{\AttestorDrawHeapConfiguration{/attestor/canonical 2}}}; \\
         };
-        \node[anchor=south] (jointGraph) at ($ (appliedR1.north)!.5!(appliedR2.north) + (0,1.5cm)$) {\tikz{\AttestorDrawHeapConfiguration{/joint graph}}};
-        \path (appliedR1.north) -- node[sloped, allow upside down] {\LARGE $\Rightarrow$} (jointGraph.south west);
-        \path (appliedR2.north) -- node[sloped, allow upside down] {\LARGE $\Rightarrow$} (jointGraph.south east);
-        \path (canonical1) -- node[sloped, allow upside down] {\LARGE $=$} (canonical2);
-        %\path [name path=p1] (canonical1.north) -- (appliedR2.south);
-        %\path [name path=p2] (appliedR1.south) -- (canonical2.north);
-        %\path [name intersections={of=p1 and p2,by=E}]
-        %            node[rotate=90] at (appliedR1.south |- E) {\LARGE $\Rightarrow$}
-        %            node[rotate=90] at (appliedR2.south |- E) {\LARGE $\Rightarrow$};
+        \node[anchor=south] (jointGraph) at ($ (appliedR1.north)!.5!(appliedR2.north) + (0,1.5cm)$) {\tikz{\AttestorDrawHeapConfiguration{/attestor/joint graph}}};
+        \path (appliedR1.north) -- node[sloped] {\LARGE $\Rightarrow$} (jointGraph.south);
+        \path (appliedR2.north) -- node[sloped] {\LARGE $\Leftarrow$} (jointGraph.south);
+        \path (canonical1) -- node[sloped, allow upside down] {\LARGE \AttestorJoinabilityResultSymbol} (canonical2);
     \end{tikzpicture}
 
-    % TODO: Add the other abstracted graphs
-    % Table with debug information
+    % TODO Table with debug information
     %\begin{tabular}{ r | l l | l l }
     %    Node & Type R1 & Type R2 & Red. tent. R1 & Red. tent. R2 \\
     %    \hline
@@ -117,12 +142,22 @@
 }
 
 \newcommand{\AttestorGrammarReport}{
-    \section{Grammar Rule}
+    \def\true{true}
+    \pgfkeys{/attestor/is original rule/.get=\isOriginalRule}
+    \pgfkeys{/attestor/original rule idx/.get=\originalRuleIdx}
+    \ifx\isOriginalRule\true
+        \edef\grammarTitle{Grammar Rule \originalRuleIdx}
+        \subsection{\grammarTitle}
+    \else
+        \pgfkeys{/attestor/collapsed rule idx/.get=\collapsedRuleIdx}
+        \edef\grammarTitle{Rule \originalRuleIdx.\collapsedRuleIdx}
+        \subsubsection{\grammarTitle}
+    \fi
 
     \begin{tikzpicture}
-        \node (lhs) {\tikz{\AttestorDrawHeapConfiguration{/left hand side}}};
+        \node (lhs) {\tikz{\AttestorDrawHeapConfiguration{/attestor/left hand side}}};
         \node[right=0cm of lhs] (arrow) {\LARGE $\Rightarrow$};
-        \node[right=0cm of arrow] (rhs) {\tikz{\AttestorDrawHeapConfiguration{/right hand side}}};
+        \node[right=0cm of arrow] (rhs) {\tikz{\AttestorDrawHeapConfiguration{/attestor/right hand side}}};
     \end{tikzpicture}
 
 }
@@ -130,7 +165,7 @@
 \newcommand{\AttestorHeapConfigurationReport}{
     \section{Heap Configuration}
 
-    \tikz{\AttestorDrawHeapConfiguration{/}}
+    \tikz{\AttestorDrawHeapConfiguration{/attestor}}
 }
 
 % HELPER MACROS
@@ -160,17 +195,17 @@
 
         % 2. draw nonterminals
         \foreach \nonterminal in \nonterminalList {
-	        \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
+            \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
             \node [hyperedge node] (nonterminal\nonterminal) {\nonterminalLabel};
-    	    \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
-	        \foreach \target in \targets {
-            	\pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
-            	\foreach \tentacle in \labels {
-            		\edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\tentacle} (node\target);}
-        	        \draw \DrawLine
-    	        }
-	        }
-	    }
+            \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
+            \foreach \target in \targets {
+                \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
+                \foreach \tentacle in \labels {
+                    \edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\tentacle} (node\target);}
+                    \draw \DrawLine
+                }
+            }
+        }
 
         % 3. draw selector edges
         \foreach \source in \nodelist {

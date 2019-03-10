@@ -18,6 +18,6 @@ public class ConfluenceTool extends AbstractAttestor {
         ConfluenceTool confluenceTool = new ConfluenceTool();
         confluenceTool.run(new String[]{defaultGrammar});
         ParseGrammarPhase parseGrammarPhase = (ParseGrammarPhase) confluenceTool.registry.getPhases().get(1);
-        return new NamedGrammar(parseGrammarPhase.getGrammar());
+        return new NamedGrammar(parseGrammarPhase.getGrammar(), defaultGrammar);
     }
 }
