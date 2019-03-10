@@ -69,11 +69,11 @@
 \tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
     external node/.style={draw,circle,double},
     internal node/.style={draw,circle},
-    selector edge/.style={red,->,thick},
+    selector edge/.style={->,thick},
     selector label/.style={auto,sloped},
     hyperedge node/.style={draw,rectangle},
     hyperedge tentacle/.style={black!40},
-    hyperedge tentacle label/.style={black,circle,fill=white,inner sep=1pt},
+    hyperedge tentacle label/.style={black,rectangle,rounded corners=4pt,fill=white,inner sep=1pt},
     global heap drawing settings/.style={spring electrical layout,node distance=1.5cm},
     grammar derivation arrow/.style={}
 }
@@ -173,22 +173,10 @@
     \tikz{\AttestorDrawHeapConfiguration{/attestor}}
 }
 
-% HELPER MACROS
-
-% A for loop equivalen to the Java code: "for (int #1=0; #1<#2; #1++) {#3}"
-\newcommand{\ForLoop}[3]{
-    \edef\End{#2}
-    \foreach #1 in {0,...,\End} {
-        \edef\Current{#1}
-        \ifx \Current \End
-        \else
-            #3
-        \fi
-    }
-}
 
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
 \newcommand{\AttestorDrawHeapConfiguration}[1] {
+    \def\true{true}
     \pgfkeys{#1/nodes/.get=\nodelist}
     \pgfkeys{#1/nonterminals/.get=\nonterminalList}
     % 1. Rendering pass: Only draw nodes correctly for the node placement algorithm (otherwise there is an issue with the edges)
@@ -205,10 +193,8 @@
             \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
             \foreach \target in \targets {
                 \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
-                \foreach \tentacle in \labels {
-                    \edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\tentacle} (node\target);}
-                    \draw \DrawLine
-                }
+                \edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\labels} (node\target);}
+                \draw \DrawLine
             }
         }
 
@@ -216,11 +202,18 @@
         \foreach \source in \nodelist {
             \pgfkeys{#1/nodes/\source/selector targets/.get=\targets}
             \foreach \target in \targets {
-                \pgfkeys{#1/nodes/\source/selector/\target/.get=\labels}
-                \foreach \selectorLabel in \labels {
-                    \edef\DrawLine{(node\source) edge [selector edge] node [selector label] {\selectorLabel} (node\target);}
-                    \draw \DrawLine
-                }
+                \pgfkeys{#1/nodes/\source/selectors/\target/labels/.get=\labels}
+                \ifx\source\target
+                    \edef\DrawLine{(node\source) edge [selector edge,loop above] node [selector label] {\labels} (node\target);}
+                \else
+                    \pgfkeys{#1/nodes/\source/selectors/\target/has reverse/.get=\hasReverse}
+                    \ifx\hasReverse\true
+                        \edef\DrawLine{(node\source) edge [selector edge, bend left] node [selector label] {\labels} (node\target);}
+                    \else
+                        \edef\DrawLine{(node\source) edge [selector edge] node [selector label] {\labels} (node\target);}
+                    \fi
+                \fi
+                \draw \DrawLine
             }
         }
     \end{scope}

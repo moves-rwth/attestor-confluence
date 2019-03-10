@@ -83,7 +83,8 @@ import java.util.*;
  * nodes/<id>/is external : (Bool)
  * nodes/<id>/external index : (Int) Only given for external nodes
  * nodes/<id>/selector targets : (List[Int]) A list of all nodes that are selector targets of node <id>
- * nodes/<id1>/selector/<id2>  : (List[String]) A list of all selector labels from node <id1> to <id2>
+ * nodes/<id1>/selectors/<id2>/labels  : (List[String]) A list of all selector labels from node <id1> to <id2>
+ * nodes/<id1>/selectors/<id2>/has reverse  : (Bool) If true there is also a selector edge in the other direction TODO
  *
  * nonterminals : (List[Int]) A list of the IDs of all nonterminals
  * nonterminals/<id>/label : (String)
@@ -309,7 +310,10 @@ public class TikzExport {
             Collection<String> selectorTargets = new ArrayList<>();
             for (Map.Entry<Integer, Collection<String>> entry : targetToSelectorsMap.entrySet()) {
                 selectorTargets.add(Integer.toString(entry.getKey()));
-                pgfListValues.add(new Pair<>(currentNodePath + "/selector/" + entry.getKey(), entry.getValue()));
+                int selectorTarget = entry.getKey();
+                pgfListValues.add(new Pair<>(currentNodePath + "/selectors/" + selectorTarget + "/labels", entry.getValue()));
+                List reverseSelectors = hc.selectorLabelsOf(selectorTarget);
+                pgfSingleValues.add(new Pair<>(currentNodePath + "/selectors/" + selectorTarget + "/has reverse", reverseSelectors.isEmpty()?"false":"true"));
             }
             pgfListValues.add(new Pair<>(currentNodePath + "/selector targets", selectorTargets));
             // Continue with the other nodes
