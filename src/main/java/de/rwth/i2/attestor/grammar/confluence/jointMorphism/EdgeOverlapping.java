@@ -87,20 +87,14 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         // Calculate the connected nodes (the lists must have same length because the types match)
         connectedNodesHC1 = newPair.first().getConnectedNodes(getContext().getGraph1());
         connectedNodesHC2 = newPair.second().getConnectedNodes(getContext().getGraph2());
-        // TODO: We need to keep track of the additional node equivalences (in case one of the tentacles connects to the same node and another one does not)
+        // We need to keep track of the additional node equivalences (in case one of the tentacles connects to the same node and another one does not)
         Map<NodeGraphElement, NodeGraphElement> newMapNodeHc1ToHc2 = new HashMap<>();
         Map<NodeGraphElement, NodeGraphElement> newMapNodeHc2ToHc1 = new HashMap<>();
         for (int i = 0; i < connectedNodesHC1.size(); i++) {
-            NodeGraphElement connectedNode1, connectedNode2;
-            connectedNode1 = connectedNodesHC1.get(i);
-            connectedNode2 = connectedNodesHC2.get(i);
-            if (mapNodeHc1ToHc2.containsKey(connectedNode1)) {
-                if (!mapNodeHc1ToHc2.get(connectedNode1).equals(connectedNode2)) {
-                    // The connected nodes are already in different equivalence classes
-                    return false;
-                }
-            } else if (mapNodeHc2ToHc1.containsKey(connectedNode2)) {
-                // The node2 is in the intersection, but node1 is not
+            NodeGraphElement connectedNode1 = connectedNodesHC1.get(i);
+            NodeGraphElement connectedNode2 = connectedNodesHC2.get(i);
+            if (!addToNodeEquivalences(newMapNodeHc1ToHc2, getNodeMapHC1ToHC2(), connectedNode1, connectedNode2)
+                    || !addToNodeEquivalences(newMapNodeHc2ToHc1, getNodeMapHC2ToHC1(), connectedNode2, connectedNode1)) {
                 return false;
             }
 
@@ -115,6 +109,24 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
 
         // No violation found
         return true;
+    }
+
+
+    /**
+     * Adds the new equivalence (newKey, newValue) to the modifiableMap if it is not already in the unmodifiableMap.
+     * Returns true, if there are no violations. There is a violation if the newKey is already in the modifiableMap or the unmodifiableMap but maps to a different value than newValue
+     */
+    private boolean addToNodeEquivalences(Map<NodeGraphElement, NodeGraphElement> modifiableMap, Map<NodeGraphElement, NodeGraphElement> unmodifiableMap, NodeGraphElement newKey, NodeGraphElement newValue) {
+        if ((unmodifiableMap.containsKey(newKey) && !unmodifiableMap.get(newKey).equals(newValue))
+                || (modifiableMap.containsKey(newKey) && !modifiableMap.get(newKey).equals(newValue))) {
+            return false;
+        } else {
+            if (!unmodifiableMap.containsKey(newKey)) {
+                modifiableMap.put(newKey, newValue);
+            }
+            return true;
+        }
+
     }
 
     @Override
