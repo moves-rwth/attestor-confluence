@@ -258,10 +258,10 @@ public class TikzExport {
 
         JointHeapConfiguration jointHeapConfiguration = criticalPair.getJointHeapConfiguration();
         addHeapConfiguration(pgfPath + "/joint graph", jointHeapConfiguration.getHeapConfiguration());
-        addHeapConfiguration(pgfPath + "/applied rule 1", jointHeapConfiguration.getRule1Applied());
-        addHeapConfiguration(pgfPath + "/applied rule 2", jointHeapConfiguration.getRule2Applied());
-        addHeapConfiguration(pgfPath + "/canonical 1", jointHeapConfiguration.getCanonical1());
-        addHeapConfiguration(pgfPath + "/canonical 2", jointHeapConfiguration.getCanonical2());
+        addHeapConfiguration(pgfPath + "/applied rule 1", criticalPair.getRule1Applied());
+        addHeapConfiguration(pgfPath + "/applied rule 2", criticalPair.getRule2Applied());
+        addHeapConfiguration(pgfPath + "/canonical 1", criticalPair.getCanonical1());
+        addHeapConfiguration(pgfPath + "/canonical 2", criticalPair.getCanonical2());
     }
 
     private void addCriticalPairDebugTable(String pgfPath, CriticalPair criticalPair) {

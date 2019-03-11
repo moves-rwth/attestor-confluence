@@ -1,8 +1,14 @@
 package de.rwth.i2.attestor.grammar;
 
+import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationHelper;
+import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationStrategy;
+import de.rwth.i2.attestor.grammar.canonicalization.EmbeddingCheckerProvider;
+import de.rwth.i2.attestor.grammar.canonicalization.GeneralCanonicalizationStrategy;
+import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
 import de.rwth.i2.attestor.grammar.util.ExternalNodesPartitioner;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -12,6 +18,7 @@ public class NamedGrammar extends Grammar {
     final String grammarName;
     final List<Pair<Nonterminal, HeapConfiguration>> originalRules;
     final List<List<CollapsedHeapConfiguration>> collapsedRules;
+    final CanonicalizationStrategy canonicalizationStrategy;
 
     public NamedGrammar(Grammar grammar, String name) {
         super(grammar.rules, grammar.collapsedRules);
@@ -41,6 +48,14 @@ public class NamedGrammar extends Grammar {
                 }
             }
         }
+        MorphismOptions options = new AbstractionOptions()
+                .setAdmissibleAbstraction(false)
+                .setAdmissibleConstants(false)
+                .setAdmissibleMarkings(false);
+
+        EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
+        CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
+        canonicalizationStrategy = new GeneralCanonicalizationStrategy(this, canonicalizationHelper);
     }
 
     public int numberOriginalRules() {
@@ -61,5 +76,32 @@ public class NamedGrammar extends Grammar {
 
     public String getGrammarName() {
         return grammarName;
+    }
+
+
+    public List<Pair<Integer, Integer>> getAllRuleIdPairs() {
+        List<Pair<Integer, Integer>> individualGrammarRules = new ArrayList<>();
+        for (int originalRuleId = 0; originalRuleId < numberOriginalRules(); originalRuleId++) {
+            individualGrammarRules.add(new Pair<>(originalRuleId, null));
+            for (int collapsedRuleId = 0; collapsedRuleId < numberCollapsedRules(originalRuleId); collapsedRuleId++) {
+                individualGrammarRules.add(new Pair<>(originalRuleId, collapsedRuleId));
+            }
+        }
+        return individualGrammarRules;
+    }
+
+    public Pair<Nonterminal, CollapsedHeapConfiguration> getRule(Pair<Integer, Integer> ruleIds) {
+        if (ruleIds.second() == null) {
+            Pair<Nonterminal, HeapConfiguration> rule = getOriginalRule(ruleIds.first());
+            CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(rule.second(), rule.second(), null);
+            return new Pair<>(rule.first(), collapsedHeapConfiguration);
+        } else {
+            Nonterminal nonterminal = getOriginalRule(ruleIds.first()).first();
+            return new Pair<>(nonterminal, getCollapsedRhs(ruleIds.first(), ruleIds.second()));
+        }
+    }
+
+    public CanonicalizationStrategy getCanonicalizationStrategy() {
+        return canonicalizationStrategy;
     }
 }

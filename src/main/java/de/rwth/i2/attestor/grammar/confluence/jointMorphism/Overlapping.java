@@ -144,7 +144,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         return result;
     }
 
-    HeapConfigurationContext getContext() {
+    public HeapConfigurationContext getContext() {
         return context;
     }
 

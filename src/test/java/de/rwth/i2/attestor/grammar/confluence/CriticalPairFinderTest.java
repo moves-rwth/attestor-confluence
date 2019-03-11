@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence;
 import de.rwth.i2.attestor.MockupSceneObject;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
+import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
@@ -33,7 +34,7 @@ public class CriticalPairFinderTest {
     private ExampleHcImplFactory hcImplFactory;
     private SceneObject sceneObject;
 
-    private Grammar getSimpleDLLGrammar() {
+    private NamedGrammar getSimpleDLLGrammar() {
         Nonterminal list = hcImplFactory.scene().createNonterminal("L", 2, new boolean[]{false, false});
         SelectorLabel nextPointer = hcImplFactory.scene().getSelectorLabel("n");
         SelectorLabel previousPointer = hcImplFactory.scene().getSelectorLabel("p");
@@ -56,18 +57,19 @@ public class CriticalPairFinderTest {
         int nonTerminalEdge = hc2Builder.addNonterminalEdgeAndReturnId(list, TIntArrayList.wrap(new int[] {nodesHc2.get(1), nodesHc2.get(2)}));
         HeapConfiguration hc2 = hc2Builder.build();
 
-        return new GrammarBuilder()
+        Grammar unnamedGrammar = new GrammarBuilder()
                 .addRule(list, hc1)
                 .addRule(list, hc2)
                 .updateCollapsedRules()
                 .build();
+        return new NamedGrammar(unnamedGrammar, "Simple DLL");
     }
 
     @Test
     public void testSimpleDLLGrammar() {
-        Grammar grammar = getSimpleDLLGrammar();
+        NamedGrammar grammar = getSimpleDLLGrammar();
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
-        assertEquals(CriticalPair.Joinability.NOT_JOINABLE, criticalPairFinder.getJoinabilityResult());
+        assertEquals(Joinability.NOT_JOINABLE, criticalPairFinder.getJoinabilityResult());
         Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
         assertEquals(3, criticalPairs.size());
     }
@@ -75,7 +77,7 @@ public class CriticalPairFinderTest {
 
     @Test
     public void testPossibleCriticalPairs() {
-        Grammar balancedTreeGrammar = new BalancedTreeGrammar(sceneObject).getGrammar();
+        NamedGrammar balancedTreeGrammar = new NamedGrammar(new BalancedTreeGrammar(sceneObject).getGrammar(), "Balanced Tree");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(balancedTreeGrammar);
         System.err.println(criticalPairFinder.getCriticalPairs().size());
         // TODO: Add assert
@@ -83,27 +85,27 @@ public class CriticalPairFinderTest {
 
     @Test
     public void testDefaultGrammar_BT_conf() {
-        testGrammar("BT_conf", CriticalPair.Joinability.STRONGLY_JOINABLE);
+        testGrammar("BT_conf", Joinability.STRONGLY_JOINABLE);
     }
 
     @Test
     public void testDefaultGrammar_BT() {
-        testGrammar("BT", CriticalPair.Joinability.STRONGLY_JOINABLE);
+        testGrammar("BT", Joinability.STRONGLY_JOINABLE);
     }
 
     @Test
     public void testDefaultGrammar_DLList() {
-        testGrammar("DLList", CriticalPair.Joinability.STRONGLY_JOINABLE);
+        testGrammar("DLList", Joinability.STRONGLY_JOINABLE);
     }
 
     @Test
     public void testDefaultGrammar_SLList() {
-        testGrammar("SLList", CriticalPair.Joinability.STRONGLY_JOINABLE);
+        testGrammar("SLList", Joinability.STRONGLY_JOINABLE);
     }
 
 
-    public void testGrammar(String grammarName, CriticalPair.Joinability joinability) {
-        Grammar grammar = ConfluenceTool.parseGrammar(grammarName);
+    public void testGrammar(String grammarName, Joinability joinability) {
+        NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         // TODO: Assert joinability
         // assertEquals(joinability, criticalPairFinder.getJoinabilityResult());

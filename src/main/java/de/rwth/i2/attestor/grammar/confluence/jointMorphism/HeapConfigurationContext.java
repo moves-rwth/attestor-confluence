@@ -33,7 +33,6 @@ public class HeapConfigurationContext {
 
     public static CollapsedHeapConfiguration convertToCollapsedHeapConfiguration(HeapConfiguration hc) {
         // Set originalToCollapsedExternalIndices to null to detect that this is from the original rule
-        // TODO: There might be a nicer solution
         return new CollapsedHeapConfiguration(hc, hc, null);
     }
 
