@@ -28,20 +28,29 @@ import java.util.Collection;
 public class Temp {
 
     public static void main(String args[]) {
-        // NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar(), "Simple DLL");
-        NamedGrammar grammar2 = ConfluenceTool.parseGrammar("DLList");
-        CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar2);
+        exportDefaultGrammar("BT_conf");
+        exportDefaultGrammar("BT");
+        exportDefaultGrammar("DLList");
+        exportDefaultGrammar("SLList");
+    }
+
+    public static void exportDefaultGrammar(String defaultGrammarName) {
+        NamedGrammar grammar = ConfluenceTool.parseGrammar(defaultGrammarName);
         try {
-            TikzExport exporter = new TikzExport("test.tex", true);
-            Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
-            exporter.exportCriticalPairs(criticalPairs, Joinability.WEAKLY_JOINABLE);
-            exporter.createPageBreak();
-            //exporter.exportGrammar(grammar, true);
-            //exporter.createPageBreak();
-            exporter.exportGrammar(grammar2, true);
+            TikzExport exporter = new TikzExport("reports/" + defaultGrammarName + "-grammar-report.tex", true);
+            exporter.exportGrammar(grammar, true);
             exporter.finishExport();
-        } catch (IOException exception) {
-            exception.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("IO Exception occurred");
+        }
+        CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
+        Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
+        try {
+            TikzExport exporter = new TikzExport("reports/" + defaultGrammarName + "-critical-pair-report.tex", true);
+            exporter.exportCriticalPairs(criticalPairs, Joinability.WEAKLY_JOINABLE);
+            exporter.finishExport();
+        } catch (IOException e) {
+            System.err.println("IO Exception occurred");
         }
     }
 

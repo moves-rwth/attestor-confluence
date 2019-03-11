@@ -173,7 +173,7 @@ public class TikzExport {
 
     public void exportGrammar(NamedGrammar grammar, boolean exportCollapsedRules) throws IOException {
         String grammarName = grammar.getGrammarName();
-        writer.write(String.format("\\section{Grammar Report (%s)}", grammarName));
+        writer.write(String.format("\\section{Grammar Report (%s)}", escapeString(grammarName)));
         writer.newLine();
         for (int originalRuleIdx=0; originalRuleIdx<grammar.numberOriginalRules(); originalRuleIdx++) {
             Pair<Nonterminal, HeapConfiguration> originalRule = grammar.getOriginalRule(originalRuleIdx);
@@ -182,7 +182,7 @@ public class TikzExport {
             // Create new report element
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
-            writer.write(String.format("%% Grammar %s Rule %d", grammarName, originalRuleIdx+1));
+            writer.write(String.format("%% Grammar %s Rule %d", escapeString(grammarName), originalRuleIdx+1));
             writer.newLine();
             CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(originalRhs, originalRhs, null);
             pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
@@ -196,7 +196,7 @@ public class TikzExport {
                 for (int collapsedRuleIdx=0; collapsedRuleIdx < numberCollapsedRules; collapsedRuleIdx++) {
                     pgfSingleValues = new ArrayList<>();
                     pgfListValues = new ArrayList<>();
-                    writer.write(String.format("%% Grammar %s Rule %d.%d", grammarName, originalRuleIdx+1, collapsedRuleIdx+1));
+                    writer.write(String.format("%% Grammar %s Rule %d.%d", escapeString(grammarName), originalRuleIdx+1, collapsedRuleIdx+1));
                     writer.newLine();
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
@@ -392,7 +392,6 @@ public class TikzExport {
     }
 
     private void writeCurrentReportToFile(String reportCommand) throws IOException {
-        // TODO: Escape characters (allow only spaces and A-Za-z0-9 and in paths allow "/")
         String indent = "    ";
         String lineSeparator = "%" + System.lineSeparator();
         StringBuilder result = new StringBuilder();
@@ -400,13 +399,13 @@ public class TikzExport {
         result.append('{').append(lineSeparator);
 
         for (Pair<String, String> pgfKeyPair : pgfSingleValues) {
-            result.append(indent).append("\\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
-                    .append(pgfKeyPair.second()).append('}').append(lineSeparator);
+            result.append(indent).append("\\pgfkeyssetvalue{").append(escapeString(pgfKeyPair.first())).append("}{")
+                    .append(escapeString(pgfKeyPair.second())).append('}').append(lineSeparator);
         }
 
         for (Pair<String, Collection<String>> pgfKeyPair : pgfListValues) {
-            result.append(indent).append("\\pgfkeyssetvalue{").append(pgfKeyPair.first()).append("}{")
-                    .append(String.join(",", pgfKeyPair.second())).append('}').append(lineSeparator);
+            result.append(indent).append("\\pgfkeyssetvalue{").append(escapeString(pgfKeyPair.first())).append("}{")
+                    .append(escapeString(String.join(",", pgfKeyPair.second()))).append('}').append(lineSeparator);
         }
 
         result.append(indent).append(reportCommand).append(lineSeparator)
@@ -415,6 +414,10 @@ public class TikzExport {
         // Note: We set those to null and not a new initialized list so an error is thrown if this method is called too early
         pgfSingleValues = null;
         pgfListValues = null;
+    }
+
+    private String escapeString(String string) {
+        return string.replaceAll("[^a-zA-Z0-9/, ]+", "");
     }
 
 }

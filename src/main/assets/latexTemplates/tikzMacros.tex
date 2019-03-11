@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[paperheight=297mm,paperwidth=210mm,margin=1cm,heightrounded,footskip=0.5cm]{geometry}
+\usepackage[paperheight=400mm,paperwidth=250mm,margin=1cm,heightrounded,footskip=0.5cm]{geometry}
 
 \usepackage{tikz}  % For drawing
 \usepackage{hyperref}  % For a clickable table of contents
@@ -70,18 +70,18 @@
 \tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
     external node/.style={draw,double,rectangle,rounded corners=5pt},
     internal node/.style={draw,circle,electric charge=1},
-    handle node/.style={fill,circle,inner sep=2pt,electric charge=2},
+    handle node/.style={fill,circle,inner sep=2pt,electric charge=1},
     selector edge/.style={->,thick},
     selector label/.style={midway,sloped,auto=left},
     hyperedge node/.style={draw,rectangle,electric charge=2},
     hyperedge tentacle/.style={black!40},
     hyperedge tentacle label/.style={black,anchor=center,rectangle,rounded corners=4pt,fill=white,inner sep=1pt},
-    global heap drawing settings/.style={spring electrical layout,node distance=2cm,electric force order=3},
+    global heap drawing settings/.style={spring electrical layout,node distance=1.6cm,electric force order=3},
     grammar derivation arrow/.style={}
 }
 
-\def\AttestorStronglyJoinable{STRONGLY_JOINABLE}
-\def\AttestorWeaklyJoinable{WEAKLY_JOINABLE}
+\def\AttestorStronglyJoinable{STRONGLYJOINABLE}
+\def\AttestorWeaklyJoinable{WEAKLYJOINABLE}
 
 \newcommand{\AttestorJoinabilityResultString}[1]{%
     \ifx#1\AttestorStronglyJoinable
@@ -96,14 +96,11 @@
 }
 
 \newcommand{\AttestorJoinabilityResultSymbol}{%
-    \def\stronglyJoinable{STRONGLY_JOINABLE}%
-    \def\weaklyJoinable{WEAKLY_JOINABLE}%
-    \def\notJoinable{NOT_JOINABLE}%
     \pgfkeys{/attestor/joinability result/.get=\joinabilityResult}%
-    \ifx\joinabilityResult\stronglyJoinable
+    \ifx\joinabilityResult\AttestorStronglyJoinable
         $=$%
     \else
-        \ifx\joinabilityResult\weaklyJoinable
+        \ifx\joinabilityResult\AttestorWeaklyJoinable
             $\cong$%
         \else
             $\neq$%
