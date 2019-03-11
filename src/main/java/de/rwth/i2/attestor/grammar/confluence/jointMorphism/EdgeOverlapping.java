@@ -49,11 +49,11 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
     }
 
     Map<NodeGraphElement, NodeGraphElement> getNodeMapHC1ToHC2() {
-        return new HashMap<>(this.mapNodeHc1ToHc2);
+        return Collections.unmodifiableMap(this.mapNodeHc1ToHc2);
     }
 
     Map<NodeGraphElement, NodeGraphElement> getNodeMapHC2ToHC1() {
-        return new HashMap<>(this.mapNodeHc2ToHc1);
+        return Collections.unmodifiableMap(this.mapNodeHc2ToHc1);
     }
 
     @Override

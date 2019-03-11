@@ -14,10 +14,7 @@ import de.rwth.i2.attestor.graph.morphism.Morphism;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A class to join two HeapConfiguration objects. It computes the joint graph using given edge and node overlappings.
@@ -26,7 +23,7 @@ import java.util.Set;
 public class JointHeapConfiguration {
     private final HeapConfiguration hc;
     private final Matching matching1, matching2;
-    private final Set<GraphElement> involvedInHc1, involvedInHc2;  // Save target space of maps separatly
+    private Map<GraphElement, GraphElement> mapHcToPattern1, mapHcToPattern2;
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
@@ -87,11 +84,11 @@ public class JointHeapConfiguration {
         involvedInHc2.addAll(edgeOverlapping.getMapHC1toHC2().values());
     }
 
-    private Morphism getMorphism(Graph graph, Map<GraphElement, Integer> patternPrivateToTargetPublic){
-        int morphism[] = new int[graph.size()];
+    private Morphism getMorphism(Graph patternGraph, Map<GraphElement, Integer> patternPrivateToTargetPublic){
+        int morphism[] = new int[patternGraph.size()];
         for (int patternPrivateId = 0; patternPrivateId < morphism.length; patternPrivateId++) {
             GraphElement graphElement;
-            NodeLabel nodeLabel = graph.getNodeLabel(patternPrivateId);
+            NodeLabel nodeLabel = patternGraph.getNodeLabel(patternPrivateId);
             if (nodeLabel instanceof Type) {
                 // Node
                 graphElement = new NodeGraphElement(patternPrivateId);
@@ -106,14 +103,6 @@ public class JointHeapConfiguration {
             morphism[patternPrivateId] = targetPrivateId;
         }
         return new Morphism(morphism);
-    }
-
-    private static Set<Integer> getMorphismTargetSpace(int[] morphism) {
-        Set<Integer> result = new HashSet<>();
-        for (int i=0; i < morphism.length; i++) {
-            result.add(morphism[i]);
-        }
-        return result;
     }
 
     public HeapConfiguration getHeapConfiguration() {
@@ -222,6 +211,23 @@ public class JointHeapConfiguration {
             // Add pubId in valuePubIdMap for the corresponding GraphElement
             valuePubIdMap.put(entry.getValue(), pubId);
         }
+    }
+
+
+    /**
+     * Returns a list of external indices. If rule 1 is applied the new Nonterminal connects to the node with those indices.
+     */
+    public List<Integer> getRule1ExternalIndices(NodeGraphElement node) {
+        // TODO
+        return null;
+    }
+
+    /**
+     * Returns a list of external indices. If rule 2 is applied the new Nonterminal connects to the node with those indices.
+     */
+    public List<Integer> getRule2ExternalIndices(NodeGraphElement node) {
+        // TODO
+        return null;
     }
 
 }

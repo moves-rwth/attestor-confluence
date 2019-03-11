@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
+import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeGraphElement;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
@@ -246,7 +247,7 @@ public class TikzExport {
         handleBuilder.addNonterminalEdge(leftHandSide, attachedNodes);
 
         addHeapConfiguration(pgfPath+"/left hand side", handleBuilder.build());
-        addHeapConfiguration(pgfPath+"/right hand side", rightHandSide.getCollapsed());
+        addHeapConfiguration(pgfPath+"/right hand side", rightHandSide);
     }
 
     private void addCriticalPair(String pgfPath, CriticalPair criticalPair) {
@@ -254,25 +255,16 @@ public class TikzExport {
         Pair<Integer, Integer> r2 = criticalPair.getR2ID();
         pgfSingleValues.add(new Pair<>(pgfPath + "/joinability result", criticalPair.getJoinability().toString()));
         // Set rules
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/original rule idx", Integer.toString(r1.first())));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/original rule idx", Integer.toString(r1.first() + 1)));
         pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/is original rule", r1.second()==null?"true":"false"));
         if (r1.second() != null) {
-            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/collapsed rule idx", Integer.toString(r1.second())));
+            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/collapsed rule idx", Integer.toString(r1.second() + 1)));
         }
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/original rule idx", Integer.toString(r2.first())));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/original rule idx", Integer.toString(r2.first()+1)));
         pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/is original rule", r2.second()==null?"true":"false"));
-        if (r1.second() != null) {
-            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/collapsed rule idx", Integer.toString(r2.second())));
+        if (r2.second() != null) {
+            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/collapsed rule idx", Integer.toString(r2.second()+1)));
         }
-
-        /**
-         * /attestor/rule 1/original rule idx  : (Int)   // TODO
-         *  * /attestor/rule 1/is original rule  : (Bool)   // TODO
-         *  * /attestor/rule 1/collapsed rule idx  : (Int)   // TODO
-         *  * /attestor/rule 2/original rule idx  : (Int)   // TODO
-         *  * /attestor/rule 2/is original rule : (Bool)   // TODO
-         *  * /attestor/rule 2/collapsed rule idx  : (Int)   // TODO
-         */
 
         addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
 
@@ -285,6 +277,7 @@ public class TikzExport {
     }
 
     private void addCriticalPairDebugTable(String pgfPath, CriticalPair criticalPair) {
+        // TODO
         HeapConfiguration hc = criticalPair.getJointHeapConfiguration().getHeapConfiguration();
         StringBuilder criticalPairDebugTableEntryMacros = new StringBuilder();
         TIntArrayList nodes = hc.nodes();
@@ -303,13 +296,18 @@ public class TikzExport {
     /**
      * Draws a HeapConfiguration (must already be inside a tikzpicture environment)
      */
-    private void addHeapConfiguration(String pgfPath, HeapConfiguration hc) {
-        addNodesAndSelectorEdges(pgfPath, hc);
-        addNonterminals(pgfPath, hc);
+    private void addHeapConfiguration(String pgfPath, CollapsedHeapConfiguration collapsedHc) {
+        addNodesAndSelectorEdges(pgfPath, collapsedHc);
+        addNonterminals(pgfPath, collapsedHc);
         // TODO: addVariables
     }
 
-    private void addNodesAndSelectorEdges(String pgfPath, HeapConfiguration hc) {
+    private void addHeapConfiguration(String pgfPath, HeapConfiguration hc) {
+        addHeapConfiguration(pgfPath, new CollapsedHeapConfiguration(hc, hc, null));
+    }
+
+    private void addNodesAndSelectorEdges(String pgfPath, CollapsedHeapConfiguration collapsedHc) {
+        HeapConfiguration hc = collapsedHc.getCollapsed();
         Collection<String> nodes = new ArrayList<>();
         hc.nodes().forEach(publicId -> {
             Type type = hc.nodeTypeOf(publicId);
@@ -347,7 +345,8 @@ public class TikzExport {
         pgfListValues.add(new Pair<>(pgfPath + "/nodes", nodes));
     }
 
-    private void addNonterminals(String pgfPath, HeapConfiguration hc) {
+    private void addNonterminals(String pgfPath, CollapsedHeapConfiguration collapsedHc) {
+        HeapConfiguration hc = collapsedHc.getCollapsed();
         Collection<String> nonterminals = new ArrayList<>();
         hc.nonterminalEdges().forEach(publicId -> {
             Nonterminal nonterminal = hc.labelOf(publicId);

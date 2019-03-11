@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
+import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
 import de.rwth.i2.attestor.graph.BasicSelectorLabel;
@@ -25,12 +26,13 @@ import java.io.IOException;
 public class Temp {
 
     public static void main(String args[]) {
-        NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar(), "Simple DLL");
+        // NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar(), "Simple DLL");
         NamedGrammar grammar2 = ConfluenceTool.parseGrammar("DLList");
-        CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
+        CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar2);
         try {
             TikzExport exporter = new TikzExport("test.tex", true);
-            exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs());
+
+            exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs(), Joinability.WEAKLY_JOINABLE);
             exporter.createPageBreak();
             //exporter.exportGrammar(grammar, true);
             //exporter.createPageBreak();

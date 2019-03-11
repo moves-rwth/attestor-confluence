@@ -3,7 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence;
 public enum Joinability {
     STRONGLY_JOINABLE, WEAKLY_JOINABLE, NOT_JOINABLE;
 
-    private int getValue() {
+    public int getValue() {
         switch (this) {
             case NOT_JOINABLE:
                 return 0;

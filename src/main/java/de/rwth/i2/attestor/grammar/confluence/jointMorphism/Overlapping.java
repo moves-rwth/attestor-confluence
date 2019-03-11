@@ -154,11 +154,11 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
     }
 
     Map<Element, Element> getMapHC1toHC2() {
-        return new HashMap<>(mapHC1toHC2); // TODO: Maybe don't copy the map here
+        return Collections.unmodifiableMap(mapHC1toHC2);
     }
 
     Map<Element, Element> getMapHC2toHC1() {
-        return new HashMap<>(mapHC2toHC1);  // TODO: Maybe don't copy the map here
+        return Collections.unmodifiableMap(mapHC2toHC1);
     }
 
     /**
