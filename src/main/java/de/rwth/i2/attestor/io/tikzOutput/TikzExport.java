@@ -52,13 +52,13 @@ import java.util.*;
  * Critical Pair Report:
  *
  * /attestor/joinability result  : (String)
- * /attestor/grammar name  : (String)   // TODO
- * /attestor/rule 1/original rule idx  : (Int)   // TODO
- * /attestor/rule 1/is original rule  : (Bool)   // TODO
- * /attestor/rule 1/collapsed rule idx  : (Int)   // TODO
- * /attestor/rule 2/original rule idx  : (Int)   // TODO
- * /attestor/rule 2/is original rule : (Bool)   // TODO
- * /attestor/rule 2/collapsed rule idx  : (Int)   // TODO
+ * /attestor/grammar name  : (String)
+ * /attestor/rule 1/original rule idx  : (Int)
+ * /attestor/rule 1/is original rule  : (Bool)
+ * /attestor/rule 1/collapsed rule idx  : (Int)
+ * /attestor/rule 2/original rule idx  : (Int)
+ * /attestor/rule 2/is original rule : (Bool)
+ * /attestor/rule 2/collapsed rule idx  : (Int)
  *
  * /attestor/debug table/num table entries  : (Int)
  * /attestor/debug table/<idx>/node id : (Int) The Id of the node of this entry
@@ -250,10 +250,30 @@ public class TikzExport {
     }
 
     private void addCriticalPair(String pgfPath, CriticalPair criticalPair) {
+        Pair<Integer, Integer> r1 = criticalPair.getR1ID();
+        Pair<Integer, Integer> r2 = criticalPair.getR2ID();
         pgfSingleValues.add(new Pair<>(pgfPath + "/joinability result", criticalPair.getJoinability().toString()));
-        // TODO: Set ruleId
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1 id", "TODO"));
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2 id", "TODO"));
+        // Set rules
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/original rule idx", Integer.toString(r1.first())));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/is original rule", r1.second()==null?"true":"false"));
+        if (r1.second() != null) {
+            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/collapsed rule idx", Integer.toString(r1.second())));
+        }
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/original rule idx", Integer.toString(r2.first())));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/is original rule", r2.second()==null?"true":"false"));
+        if (r1.second() != null) {
+            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/collapsed rule idx", Integer.toString(r2.second())));
+        }
+
+        /**
+         * /attestor/rule 1/original rule idx  : (Int)   // TODO
+         *  * /attestor/rule 1/is original rule  : (Bool)   // TODO
+         *  * /attestor/rule 1/collapsed rule idx  : (Int)   // TODO
+         *  * /attestor/rule 2/original rule idx  : (Int)   // TODO
+         *  * /attestor/rule 2/is original rule : (Bool)   // TODO
+         *  * /attestor/rule 2/collapsed rule idx  : (Int)   // TODO
+         */
+
         addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
 
         JointHeapConfiguration jointHeapConfiguration = criticalPair.getJointHeapConfiguration();
