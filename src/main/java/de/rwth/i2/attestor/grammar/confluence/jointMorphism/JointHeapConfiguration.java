@@ -76,12 +76,7 @@ public class JointHeapConfiguration {
         matching2 = new InternalMatching(context.getHc2(), getMorphism(context.getGraph2(), hc2PubIdMap), hc);
 
         // 5. Save which elements are involved in the rule applications
-        involvedInHc1 = new HashSet<>();
-        involvedInHc1.addAll(nodeOverlapping.getMapHC1toHC2().keySet());
-        involvedInHc1.addAll(edgeOverlapping.getMapHC1toHC2().keySet());
-        involvedInHc2 = new HashSet<>();
-        involvedInHc2.addAll(nodeOverlapping.getMapHC1toHC2().values());
-        involvedInHc2.addAll(edgeOverlapping.getMapHC1toHC2().values());
+        // TODO: Setup reverse matching
     }
 
     private Morphism getMorphism(Graph patternGraph, Map<GraphElement, Integer> patternPrivateToTargetPublic){

@@ -147,19 +147,21 @@ public class TikzExport {
         writer.newLine();
     }
 
-    public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
+    public void exportCriticalPairs(Collection<CriticalPair> criticalPairs, Joinability joinability) throws IOException {
         writer.write("\\section{Critical Pair Report}");
         writer.newLine();
         int i = 0;
         // Start new scope
         for (CriticalPair criticalPair : criticalPairs) {
-            i++;
-            pgfSingleValues = new ArrayList<>();
-            pgfListValues = new ArrayList<>();
-            writer.write("% Critical Pair: " + i);
-            writer.newLine();
-            addCriticalPair(BASE_PATH, criticalPair);
-            writeCurrentReportToFile("\\AttestorCriticalPairReport");
+            if (criticalPair.getJoinability().getValue() <= joinability.getValue()) {
+                i++;
+                pgfSingleValues = new ArrayList<>();
+                pgfListValues = new ArrayList<>();
+                writer.write("% Critical Pair: " + i);
+                writer.newLine();
+                addCriticalPair(BASE_PATH, criticalPair);
+                writeCurrentReportToFile("\\AttestorCriticalPairReport");
+            }
         }
         pgfSingleValues = null;
         pgfListValues = null;

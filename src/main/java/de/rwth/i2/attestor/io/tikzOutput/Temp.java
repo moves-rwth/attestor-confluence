@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.io.tikzOutput;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
@@ -20,6 +21,7 @@ import gnu.trove.list.array.TIntArrayList;
 
 import javax.naming.Name;
 import java.io.IOException;
+import java.util.Collection;
 
 
 // TODO: Remove this test class
@@ -31,8 +33,8 @@ public class Temp {
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar2);
         try {
             TikzExport exporter = new TikzExport("test.tex", true);
-
-            exporter.exportCriticalPairs(criticalPairFinder.getCriticalPairs(), Joinability.WEAKLY_JOINABLE);
+            Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
+            exporter.exportCriticalPairs(criticalPairs, Joinability.WEAKLY_JOINABLE);
             exporter.createPageBreak();
             //exporter.exportGrammar(grammar, true);
             //exporter.createPageBreak();
