@@ -70,13 +70,13 @@
 \tikzset {  % TODO: Add style options that distinguish nodes/edges that are from rule 1 / rule 2 or both
     external node/.style={draw,double,rectangle,rounded corners=5pt},
     internal node/.style={draw,circle,electric charge=1},
-    handle node/.style={fill,circle,inner sep=2pt,electric charge=1},
+    handle node/.style={fill,circle,inner sep=2pt,electric charge=2},
     selector edge/.style={->,thick},
     selector label/.style={midway,sloped,auto=left},
-    hyperedge node/.style={draw,rectangle,electric charge=1},
+    hyperedge node/.style={draw,rectangle,electric charge=2},
     hyperedge tentacle/.style={black!40},
     hyperedge tentacle label/.style={black,anchor=center,rectangle,rounded corners=4pt,fill=white,inner sep=1pt},
-    global heap drawing settings/.style={spring electrical layout,node distance=1.5cm,electric force order=3},
+    global heap drawing settings/.style={spring electrical layout,node distance=2cm,electric force order=3},
     grammar derivation arrow/.style={}
 }
 
@@ -187,20 +187,48 @@
     \tikz{\AttestorDrawHeapConfiguration{/attestor}}
 }
 
+% #1: Path to current heap  #2: current node id
 \newcommand{\AttestorDrawNode}[2] {
+    \def\true{true}
+    \def\pathLHS{/attestor/left hand side}
+    \def\pathRHS{/attestor/right hand side}
+    \def\currentHeapPath{#1}
+    \def\pathJointGraph{/attestor/joint graph}
+    \def\currentNodePath{#1/nodes/#2}
+    \pgfkeys{\currentNodePath/is external/.get=\isExternal}
+    \ifx\isExternal\true
+        % Is external node
+        \ifx\currentHeapPath\pathLHS
+            % Is node in LHS of grammar rule
+            \node[handle node] (node#2) {};
+        \else
+            \pgfkeys{\currentNodePath/external indices/.get=\externalIdices}
+            \ifx\currentHeapPath\pathRHS
+                % Is node in RHS of grammar rule
+                \node[external node] (node#2) {$(\externalIdices)$}; % TODO
+            \else
+                % Is normal external node
+                \node[external node] (node#2) {$#2(\externalIdices)$};
+            \fi
+        \fi
+    \else
+        \ifx\currentHeapPath\pathJointGraph
+            % Is node in joint graph of a critical pair
+            \node[internal node] (node#2) {#2};
+            %\node[external node] (node#2) {$#2^{(?)}_{(?)}$}; % TODO
+        \else
+            % normal internal node
+            \node[internal node] (node#2) {#2};
+        \fi
+
+    \fi
     % TODO: Select correct case and get the values of \id, \externalHC1, \externalHC2, \external and apply correct styles
     % Joint Heap Configuration, external in both rules
-    \node[external node] (node\id) {${\id}^{(\externalHC1)}_{(\externalHC2)}$};
+    %\node[external node] (node\id) {${\id}^{(\externalHC1)}_{(\externalHC2)}$};
     % Joint Heap Configuration, external in rule 1
-    \node[external node] (node\id) {${\id}^{(\externalHC1)}$};
+    %\node[external node] (node\id) {${\id}^{(\externalHC1)}$};
     % Joint Heap Configuration, external in rule 2
-    \node[external node] (node\id) {${\id}_{(\externalHC2)}$};
-    % Normal external node
-    \node[external node] (node\id) {$\id(\external)$};
-    % External node in handle
-    \node[handle node] (n3) {};
-    % Internal Node
-    \node [internal node] (node\n) {\n};
+    %\node[external node] (node\id) {${\id}_{(\externalHC2)}$};
 }
 
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
@@ -212,7 +240,7 @@
     \begin{scope}[global heap drawing settings]
         % 1. draw nodes
         \foreach \n in \nodelist {
-            \node [internal node] (node\n) {\n};  % TODO: Change internal / external
+            \AttestorDrawNode{#1}{\n}
         }
 
         % 2. draw nonterminals

@@ -320,8 +320,21 @@ public class TikzExport {
             boolean isExternal = hc.isExternalNode(publicId);
             pgfSingleValues.add(new Pair<>(currentNodePath + "/is external", isExternal?"true":"false"));
             if (isExternal) {
-                String externalIndex = Integer.toString(hc.externalIndexOf(publicId));
-                pgfSingleValues.add(new Pair<>(currentNodePath + "/external index", externalIndex));
+                int collapsedExternalIdx = hc.externalIndexOf(publicId);
+                TIntArrayList originalToCollapsedExternalIndices = collapsedHc.getOriginalToCollapsedExternalIndices();
+                List<String> externalIdices = new ArrayList<>();
+                if (originalToCollapsedExternalIndices == null) {
+                    // Is original heap configuration
+                    externalIdices.add(Integer.toString(collapsedExternalIdx));
+                } else {
+                    // Obtain original heap configuration indices
+                    for (int idx=0; idx < originalToCollapsedExternalIndices.size(); idx++) {
+                        if (originalToCollapsedExternalIndices.get(idx) == collapsedExternalIdx) {
+                            externalIdices.add(Integer.toString(idx));
+                        }
+                    }
+                }
+                pgfListValues.add(new Pair<>(currentNodePath + "/external indices", externalIdices));
             }
 
             // Find all selector edges (Restructure them for easier processing)
