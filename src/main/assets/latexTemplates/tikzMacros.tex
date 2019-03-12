@@ -243,7 +243,7 @@
         % 2. draw nonterminals
         \foreach \nonterminal in \nonterminalList {
             \pgfkeys{#1/nonterminals/\nonterminal/label/.get=\nonterminalLabel}
-            \node [hyperedge node] (nonterminal\nonterminal) {$^\nonterminal$\nonterminalLabel};
+            \node [hyperedge node] (nonterminal\nonterminal) {$^{\nonterminal}$\nonterminalLabel};
             \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
             \foreach \target in \targets {
                 \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
