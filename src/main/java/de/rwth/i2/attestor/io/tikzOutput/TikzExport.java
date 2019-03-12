@@ -82,6 +82,7 @@ import java.util.*;
  * nodes : (List[Int])  A list of the Ids of all nodes
  * nodes/<id>/type : (String) The type of the node
  * nodes/<id>/is external : (Bool)
+ * nodes/<id>/is primitive : (Bool)
  * nodes/<id>/external indices : (List[Int]) Only given for external nodes (Multiple values in case of a collapsed heap)
  * nodes/<id>/selector targets : (List[Int]) A list of all nodes that are selector targets of node <id>
  * nodes/<id1>/selectors/<id2>/labels  : (List[String]) A list of all selector labels from node <id1> to <id2>
@@ -91,7 +92,8 @@ import java.util.*;
  * nonterminals/<id>/label : (String)
  * nonterminals/<id>/rank : (Int)
  * nonterminals/<nterm-id>/tentacle targets : (List[Int]) A list of all nodes that are connected to the nonterminal <nterm-id>
- * nonterminals/<nterm-id>/tentacles/<node-id> : (List[Int]) A list of all tentacle edges between <nterm-id> and <node-id>
+ * nonterminals/<nterm-id>/tentacles/<node-id>/indices : (List[Int]) A list of all tentacle edges between <nterm-id> and <node-id>
+ * nonterminals/<nterm-id>/tentacles/<node-id>/reduction tentacle : (String) one of "all" "none" "mixed"
  *
  * <heap configuration>: (only for heap configurations of a critical pair)  TODO
  * nodes/<id>/critical pair involvement : (String) one of "hc1", "hc2", "both", "new"
@@ -265,7 +267,7 @@ public class TikzExport {
         pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/original rule idx", Integer.toString(r2.first()+1)));
         pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/is original rule", r2.second()==null?"true":"false"));
         if (r2.second() != null) {
-            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/collapsed rule idx", Integer.toString(r2.second()+1)));
+            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/collapsed rule idx", Integer.toString(r2.second() + 1)));
         }
 
         addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
@@ -319,6 +321,8 @@ public class TikzExport {
             pgfSingleValues.add(new Pair<>(currentNodePath + "/type", type.toString()));
             boolean isExternal = hc.isExternalNode(publicId);
             pgfSingleValues.add(new Pair<>(currentNodePath + "/is external", isExternal?"true":"false"));
+            boolean isPrimitive = type.isPrimitiveType();
+            pgfSingleValues.add(new Pair<>(currentNodePath + "/is primitive", isPrimitive?"true":"false"));
             if (isExternal) {
                 int collapsedExternalIdx = hc.externalIndexOf(publicId);
                 TIntArrayList originalToCollapsedExternalIndices = collapsedHc.getOriginalToCollapsedExternalIndices();
@@ -373,16 +377,32 @@ public class TikzExport {
             pgfSingleValues.add(new Pair<>(currentNonterminalPath + "/rank", Integer.toString(rank)));
             // Add tentacle edges
             Map<Integer, Collection<String>> attachedNodeToTentacleList = new HashMap<>();
+            Map<Integer, Integer> numberReductionTentacles = new HashMap<>();
             TIntArrayList attachedNodes = hc.attachedNodesOf(publicId);
             for (int idx=0; idx<rank; idx++) {
                 int attachedNode = attachedNodes.get(idx);
                 Collection<String> tentacleList = attachedNodeToTentacleList.computeIfAbsent(attachedNode, ArrayList::new);
                 tentacleList.add(Integer.toString(idx));
+                if (nonterminal.isReductionTentacle(idx)) {
+                    int oldNumberReductionTentacles = numberReductionTentacles.getOrDefault(attachedNode, 0);
+                    numberReductionTentacles.put(attachedNode, oldNumberReductionTentacles + 1);
+                }
+
             }
             Collection<String> tentacleTargets = new ArrayList<>();
             for (Map.Entry<Integer, Collection<String>> entry : attachedNodeToTentacleList.entrySet()) {
                 tentacleTargets.add(Integer.toString(entry.getKey()));
-                pgfListValues.add(new Pair<>(currentNonterminalPath + "/tentacles/" + entry.getKey(), entry.getValue()));
+                pgfListValues.add(new Pair<>(currentNonterminalPath + "/tentacles/" + entry.getKey() + "/indices", entry.getValue()));
+                int numReductionTentacles = numberReductionTentacles.getOrDefault(entry.getKey(), 0);
+                String reductionTentacle;
+                if (numReductionTentacles == 0) {
+                    reductionTentacle = "none";
+                } else if (numReductionTentacles == entry.getValue().size()) {
+                    reductionTentacle = "all";
+                } else {
+                    reductionTentacle = "mixed";
+                }
+                pgfSingleValues.add(new Pair<>(currentNonterminalPath + "/tentacles/" + entry.getKey() + "/reduction tentacle", reductionTentacle));
             }
             pgfListValues.add(new Pair<>(currentNonterminalPath + "/tentacle targets", tentacleTargets));
             // Continue with the other nonterminals

@@ -77,7 +77,11 @@
     hyperedge tentacle/.style={black!40},
     hyperedge tentacle label/.style={black,anchor=center,rectangle,rounded corners=4pt,fill=white,inner sep=1pt},
     global heap drawing settings/.style={spring electrical layout,node distance=1.6cm,electric force order=3},
-    grammar derivation arrow/.style={}
+    grammar derivation arrow/.style={},
+    node primitive type/.style={fill=gray},
+    all reduction tentacle/.style={green},
+    none reduction tentacle/.style={red},
+    mixed reduction tentacle/.style={blue}
 }
 
 \def\AttestorStronglyJoinable{STRONGLYJOINABLE}
@@ -187,11 +191,18 @@
 % #1: Path to current heap  #2: current node id
 \newcommand{\AttestorDrawNode}[2] {
     \def\true{true}
+    \def\currentNodePath{#1/nodes/#2}
+    % Check if the node type is primitive
+    \pgfkeys{\currentNodePath/is primitive/.get=\isPrimitive}
+    \tikzset{temp style/.code={
+        \ifx\isPrimitive\true
+            \tikzset{node primitive type}
+        \fi
+    }}
     \def\pathLHS{/attestor/left hand side}
     \def\pathRHS{/attestor/right hand side}
     \def\currentHeapPath{#1}
     \def\pathJointGraph{/attestor/joint graph}
-    \def\currentNodePath{#1/nodes/#2}
     \pgfkeys{\currentNodePath/is external/.get=\isExternal}
     \ifx\isExternal\true
         % Is external node
@@ -202,20 +213,23 @@
             \pgfkeys{\currentNodePath/external indices/.get=\externalIdices}
             \ifx\currentHeapPath\pathRHS
                 % Is node in RHS of grammar rule
-                \node[external node] (node#2) {$(\externalIdices)$}; % TODO
+                \node [external node,temp style] (node#2) {$(\externalIdices)$};
             \else
                 % Is normal external node
-                \node[external node] (node#2) {$#2(\externalIdices)$};
+                %\edef\nodeStyles{[external node] (node#2) {$#2(\externalIdices)$};}
+                \node [external node,temp style] (node#2) {$#2(\externalIdices)$};
             \fi
         \fi
     \else
         \ifx\currentHeapPath\pathJointGraph
             % Is node in joint graph of a critical pair
-            \node[internal node] (node#2) {#2};
+            %\def\nodeStyles{[internal node] (node#2) {#2};}
+            \node [internal node,temp style] (node#2) {#2};
             %\node[external node] (node#2) {$#2^{(?)}_{(?)}$}; % TODO
         \else
             % normal internal node
-            \node[internal node] (node#2) {#2};
+            %\edef\nodeStyles{[internal node]}
+            \node [internal node,temp style] (node#2) {#2};
         \fi
 
     \fi
@@ -230,6 +244,8 @@
 
 % #1 is the pgfkeys prefix. The macro must be called from inside a tikzpicture environment
 \newcommand{\AttestorDrawHeapConfiguration}[1] {
+    \edef\all{all}
+    \edef\none{none}
     \def\true{true}
     \pgfkeys{#1/nodes/.get=\nodelist}
     \pgfkeys{#1/nonterminals/.get=\nonterminalList}
@@ -246,8 +262,20 @@
             \node [hyperedge node] (nonterminal\nonterminal) {$^\nonterminal$\nonterminalLabel};
             \pgfkeys{#1/nonterminals/\nonterminal/tentacle targets/.get=\targets}
             \foreach \target in \targets {
-                \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/.get=\labels}
-                \edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle] node [hyperedge tentacle label] {\labels} (node\target);}
+                \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/indices/.get=\labels}
+                \pgfkeys{#1/nonterminals/\nonterminal/tentacles/\target/reduction tentacle/.get=\reductionTentacle}
+                \edef\tentacleStyle{%
+                    \ifx\reductionTentacle\all
+                        all reduction tentacle%
+                    \else
+                        \ifx\reductionTentacle\none
+                            none reduction tentacle%
+                        \else
+                            mixed reduction tentacle%
+                        \fi
+                    \fi
+                }
+                \edef\DrawLine{(nonterminal\nonterminal) edge [hyperedge tentacle,\tentacleStyle] node [hyperedge tentacle label] {\labels} (node\target);}
                 \draw \DrawLine
             }
         }
