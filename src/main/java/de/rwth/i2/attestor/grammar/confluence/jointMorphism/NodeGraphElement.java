@@ -6,7 +6,9 @@ import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.internal.HeapConfigurationIdConverter;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
+import de.rwth.i2.attestor.types.Types;
 import gnu.trove.list.array.TIntArrayList;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,6 +99,19 @@ public class NodeGraphElement extends GraphElement {
                 if (edgeLabel instanceof SelectorLabel && ((SelectorLabel) edgeLabel).hasLabel(selector)) {
                     // Found the corresponding selector edge
                     return new NodeGraphElement(successors.get(i));
+                }
+            }
+        }
+        return null;
+    }
+
+    public static NodeGraphElement getNullNode(Graph graph) {
+        for (int i=0; i<graph.size(); i++) {
+            NodeLabel label = graph.getNodeLabel(i);
+            if (label instanceof Type) {
+                Type type = (Type) label;
+                if (type.matches(Types.NULL)) {
+                    return new NodeGraphElement(i);
                 }
             }
         }

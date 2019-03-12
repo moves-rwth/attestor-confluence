@@ -38,31 +38,28 @@ public class CriticalPair {
         HeapConfiguration fullyAbstracted2 = getCanonical2();
 
         // 4. Check if both fully abstracted heap configurations are isomorphic (and therefore joinable)
-        Joinability joinability = null;
-        if (fullyAbstracted1.nodes().equals(fullyAbstracted2.nodes())) {
-            // Both fully abstracted heap configurations contain the nodes
-            // Check if track morphism defines the isomorphism (strong joinable)
-            HeapConfiguration fullyAbstracted1Track = setExternalNodesAccordingToIds(fullyAbstracted1);
-            HeapConfiguration fullyAbstracted2Track = setExternalNodesAccordingToIds(fullyAbstracted2);
 
-            checker.run((Graph) fullyAbstracted1Track, (Graph) fullyAbstracted2Track);
-            if (checker.hasMorphism()) {
-                // Strongly joinable
-                joinability = Joinability.STRONGLY_JOINABLE;
-            }
-        }
-        if (joinability == null) {
+        // Check if track morphism defines the isomorphism (strongly joinable)
+        TIntArrayList publicIdIntersection = new TIntArrayList(fullyAbstracted1.nodes()); // TODO: Copy probably unnecessary
+        publicIdIntersection.retainAll(fullyAbstracted2.nodes());
+
+        HeapConfiguration fullyAbstracted1Track = setNodesExternal(fullyAbstracted1, publicIdIntersection);
+        HeapConfiguration fullyAbstracted2Track = setNodesExternal(fullyAbstracted2, publicIdIntersection);
+
+        checker.run((Graph) fullyAbstracted1Track, (Graph) fullyAbstracted2Track);
+        if (checker.hasMorphism()) {
+            // Strongly joinable
+            this.joinability = Joinability.STRONGLY_JOINABLE;
+        } else {
             // The critical pair is not strongly joinable -> check if it is weakly joinable
             // Check if there is ANY isomorphism
             checker.run((Graph) fullyAbstracted1, (Graph) fullyAbstracted2);
             if (checker.hasMorphism()) {
-                joinability = Joinability.WEAKLY_JOINABLE;
+                this.joinability = Joinability.WEAKLY_JOINABLE;
             } else {
-                joinability = Joinability.NOT_JOINABLE;
+                this.joinability = Joinability.NOT_JOINABLE;
             }
         }
-
-        this.joinability = joinability;
     }
 
     public JointHeapConfiguration getJointHeapConfiguration() {
@@ -111,11 +108,10 @@ public class CriticalPair {
         }
     }
 
-    private static HeapConfiguration setExternalNodesAccordingToIds(HeapConfiguration hc) {
+    private static HeapConfiguration setNodesExternal(HeapConfiguration hc, TIntArrayList nodes) {
         // Clone the HeapConfiguration
         HeapConfigurationBuilder builder = hc.clone().builder();
-        // TODO: Assumes the ids in hc.nodes() are in ascending order. Is this ok?
-        hc.nodes().forEach(hcId -> {
+        nodes.forEach(hcId -> {
             builder.setExternal(hcId);
             return true;
         });
