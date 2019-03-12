@@ -354,8 +354,14 @@ public class TikzExport {
                 selectorTargets.add(Integer.toString(entry.getKey()));
                 int selectorTarget = entry.getKey();
                 pgfListValues.add(new Pair<>(currentNodePath + "/selectors/" + selectorTarget + "/labels", entry.getValue()));
-                List reverseSelectors = hc.selectorLabelsOf(selectorTarget);
-                pgfSingleValues.add(new Pair<>(currentNodePath + "/selectors/" + selectorTarget + "/has reverse", reverseSelectors.isEmpty()?"false":"true"));
+                boolean hasReverse = false;
+                for (SelectorLabel sel : hc.selectorLabelsOf(selectorTarget)) {
+                    if (hc.selectorTargetOf(selectorTarget, sel) == publicId) {
+                        hasReverse = true;
+                        break;
+                    }
+                }
+                pgfSingleValues.add(new Pair<>(currentNodePath + "/selectors/" + selectorTarget + "/has reverse", hasReverse?"true":"false"));
             }
             pgfListValues.add(new Pair<>(currentNodePath + "/selector targets", selectorTargets));
             // Continue with the other nodes
