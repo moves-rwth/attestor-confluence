@@ -27,6 +27,13 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         // Initialize empty node equivalences
         this.mapNodeHc1ToHc2 = new HashMap<>();
         this.mapNodeHc2ToHc1 = new HashMap<>();
+        // Null nodes in both graphs must be equal
+        NodeGraphElement nullHc1 = NodeGraphElement.getNullNode(context.getGraph1());
+        NodeGraphElement nullHc2 = NodeGraphElement.getNullNode(context.getGraph1());
+        if (nullHc1 != null && nullHc2 != null) {
+            this.mapNodeHc1ToHc2.put(nullHc1, nullHc2);
+            this.mapNodeHc2ToHc1.put(nullHc2, nullHc1);
+        }
     }
 
     private EdgeOverlapping(EdgeOverlapping oldEdgeOverlapping, Pair<EdgeGraphElement, EdgeGraphElement> newEquivalence) {
