@@ -32,6 +32,8 @@ public class Temp {
         exportDefaultGrammar("BT");
         exportDefaultGrammar("DLList");
         exportDefaultGrammar("SLList");
+        exportDefaultGrammar("DLList_simple_one_way");
+        exportDefaultGrammar("DLList_simple_two_way");
     }
 
     public static void exportDefaultGrammar(String defaultGrammarName) {
