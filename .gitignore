@@ -1,6 +1,10 @@
 *.aux
 *.log
 *.pdf
+*.out
+*.toc
+reports/*.pdf
+reports/*.tex
 
 .metadata
 bin/
