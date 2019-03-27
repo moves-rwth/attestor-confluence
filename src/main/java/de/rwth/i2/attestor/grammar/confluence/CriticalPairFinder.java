@@ -111,9 +111,8 @@ public class CriticalPairFinder {
         }
     }
 
-
     public Collection<CriticalPair> getCriticalPairs() {
-        return criticalPairs;
+        return Collections.unmodifiableCollection(criticalPairs);
     }
 
     public Joinability getJoinabilityResult() {
