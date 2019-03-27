@@ -66,10 +66,12 @@ public class NamedGrammar extends Grammar {
         return collapsedRules.get(originalRuleIdx).size();
     }
 
+    @Deprecated
     public Pair<Nonterminal, HeapConfiguration> getOriginalRule(int originalRuleIdx) {
         return originalRules.get(originalRuleIdx);
     }
 
+    @Deprecated
     public CollapsedHeapConfiguration getCollapsedRhs(int originalRuleIdx, int collapsedRuleIdx) {
         return collapsedRules.get(originalRuleIdx).get(collapsedRuleIdx);
     }
@@ -78,7 +80,7 @@ public class NamedGrammar extends Grammar {
         return grammarName;
     }
 
-
+    @Deprecated
     public List<Pair<Integer, Integer>> getAllRuleIdPairs() {
         List<Pair<Integer, Integer>> individualGrammarRules = new ArrayList<>();
         for (int originalRuleId = 0; originalRuleId < numberOriginalRules(); originalRuleId++) {
@@ -90,6 +92,7 @@ public class NamedGrammar extends Grammar {
         return individualGrammarRules;
     }
 
+    @Deprecated
     public Pair<Nonterminal, CollapsedHeapConfiguration> getRule(Pair<Integer, Integer> ruleIds) {
         if (ruleIds.second() == null) {
             Pair<Nonterminal, HeapConfiguration> rule = getOriginalRule(ruleIds.first());
@@ -103,5 +106,23 @@ public class NamedGrammar extends Grammar {
 
     public CanonicalizationStrategy getCanonicalizationStrategy() {
         return canonicalizationStrategy;
+    }
+
+
+    public Collection<GrammarRule> getGrammarRules() {
+        Collection<GrammarRule> result = new ArrayList<>();
+        for (int originalRuleIdx = 0; originalRuleIdx < originalRules.size(); originalRuleIdx++) {
+            result.add(new GrammarRule(originalRuleIdx));
+            List<CollapsedHeapConfiguration> collapsedHeapConfigurations = collapsedRules.get(originalRuleIdx);
+            for (int collapsedRuleIdx = 0; collapsedRuleIdx < collapsedHeapConfigurations.size(); collapsedRuleIdx++) {
+                result.add(new GrammarRule(originalRuleIdx, collapsedRuleIdx));
+            }
+        }
+        return result;
+    }
+
+    public static NamedGrammar getNamedGrammar(Collection<GrammarRule> rules) {
+        // TODO
+        throw new UnsupportedOperationException();
     }
 }

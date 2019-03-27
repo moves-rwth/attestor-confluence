@@ -115,6 +115,20 @@ public class CriticalPairFinder {
         return Collections.unmodifiableCollection(criticalPairs);
     }
 
+    /**
+     * Returns the critical pairs that are joinable by at most the given joinability.
+     * So if maxJoinability == WEAKLY_JOINABLE then only critical pairs that are not joinable or weakly joinable are returned.
+     */
+    public Collection<CriticalPair> getCriticalPairsMaxJoinability(Joinability maxJoinability) {
+        Collection result = new ArrayList();
+        for (CriticalPair criticalPair : criticalPairs) {
+            if (criticalPair.getJoinability().getValue() <= maxJoinability.getValue()) {
+                result.add(criticalPair);
+            }
+        }
+        return result;
+    }
+
     public Joinability getJoinabilityResult() {
         return joinabilityResult;
     }

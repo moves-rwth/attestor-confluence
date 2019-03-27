@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion.penalties;
 
 import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
+import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 import java.util.Collection;
@@ -18,5 +19,5 @@ public interface CompletionStatePenalty {
      * Returns an integer representing the quality of the given completion state (remaining critical pairs & current list of grammar rules)
      * A smaller value means that the completion state is closer to being confluent or that the state is more desirable.
      */
-    int getPenalty(Collection<CriticalPair> criticalPairs, Collection<GrammarRule> rules, Set<HeapConfiguration> abstractionBlockingHeapConfigurations);
+    int getPenalty(CompletionState state);
 }
