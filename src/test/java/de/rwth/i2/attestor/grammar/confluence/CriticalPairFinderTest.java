@@ -104,6 +104,16 @@ public class CriticalPairFinderTest {
         testGrammar("SLList", 446081815);
     }
 
+    @Test
+    public void testDefaultGrammar_DLList_one_way() {
+        testGrammar("DLList_simple_one_way", 298312679);
+    }
+
+    @Test
+    public void testDefaultGrammar_DLList_two_way() {
+        testGrammar("DLList_simple_two_way", 541222743);
+    }
+
 
     public void testGrammar(String grammarName, int hash) {
         NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
