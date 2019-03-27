@@ -19,6 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -69,9 +71,8 @@ public class CriticalPairFinderTest {
     public void testSimpleDLLGrammar() {
         NamedGrammar grammar = getSimpleDLLGrammar();
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
-        assertEquals(Joinability.NOT_JOINABLE, criticalPairFinder.getJoinabilityResult());
-        Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
-        assertEquals(3, criticalPairs.size());
+        Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
+        assertEquals(86812900, criticalPairSet.hashCode());
     }
 
 
@@ -79,36 +80,36 @@ public class CriticalPairFinderTest {
     public void testPossibleCriticalPairs() {
         NamedGrammar balancedTreeGrammar = new NamedGrammar(new BalancedTreeGrammar(sceneObject).getGrammar(), "Balanced Tree");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(balancedTreeGrammar);
-        System.err.println(criticalPairFinder.getCriticalPairs().size());
-        // TODO: Add assert
+        Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
+        assertEquals(544915858, criticalPairSet.hashCode());
     }
 
     @Test
     public void testDefaultGrammar_BT_conf() {
-        testGrammar("BT_conf", Joinability.STRONGLY_JOINABLE);
+        testGrammar("BT_conf", 1302461630);
     }
 
     @Test
     public void testDefaultGrammar_BT() {
-        testGrammar("BT", Joinability.STRONGLY_JOINABLE);
+        testGrammar("BT", 1205480388);
     }
 
     @Test
     public void testDefaultGrammar_DLList() {
-        testGrammar("DLList", Joinability.STRONGLY_JOINABLE);
+        testGrammar("DLList", 1999555369);
     }
 
     @Test
     public void testDefaultGrammar_SLList() {
-        testGrammar("SLList", Joinability.STRONGLY_JOINABLE);
+        testGrammar("SLList", 446081815);
     }
 
 
-    public void testGrammar(String grammarName, Joinability joinability) {
+    public void testGrammar(String grammarName, int hash) {
         NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
-        // TODO: Assert joinability
-        // assertEquals(joinability, criticalPairFinder.getJoinabilityResult());
+        Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
+        assertEquals(hash, criticalPairSet.hashCode());
     }
 
 }

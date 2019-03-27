@@ -15,6 +15,8 @@ import de.rwth.i2.attestor.graph.morphism.checkers.VF2IsomorphismChecker;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
+import java.util.Objects;
+
 public class CriticalPair {
     private final NamedGrammar grammar;
     private final JointHeapConfiguration jointHeapConfiguration;
@@ -126,4 +128,9 @@ public class CriticalPair {
         return r2ID;
     }
 
+    @Override
+    public int hashCode() {
+        // Note: Should also include the joint head configuration and its two rule applications, but then hash code does not stay the same over multiple runs
+        return Objects.hash(r1ID.first(), r1ID.second(), r2ID.first(), r2ID.second(), joinability.getValue());
+    }
 }

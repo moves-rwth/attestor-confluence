@@ -23,7 +23,6 @@ import java.util.*;
 public class JointHeapConfiguration {
     private final HeapConfiguration hc;
     private final Matching matching1, matching2;
-    private Map<GraphElement, GraphElement> mapHcToPattern1, mapHcToPattern2;
 
     /**
      * Creates a new HeapConfiguration that is the union between the two HeapConfigurations in the context object.
@@ -208,21 +207,5 @@ public class JointHeapConfiguration {
         }
     }
 
-
-    /**
-     * Returns a list of external indices. If rule 1 is applied the new Nonterminal connects to the node with those indices.
-     */
-    public List<Integer> getRule1ExternalIndices(NodeGraphElement node) {
-        // TODO
-        return null;
-    }
-
-    /**
-     * Returns a list of external indices. If rule 2 is applied the new Nonterminal connects to the node with those indices.
-     */
-    public List<Integer> getRule2ExternalIndices(NodeGraphElement node) {
-        // TODO
-        return null;
-    }
 
 }

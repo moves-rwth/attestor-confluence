@@ -42,12 +42,10 @@ public class CriticalPairFinder {
     private Joinability joinabilityResult;
     final private Collection<CriticalPair> criticalPairs;
     final private NamedGrammar underlyingGrammar;
-    final private VF2IsomorphismChecker checker;
 
     public CriticalPairFinder(NamedGrammar grammar) {
         this.underlyingGrammar = grammar;
         this.criticalPairs = new ArrayList<>();
-        this.checker = new VF2IsomorphismChecker();
         this.joinabilityResult = Joinability.STRONGLY_JOINABLE;
 
         computeAllCriticalPairs();
