@@ -71,7 +71,14 @@ public class NamedGrammar extends Grammar {
         return originalRules.get(originalRuleIdx);
     }
 
-    @Deprecated
+    public Nonterminal getNonterminal(int originalRuleIdx) {
+        return originalRules.get(originalRuleIdx).first();
+    }
+
+    public HeapConfiguration getHeapConfiguration(int originalRuleIdx) {
+        return originalRules.get(originalRuleIdx).second();
+    }
+
     public CollapsedHeapConfiguration getCollapsedRhs(int originalRuleIdx, int collapsedRuleIdx) {
         return collapsedRules.get(originalRuleIdx).get(collapsedRuleIdx);
     }
@@ -112,10 +119,10 @@ public class NamedGrammar extends Grammar {
     public Collection<GrammarRule> getGrammarRules() {
         Collection<GrammarRule> result = new ArrayList<>();
         for (int originalRuleIdx = 0; originalRuleIdx < originalRules.size(); originalRuleIdx++) {
-            result.add(new GrammarRule(originalRuleIdx));
+            result.add(new GrammarRule(this, originalRuleIdx));
             List<CollapsedHeapConfiguration> collapsedHeapConfigurations = collapsedRules.get(originalRuleIdx);
             for (int collapsedRuleIdx = 0; collapsedRuleIdx < collapsedHeapConfigurations.size(); collapsedRuleIdx++) {
-                result.add(new GrammarRule(originalRuleIdx, collapsedRuleIdx));
+                result.add(new GrammarRule(this, originalRuleIdx, collapsedRuleIdx));
             }
         }
         return result;

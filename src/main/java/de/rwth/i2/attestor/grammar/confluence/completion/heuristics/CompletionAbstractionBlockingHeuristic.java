@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public class CompletionAbstractionBlockingHeuristic implements CompletionHeuristic {
     @Override
-    public Collection<CompletionState> applyHeuristic(CompletionState state) {
+    public Iterable<CompletionState> applyHeuristic(CompletionState state) {
         // TODO
         throw new UnsupportedOperationException();
     }

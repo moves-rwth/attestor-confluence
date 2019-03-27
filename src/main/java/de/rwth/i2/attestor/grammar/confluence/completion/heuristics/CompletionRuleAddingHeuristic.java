@@ -11,7 +11,7 @@ import java.util.Collection;
 public abstract class CompletionRuleAddingHeuristic implements CompletionHeuristic {
 
     @Override
-    public Collection<CompletionState> applyHeuristic(CompletionState state) {
+    public Iterable<CompletionState> applyHeuristic(CompletionState state) {
         // TODO: Implement
         throw new UnsupportedOperationException();
     }

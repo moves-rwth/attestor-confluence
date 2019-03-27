@@ -1,4 +1,4 @@
-package de.rwth.i2.attestor.grammar.confluence.completion.penalties;
+package de.rwth.i2.attestor.grammar.confluence.completion.loss;
 
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 
@@ -7,11 +7,11 @@ import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
  * - Number of critical pairs: This should be the main factor
  * - Number of nodes in right hand sides: It is more desirable to have fewer external nodes in grammar rules
  */
-public interface CompletionStatePenalty {
+public interface CompletionStateLoss {
 
     /**
      * Returns an integer representing the quality of the given completion state (remaining critical pairs & current list of grammar rules)
      * A smaller value means that the completion state is closer to being confluent or that the state is more desirable.
      */
-    int getPenalty(CompletionState state);
+    int getLoss(CompletionState state);
 }

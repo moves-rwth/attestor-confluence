@@ -10,5 +10,5 @@ public interface CompletionHeuristic {
      * @param state The state on which the heuristic should be applied
      * @return A collection of all possible immediate successors the the input state according to the heuristic
      */
-    Collection<CompletionState> applyHeuristic(CompletionState state);
+    Iterable<CompletionState> applyHeuristic(CompletionState state);
 }

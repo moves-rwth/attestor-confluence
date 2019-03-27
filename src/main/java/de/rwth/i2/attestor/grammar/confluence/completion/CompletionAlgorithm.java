@@ -2,7 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion;
 
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
-import de.rwth.i2.attestor.grammar.confluence.completion.penalties.CompletionStatePenalty;
+import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.CompletionStrategy;
 
 import java.util.ArrayList;
@@ -11,23 +11,24 @@ import java.util.List;
 
 public class CompletionAlgorithm {
     private List<CompletionHeuristic> heuristics;
-    private CompletionStatePenalty completionStatePenalty;
+    private CompletionStateLoss completionStateLoss;
     private CompletionStrategy completionStrategy;
-    private int searchDepth;
+    private int maxSearchDepth;
 
     public CompletionAlgorithm() {
         this.heuristics = new ArrayList<>();
+        this.maxSearchDepth = 0;
     }
 
     // Builder style setters
 
-    public CompletionAlgorithm setSearchDepth(int searchDepth) {
-        this.searchDepth = searchDepth;
+    public CompletionAlgorithm setMaxSearchDepth(int maxSearchDepth) {
+        this.maxSearchDepth = maxSearchDepth;
         return this;
     }
 
-    public CompletionAlgorithm setCompletionStatePenalty(CompletionStatePenalty penalty) {
-        this.completionStatePenalty = penalty;
+    public CompletionAlgorithm setCompletionStateLoss(CompletionStateLoss penalty) {
+        this.completionStateLoss = penalty;
         return this;
     }
 
@@ -47,23 +48,25 @@ public class CompletionAlgorithm {
         return Collections.unmodifiableList(heuristics);
     }
 
-    public CompletionStatePenalty getCompletionStatePenalty() {
-        return completionStatePenalty;
+    public CompletionStateLoss getCompletionStateLoss() {
+        return completionStateLoss;
     }
 
     public CompletionStrategy getCompletionStrategy() {
         return completionStrategy;
     }
 
-    public int getSearchDepth() {
-        return searchDepth;
+    public int getMaxSearchDepth() {
+        return maxSearchDepth;
     }
 
     // Run algorithm
 
     public CompletionState runCompletionAlgorithm(NamedGrammar inputGrammar) {
-        // TODO: Maybe check that all neccessary values have been set (throw exception if not)
-        return completionStrategy.executeCompletionAlgorithm(inputGrammar, this);
+        if (heuristics.size() == 0 || completionStateLoss == null || completionStrategy == null) {
+            throw new IllegalStateException("The completion algorithm is missing a necessary parameter.");
+        }
+        return completionStrategy.executeCompletionStrategy(inputGrammar, this);
     }
 
 }
