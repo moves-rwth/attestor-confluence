@@ -62,6 +62,7 @@ public class CompletionAlgorithm {
     // Run algorithm
 
     public CompletionState runCompletionAlgorithm(NamedGrammar inputGrammar) {
+        // TODO: Maybe check that all neccessary values have been set (throw exception if not)
         return completionStrategy.executeCompletionAlgorithm(inputGrammar, this);
     }
 
