@@ -5,7 +5,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 
 public class WeightedCompletionStateLoss implements CompletionStateLoss {
     int numCriticalPairWeight;  // This should be the main factor, as we want to minimize the number critical pairs
-    int numExternalNodesWeight;  // Fewer external nodes decrease the likelyhood of new critical pairs
+    int numExternalNodesWeight;  // Fewer external nodes decrease the likelihood of new critical pairs
     int numRulesWeight;  // A smaller grammar means a faster analysis later
 
     public WeightedCompletionStateLoss(int numCriticalPairWeight, int numExternalNodesWeight, int numRulesWeight) {

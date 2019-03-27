@@ -10,6 +10,7 @@ import java.util.Collection;
 public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeuristic {
     @Override
     Collection<Pair<Nonterminal, CollapsedHeapConfiguration>> addNewRules(CriticalPair criticalPair) {
+        // TODO
         throw new UnsupportedOperationException();
     }
 }
