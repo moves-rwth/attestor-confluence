@@ -13,7 +13,7 @@ public abstract class CompletionRuleAddingHeuristic implements CompletionHeurist
     @Override
     public Collection<CompletionState> applyHeuristic(CompletionState state) {
         // TODO: Implement
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

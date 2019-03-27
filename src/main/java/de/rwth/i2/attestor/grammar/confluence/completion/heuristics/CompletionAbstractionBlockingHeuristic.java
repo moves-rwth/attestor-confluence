@@ -8,6 +8,6 @@ public class CompletionAbstractionBlockingHeuristic implements CompletionHeurist
     @Override
     public Collection<CompletionState> applyHeuristic(CompletionState state) {
         // TODO
-        return null;
+        throw new UnsupportedOperationException();
     }
 }

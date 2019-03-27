@@ -13,6 +13,6 @@ public class GreedyCompletion implements CompletionStrategy {
     @Override
     public CompletionState executeCompletionAlgorithm(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
         // TODO: Implement
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
