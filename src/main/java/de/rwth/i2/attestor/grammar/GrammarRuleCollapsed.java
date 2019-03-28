@@ -8,19 +8,44 @@ import java.util.Objects;
 public class GrammarRuleCollapsed implements GrammarRule {
     private final GrammarRuleOriginal originalRule;
     private final CollapsedHeapConfiguration collapsedHeapConfiguration;
-    private final boolean isDeactivated;
     private final int collapsedRuleIdx;
+    private final RuleStatus status;
 
-    public GrammarRuleCollapsed(GrammarRuleOriginal originalRule, int collapsedRuleIdx, CollapsedHeapConfiguration cHC, boolean isDeactivated) {
+
+    public GrammarRuleCollapsed(GrammarRuleOriginal originalRule, int collapsedRuleIdx, CollapsedHeapConfiguration cHC, RuleStatus status) {
+        if (status == RuleStatus.CONFLUENCE_GENERATED) {
+            throw new IllegalArgumentException("Collapsed rules cannot have state CONFLUENCE_GENERATED");
+        }
         this.originalRule = originalRule;
         this.collapsedHeapConfiguration = cHC;
-        this.isDeactivated = isDeactivated;
         this.collapsedRuleIdx = collapsedRuleIdx;
+        this.status = status;
+    }
+
+    GrammarRuleCollapsed flipActivation(GrammarRuleOriginal newOriginal) {
+        RuleStatus newStatus;
+        switch (status) {
+            case ACTIVE:  // Rule should be inactivated
+                newStatus = RuleStatus.INACTIVE;
+                break;
+            case INACTIVE:  // Rule should be activated
+                newStatus = RuleStatus.ACTIVE;
+                break;
+            case CONFLUENCE_GENERATED:
+                throw new IllegalStateException("Collapsed rules should not be CONFLUENCE_GENERATED");
+            default:
+                throw new IllegalStateException("Invalid status");
+        }
+        return new GrammarRuleCollapsed(newOriginal, collapsedRuleIdx, collapsedHeapConfiguration, newStatus);
+    }
+
+    GrammarRuleCollapsed attachToOriginalRule(GrammarRuleOriginal newOriginal) {
+        return new GrammarRuleCollapsed(newOriginal, collapsedRuleIdx, collapsedHeapConfiguration, status);
     }
 
     @Override
-    public boolean deactivatedForAbstraction() {
-        return isDeactivated;
+    public RuleStatus getRuleStatus() {
+        return status;
     }
 
     @Override

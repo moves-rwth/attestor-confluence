@@ -4,10 +4,17 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 public interface GrammarRule {
+
+    enum RuleStatus {
+        ACTIVE,  // The rule originates from a handwritten rule and can be used for abstraction
+        INACTIVE,  // The rule originates from a handwritten rule and cannot be used for abstraction
+        CONFLUENCE_GENERATED  // The rule was generated to achieve confluence and can be used for abstraction (those rules are never deactivated, but just deleted)
+    }
+
     /**
      * @return true if this rule should only be used for concretization and not for abstraction
      */
-    boolean deactivatedForAbstraction();
+    RuleStatus getRuleStatus();
 
     Nonterminal getNonterminal();
 

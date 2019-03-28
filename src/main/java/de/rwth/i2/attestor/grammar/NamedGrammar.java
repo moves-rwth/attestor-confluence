@@ -16,19 +16,42 @@ import java.util.*;
 
 /**
  * A grammar with a name, where each rule is numbered.
+ *
  */
-public class NamedGrammar extends Grammar {
+public class NamedGrammar {
     final private String grammarName;
-    List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
+    final private Grammar abstractionGrammar, concretizationGrammar;
+    final private List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
 
     final CanonicalizationStrategy canonicalizationStrategy;
 
+    private NamedGrammar(NamedGrammar oldGrammar, List<GrammarRuleOriginal> newOriginalRules) {
+        this.concretizationGrammar = oldGrammar.concretizationGrammar;
+        this.grammarName = oldGrammar.grammarName;
+        this.originalRules = newOriginalRules;
+        Map<Nonterminal, Set<HeapConfiguration>> abstractionOriginalRules = new HashMap<>();
+        Map<Nonterminal, Set<CollapsedHeapConfiguration>> abstractionCollapsedRules = new HashMap<>();
+
+        for (GrammarRuleOriginal originalRule : originalRules) {
+            switch (originalRule.getRuleStatus()) {
+                case ACTIVE:
+                case CONFLUENCE_GENERATED:
+                    Set<HeapConfiguration> originalRules = abstractionOriginalRules.computeIfAbsent(originalRule.getNonterminal(), HashSet::new);
+            }
+        }
+        // TODO: Compute the abstraction rules
+
+        this.abstractionGrammar = new Grammar(abstractionOriginalRules, abstractionCollapsedRules);
+        this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+    }
+
     public NamedGrammar(Grammar grammar, String name) {
-        super(grammar.rules, grammar.collapsedRules);
+        this.abstractionGrammar = grammar;
+        this.concretizationGrammar = grammar;
         this.grammarName = name;
         this.originalRules = new ArrayList<>();
 
-        for(Map.Entry<Nonterminal, Set<HeapConfiguration>> entry : rules.entrySet()) {
+        for(Map.Entry<Nonterminal, Set<HeapConfiguration>> entry : grammar.rules.entrySet()) {
             Nonterminal nonterminal = entry.getKey();
             boolean[] reductionTentacles = new boolean[nonterminal.getRank()];
             for (int i=0; i < nonterminal.getRank(); i++) {
@@ -39,7 +62,7 @@ public class NamedGrammar extends Grammar {
             for (HeapConfiguration originalHC : entry.getValue()) {
                 int originalRuleIdx = originalRules.size();
                 List<GrammarRuleCollapsed> collapsedRules = new ArrayList<>();
-                GrammarRuleOriginal originalRule = new GrammarRuleOriginal(this, originalRuleIdx, nonterminal, originalHC, collapsedRules, false);
+                GrammarRuleOriginal originalRule = new GrammarRuleOriginal(this, originalRuleIdx, nonterminal, originalHC, collapsedRules, GrammarRule.RuleStatus.ACTIVE);
                 originalRules.add(originalRule);
 
                 // Add collapsed rules
@@ -47,15 +70,15 @@ public class NamedGrammar extends Grammar {
                 for (TIntArrayList extIndexPartition : partitioner.getPartitions()) {
                     HeapConfiguration collapsedHc = originalHC.clone().builder().mergeExternals(extIndexPartition).build();
                     CollapsedHeapConfiguration collapsed = new CollapsedHeapConfiguration(originalHC, collapsedHc, extIndexPartition);
-                    collapsedRules.add(new GrammarRuleCollapsed(originalRule, collapsedRules.size(), collapsed, false));
+                    collapsedRules.add(new GrammarRuleCollapsed(originalRule, collapsedRules.size(), collapsed, GrammarRule.RuleStatus.ACTIVE));
                 }
             }
         }
 
-        canonicalizationStrategy = createCanonicalizationStrategy();
+        canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
     }
 
-    private GeneralCanonicalizationStrategy createCanonicalizationStrategy() {
+    private static GeneralCanonicalizationStrategy createCanonicalizationStrategy(Grammar abstractionGrammar) {
         MorphismOptions options = new AbstractionOptions()
                 .setAdmissibleAbstraction(false)
                 .setAdmissibleConstants(false)
@@ -63,7 +86,7 @@ public class NamedGrammar extends Grammar {
 
         EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
         CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
-        return new GeneralCanonicalizationStrategy(this, canonicalizationHelper);
+        return new GeneralCanonicalizationStrategy(abstractionGrammar, canonicalizationHelper);
     }
 
     public String getGrammarName() {
@@ -87,16 +110,45 @@ public class NamedGrammar extends Grammar {
         return originalRules;
     }
 
+    public Grammar getAbstractionGrammar() {
+        return abstractionGrammar;
+    }
+
+    public Grammar getConcretizationGrammar() {
+        return concretizationGrammar;
+    }
+
+    private NamedGrammar(NamedGrammar oldGrammar, Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules) {
+        this.originalRules = new ArrayList<>();
+        this.grammarName = oldGrammar.grammarName;
+
+        // Activate / Deactivate rules
+        for (GrammarRuleOriginal oldOriginalRule : oldGrammar.originalRules) {
+            GrammarRuleOriginal newOriginalRule = oldOriginalRule.changeRuleActivation(this, flipActivation);
+            if (newOriginalRule != null) {
+                this.originalRules.add(newOriginalRule);
+            }
+        }
+
+        // Add new rules
+        for (GrammarRuleOriginal newOriginalRule : addRules) {
+            this.originalRules.add(newOriginalRule.attachToGrammar(this, this.originalRules.size()));
+        }
+
+        // TODO: Set concretizationGrammar and abstractionGrammar
+
+        this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+    }
+
     /**
-     * Creates a new grammar with the given modifications.
-     * @param deactivateRules  Rules that are in this grammar which should be deactivated for abstraction
-     * @param activateRules  Rules that are in this grammar which should be activated for abstraction
+     * Creates a new grammar with the given modifications. The collections deactivateRules and activateRules should be disjoint.
+     *
+     * @param flipActivation Rules in the grammar whose activation should be flipped
      * @param addRules  Rules that should be added to this grammar
      * @return the resulting grammar
      */
-    public NamedGrammar getModyfiedGrammar(Iterable<GrammarRule> deactivateRules, Iterable<GrammarRule> activateRules, Iterable<GrammarRuleOriginal> addRules) {
-
-        throw new UnsupportedOperationException();
+    public NamedGrammar getModifiedGrammar(Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules) {
+        return new NamedGrammar(this, flipActivation, addRules);
     }
 
 }
