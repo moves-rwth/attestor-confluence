@@ -8,6 +8,9 @@ import de.rwth.i2.attestor.util.Pair;
 
 import java.util.Collection;
 
+/**
+ * Abstract class for all heuristics that try to add one or more rules for every critical pair.
+ */
 public abstract class CompletionRuleAddingHeuristic implements CompletionHeuristic {
 
     @Override

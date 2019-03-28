@@ -4,6 +4,10 @@ import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 
+/**
+ * A completion strategy specifies how the different heuristics should be applied in order to find a completion state
+ * with minimal loss.
+ */
 public interface CompletionStrategy {
 
     /**

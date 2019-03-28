@@ -16,7 +16,7 @@ public class GreedyCompletion implements CompletionStrategy {
     public CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
         CompletionState currentState = new CompletionState(inputGrammar);
         CompletionStateLoss completionStateLoss = completionSettings.getCompletionStateLoss();
-        int currentLoss = completionStateLoss.getLoss(currentState);
+        double currentLoss = completionStateLoss.getLoss(currentState);
         int currentSearchDepth = 0;
         boolean madeProgress = true;
 
@@ -34,7 +34,7 @@ public class GreedyCompletion implements CompletionStrategy {
                             return nextState;
                         }
                         // Compute loss
-                        int nextLoss = completionStateLoss.getLoss(nextState);
+                        double nextLoss = completionStateLoss.getLoss(nextState);
                         if (nextLoss < currentLoss) {
                             // Update state
                             currentState = nextState;

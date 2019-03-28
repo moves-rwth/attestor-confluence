@@ -2,8 +2,11 @@ package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 
-import java.util.Collection;
-
+/**
+ * Interface for all completion heuristics. A completion heuristic returns all possible ways the heuristic can be applied
+ * in the current state.
+ * A heuristic tries to modify the grammar so it is "closer" to being confluent.
+ */
 public interface CompletionHeuristic {
 
     /**

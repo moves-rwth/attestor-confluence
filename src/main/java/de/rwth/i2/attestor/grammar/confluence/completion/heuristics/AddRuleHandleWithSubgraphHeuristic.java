@@ -7,6 +7,11 @@ import de.rwth.i2.attestor.util.Pair;
 
 import java.util.Collection;
 
+/**
+ * If one of the fully abstracted heap configurations of the critical pair contains a handle and a subgraph that is
+ * also contained in the other fully abstracted heap configuration then we add a new rule mapping the handle to a heap
+ * configuration without this subgraph to make the critical pair strongly joinable if possible.
+ */
 public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeuristic {
     @Override
     Collection<Pair<Nonterminal, CollapsedHeapConfiguration>> addNewRules(CriticalPair criticalPair) {
