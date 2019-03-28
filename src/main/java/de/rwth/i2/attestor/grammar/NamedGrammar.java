@@ -10,9 +10,7 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
-import fj.test.Bool;
 import gnu.trove.list.array.TIntArrayList;
-import org.jboss.util.Heap;
 
 import java.util.*;
 
@@ -20,34 +18,16 @@ import java.util.*;
  * A grammar with a name, where each rule is numbered.
  */
 public class NamedGrammar extends Grammar {
-
-    /**
-     * Helper class to store multiple values in the originalRules map
-     */
-    private class OriginalRule {
-        public OriginalRule(Nonterminal nt, HeapConfiguration hc) {
-            this.nonterminal = nt;
-            this.heapConfiguration = hc;
-            this.collapsedHeapConfigurationMap = new HashMap<>();
-            this.isDeactivated = false;
-        }
-        final Nonterminal nonterminal;
-        final HeapConfiguration heapConfiguration;
-        final Map<Integer, Pair<CollapsedHeapConfiguration, Boolean>> collapsedHeapConfigurationMap;
-        final boolean isDeactivated;
-    }
-
     final private String grammarName;
-    final private  Map<Integer, OriginalRule> originalRules;
+    List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
 
     final CanonicalizationStrategy canonicalizationStrategy;
 
     public NamedGrammar(Grammar grammar, String name) {
         super(grammar.rules, grammar.collapsedRules);
-        originalRules = new HashMap<>();
-        grammarName = name;
+        this.grammarName = name;
+        this.originalRules = new ArrayList<>();
 
-        int originalRuleIdx = 0;
         for(Map.Entry<Nonterminal, Set<HeapConfiguration>> entry : rules.entrySet()) {
             Nonterminal nonterminal = entry.getKey();
             boolean[] reductionTentacles = new boolean[nonterminal.getRank()];
@@ -57,23 +37,25 @@ public class NamedGrammar extends Grammar {
 
             // Add original rules
             for (HeapConfiguration originalHC : entry.getValue()) {
-                OriginalRule newOriginalRule = new OriginalRule(nonterminal, originalHC);
-                originalRules.put(originalRuleIdx, newOriginalRule);
+                int originalRuleIdx = originalRules.size();
+                List<GrammarRuleCollapsed> collapsedRules = new ArrayList<>();
+                GrammarRuleOriginal originalRule = new GrammarRuleOriginal(this, originalRuleIdx, nonterminal, originalHC, collapsedRules, false);
+                originalRules.add(originalRule);
 
                 // Add collapsed rules
-                int collapsedRuleIdx = 0;
                 ExternalNodesPartitioner partitioner = new ExternalNodesPartitioner(originalHC, reductionTentacles);
                 for (TIntArrayList extIndexPartition : partitioner.getPartitions()) {
                     HeapConfiguration collapsedHc = originalHC.clone().builder().mergeExternals(extIndexPartition).build();
                     CollapsedHeapConfiguration collapsed = new CollapsedHeapConfiguration(originalHC, collapsedHc, extIndexPartition);
-                    newOriginalRule.collapsedHeapConfigurationMap.put(collapsedRuleIdx, new Pair<>(collapsed, false));
-                    collapsedRuleIdx++;
+                    collapsedRules.add(new GrammarRuleCollapsed(originalRule, collapsedRules.size(), collapsed, false));
                 }
-
-                originalRuleIdx++;
             }
-
         }
+
+        canonicalizationStrategy = createCanonicalizationStrategy();
+    }
+
+    private GeneralCanonicalizationStrategy createCanonicalizationStrategy() {
         MorphismOptions options = new AbstractionOptions()
                 .setAdmissibleAbstraction(false)
                 .setAdmissibleConstants(false)
@@ -81,84 +63,39 @@ public class NamedGrammar extends Grammar {
 
         EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
         CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
-        canonicalizationStrategy = new GeneralCanonicalizationStrategy(this, canonicalizationHelper);
-    }
-
-    Nonterminal getNonterminal(NamedGrammarRule rule) {
-        return originalRules.get(rule.getOriginalRuleIdx()).nonterminal;
-    }
-
-    HeapConfiguration getHeapConfiguration(NamedGrammarRule rule) {
-        if (rule.isOriginalRule()) {
-            return originalRules.get(rule.getOriginalRuleIdx()).heapConfiguration;
-        } else {
-            return originalRules.get(rule.getOriginalRuleIdx()).collapsedHeapConfigurationMap.get(rule.getCollapsedRuleIdx()).first().getCollapsed();
-        }
-    }
-
-    CollapsedHeapConfiguration getCollapsedHeapConfiguration(NamedGrammarRule rule) {
-        if (rule.isOriginalRule()) {
-            HeapConfiguration hc = originalRules.get(rule.getOriginalRuleIdx()).heapConfiguration;
-            return new CollapsedHeapConfiguration(hc, hc, null);
-        } else {
-            return originalRules.get(rule.getOriginalRuleIdx()).collapsedHeapConfigurationMap.get(rule.getCollapsedRuleIdx()).first();
-        }
-    }
-
-    boolean isRuleDeactivated(NamedGrammarRule rule) {
-        if (rule.isOriginalRule()) {
-            return originalRules.get(rule.getOriginalRuleIdx()).isDeactivated;
-        } else {
-            return originalRules.get(rule.getOriginalRuleIdx()).collapsedHeapConfigurationMap.get(rule.getCollapsedRuleIdx()).second();
-        }
+        return new GeneralCanonicalizationStrategy(this, canonicalizationHelper);
     }
 
     public String getGrammarName() {
         return grammarName;
     }
 
-    @Deprecated
     public CanonicalizationStrategy getCanonicalizationStrategy() {
         return canonicalizationStrategy;
     }
 
-
-    public Collection<NamedGrammarRule> getAllGrammarRules() {
-        Collection<NamedGrammarRule> result = new ArrayList<>();
-        for (int originalRuleIdx : new TreeSet<>(originalRules.keySet())) {
-            result.add(new NamedGrammarRule(this, originalRuleIdx));
-            OriginalRule originalRule = originalRules.get(originalRuleIdx);
-            for (int collapsedRuleIdx : new TreeSet<>(originalRule.collapsedHeapConfigurationMap.keySet())) {
-                result.add(new NamedGrammarRule(this, originalRuleIdx, collapsedRuleIdx));
-            }
+    public List<GrammarRule> getAllGrammarRules() {
+        List<GrammarRule> result = new ArrayList<>();
+        for (GrammarRuleOriginal originalRule : originalRules) {
+            result.add(originalRule);
+            result.addAll(originalRule.getCollapsedRules());
         }
         return result;
     }
 
-    public Collection<NamedGrammarRule> getOriginalGrammarRules() {
-        Collection<NamedGrammarRule> result = new ArrayList<>();
-        for (int originalRuleIdx : new TreeSet<>(originalRules.keySet())) {
-            result.add(new NamedGrammarRule(this, originalRuleIdx));
-        }
-        return result;
-    }
-
-    public Collection<NamedGrammarRule> getCollapsedGrammarRules(NamedGrammarRule originalRule) {
-        Collection<NamedGrammarRule> result = new ArrayList<>();
-        Map<Integer, Pair<CollapsedHeapConfiguration, Boolean>> collapsedHeapConfigurationMap = originalRules.get(originalRule.getOriginalRuleIdx()).collapsedHeapConfigurationMap;
-        for (int collapsedRuleIdx : new TreeSet<>(collapsedHeapConfigurationMap.keySet())) {
-            result.add(new NamedGrammarRule(this, originalRule.getOriginalRuleIdx(), collapsedRuleIdx));
-        }
-        return result;
+    public Iterable<GrammarRuleOriginal> getOriginalGrammarRules() {
+        return originalRules;
     }
 
     /**
-     * Converts the collection of grammar rules into a new NamedGrammar.
-     *
-     * @throws IllegalArgumentException NamedGrammarRules should not have conflicting indices (e.g. if they come from multiple named grammars)
+     * Creates a new grammar with the given modifications.
+     * @param deactivateRules  Rules that are in this grammar which should be deactivated for abstraction
+     * @param activateRules  Rules that are in this grammar which should be activated for abstraction
+     * @param addRules  Rules that should be added to this grammar
+     * @return the resulting grammar
      */
-    public static NamedGrammar getNamedGrammar(Collection<GrammarRule> rules) {
-        // TODO
+    public NamedGrammar getModyfiedGrammar(Iterable<GrammarRule> deactivateRules, Iterable<GrammarRule> activateRules, Iterable<GrammarRuleOriginal> addRules) {
+
         throw new UnsupportedOperationException();
     }
 

@@ -2,7 +2,6 @@ package de.rwth.i2.attestor.grammar.confluence.completion;
 
 import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
-import de.rwth.i2.attestor.grammar.NamedGrammarRule;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;

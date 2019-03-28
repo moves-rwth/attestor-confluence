@@ -4,9 +4,6 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 public interface GrammarRule {
-
-    boolean isOriginalRule();
-
     /**
      * @return true if this rule should only be used for concretization and not for abstraction
      */
@@ -20,4 +17,8 @@ public interface GrammarRule {
      * Can be called for collapsed and non collapsed rules. For non collapsed rules, the morphism in the collapsed heap configuration is null.
      */
     CollapsedHeapConfiguration getCollapsedHeapConfiguration();
+
+    NamedGrammar getGrammar();
+
+    int getOriginalRuleIdx();
 }

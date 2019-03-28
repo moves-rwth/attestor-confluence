@@ -2,7 +2,6 @@ package de.rwth.i2.attestor.io.tikzOutput;
 
 import de.rwth.i2.attestor.grammar.*;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
-import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
@@ -167,7 +166,7 @@ public class TikzExport {
         String grammarName = grammar.getGrammarName();
         writer.write(String.format("\\section{Grammar Report (%s)}", escapeString(grammarName)));
         writer.newLine();
-        for (NamedGrammarRule originalRule : grammar.getOriginalGrammarRules()) {
+        for (GrammarRuleOriginal originalRule : grammar.getOriginalGrammarRules()) {
             int originalRuleIdx = originalRule.getOriginalRuleIdx();
             Nonterminal nonterminal = originalRule.getNonterminal();
             HeapConfiguration originalRhs = originalRule.getHeapConfiguration();
@@ -184,7 +183,7 @@ public class TikzExport {
             writeCurrentReportToFile("\\AttestorGrammarReport");
             if (exportCollapsedRules) {
                 // Export collapsed rules
-                for (NamedGrammarRule collapsedRule : grammar.getCollapsedGrammarRules(originalRule)) {
+                for (GrammarRuleCollapsed collapsedRule : originalRule.getCollapsedRules()) {
                     pgfSingleValues = new ArrayList<>();
                     pgfListValues = new ArrayList<>();
                     int collapsedRuleIdx = collapsedRule.getCollapsedRuleIdx();

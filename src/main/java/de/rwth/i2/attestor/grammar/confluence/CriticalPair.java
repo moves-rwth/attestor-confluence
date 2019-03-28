@@ -1,9 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
-import de.rwth.i2.attestor.grammar.NamedGrammarRule;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeOverlapping;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.HeapConfigurationContext;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
@@ -14,7 +12,6 @@ import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.Matching;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.graph.morphism.checkers.VF2IsomorphismChecker;
-import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.Objects;
