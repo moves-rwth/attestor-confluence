@@ -4,49 +4,21 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
 
-/**
- * TODO: Should this object optionally contain the rule itself and maybe a link to the contained grammar
- * TODO: Maybe introduce "standalone grammar rule" and "rule from grammar" subclasses
- */
-public class GrammarRule {
-    public final int NO_COLLAPSED_RULE_IDX = -1;
-    private final int originalRuleIdx;
-    private final int collapsedRuleIdx;
-    private final NamedGrammar grammar;
+public interface GrammarRule {
 
-    public GrammarRule(NamedGrammar grammar, int originalRuleIdx) {
-        this.originalRuleIdx = originalRuleIdx;
-        this.collapsedRuleIdx = NO_COLLAPSED_RULE_IDX;
-        this.grammar = grammar;
-    }
+    boolean isOriginalRule();
 
-    public GrammarRule(NamedGrammar grammar, int originalRuleIdx, int collapsedRuleIdx) {
-        this.originalRuleIdx = originalRuleIdx;
-        this.collapsedRuleIdx = collapsedRuleIdx;
-        this.grammar = grammar;
-    }
+    /**
+     * @return true if this rule should only be used for concretization and not for abstraction
+     */
+    boolean deactivatedForAbstraction();
 
-    public int getOriginalRuleIdx() {
-        return originalRuleIdx;
-    }
+    Nonterminal getNonterminal();
 
-    public int getCollapsedRuleIdx() {
-        return collapsedRuleIdx;
-    }
+    HeapConfiguration getHeapConfiguration();
 
-    public boolean isOriginalRule() {
-        return collapsedRuleIdx == NO_COLLAPSED_RULE_IDX;
-    }
-
-    public Nonterminal getNonterminal() {
-        return grammar.getNonterminal(originalRuleIdx);
-    }
-
-    public HeapConfiguration getHeapConfiguration() {
-        if (collapsedRuleIdx == NO_COLLAPSED_RULE_IDX) {
-            return grammar.getHeapConfiguration(originalRuleIdx);
-        } else {
-            return grammar.getCollapsedRhs(originalRuleIdx, collapsedRuleIdx).getCollapsed();
-        }
-    }
+    /**
+     * Can be called for collapsed and non collapsed rules. For non collapsed rules, the morphism in the collapsed heap configuration is null.
+     */
+    CollapsedHeapConfiguration getCollapsedHeapConfiguration();
 }
