@@ -10,6 +10,7 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
+import fj.test.Bool;
 import gnu.trove.list.array.TIntArrayList;
 import org.jboss.util.Heap;
 
@@ -28,10 +29,12 @@ public class NamedGrammar extends Grammar {
             this.nonterminal = nt;
             this.heapConfiguration = hc;
             this.collapsedHeapConfigurationMap = new HashMap<>();
+            this.isDeactivated = false;
         }
         final Nonterminal nonterminal;
         final HeapConfiguration heapConfiguration;
-        final Map<Integer, CollapsedHeapConfiguration> collapsedHeapConfigurationMap;
+        final Map<Integer, Pair<CollapsedHeapConfiguration, Boolean>> collapsedHeapConfigurationMap;
+        final boolean isDeactivated;
     }
 
     final private String grammarName;
@@ -63,7 +66,7 @@ public class NamedGrammar extends Grammar {
                 for (TIntArrayList extIndexPartition : partitioner.getPartitions()) {
                     HeapConfiguration collapsedHc = originalHC.clone().builder().mergeExternals(extIndexPartition).build();
                     CollapsedHeapConfiguration collapsed = new CollapsedHeapConfiguration(originalHC, collapsedHc, extIndexPartition);
-                    newOriginalRule.collapsedHeapConfigurationMap.put(collapsedRuleIdx, collapsed);
+                    newOriginalRule.collapsedHeapConfigurationMap.put(collapsedRuleIdx, new Pair<>(collapsed, false));
                     collapsedRuleIdx++;
                 }
 
@@ -81,30 +84,40 @@ public class NamedGrammar extends Grammar {
         canonicalizationStrategy = new GeneralCanonicalizationStrategy(this, canonicalizationHelper);
     }
 
-    @Deprecated
-    public Pair<Nonterminal, HeapConfiguration> getOriginalRule(int originalRuleIdx) {
-        return new Pair<>(originalRules.get(originalRuleIdx).nonterminal, originalRules.get(originalRuleIdx).heapConfiguration);
+    Nonterminal getNonterminal(NamedGrammarRule rule) {
+        return originalRules.get(rule.getOriginalRuleIdx()).nonterminal;
     }
 
-    @Deprecated
-    public Nonterminal getNonterminal(int originalRuleIdx) {
-        return originalRules.get(originalRuleIdx).nonterminal;
+    HeapConfiguration getHeapConfiguration(NamedGrammarRule rule) {
+        if (rule.isOriginalRule()) {
+            return originalRules.get(rule.getOriginalRuleIdx()).heapConfiguration;
+        } else {
+            return originalRules.get(rule.getOriginalRuleIdx()).collapsedHeapConfigurationMap.get(rule.getCollapsedRuleIdx()).first().getCollapsed();
+        }
     }
 
-    @Deprecated
-    public HeapConfiguration getHeapConfiguration(int originalRuleIdx) {
-        return originalRules.get(originalRuleIdx).heapConfiguration;
+    CollapsedHeapConfiguration getCollapsedHeapConfiguration(NamedGrammarRule rule) {
+        if (rule.isOriginalRule()) {
+            HeapConfiguration hc = originalRules.get(rule.getOriginalRuleIdx()).heapConfiguration;
+            return new CollapsedHeapConfiguration(hc, hc, null);
+        } else {
+            return originalRules.get(rule.getOriginalRuleIdx()).collapsedHeapConfigurationMap.get(rule.getCollapsedRuleIdx()).first();
+        }
     }
 
-    @Deprecated
-    public CollapsedHeapConfiguration getCollapsedRhs(int originalRuleIdx, int collapsedRuleIdx) {
-        return originalRules.get(originalRuleIdx).collapsedHeapConfigurationMap.get(collapsedRuleIdx);
+    boolean isRuleDeactivated(NamedGrammarRule rule) {
+        if (rule.isOriginalRule()) {
+            return originalRules.get(rule.getOriginalRuleIdx()).isDeactivated;
+        } else {
+            return originalRules.get(rule.getOriginalRuleIdx()).collapsedHeapConfigurationMap.get(rule.getCollapsedRuleIdx()).second();
+        }
     }
 
     public String getGrammarName() {
         return grammarName;
     }
 
+    @Deprecated
     public CanonicalizationStrategy getCanonicalizationStrategy() {
         return canonicalizationStrategy;
     }
@@ -132,7 +145,7 @@ public class NamedGrammar extends Grammar {
 
     public Collection<NamedGrammarRule> getCollapsedGrammarRules(NamedGrammarRule originalRule) {
         Collection<NamedGrammarRule> result = new ArrayList<>();
-        Map<Integer, CollapsedHeapConfiguration> collapsedHeapConfigurationMap = originalRules.get(originalRule.getOriginalRuleIdx()).collapsedHeapConfigurationMap;
+        Map<Integer, Pair<CollapsedHeapConfiguration, Boolean>> collapsedHeapConfigurationMap = originalRules.get(originalRule.getOriginalRuleIdx()).collapsedHeapConfigurationMap;
         for (int collapsedRuleIdx : new TreeSet<>(collapsedHeapConfigurationMap.keySet())) {
             result.add(new NamedGrammarRule(this, originalRule.getOriginalRuleIdx(), collapsedRuleIdx));
         }

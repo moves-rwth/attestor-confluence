@@ -33,7 +33,7 @@ public class NamedGrammarRule implements GrammarRule {
 
     @Override
     public Nonterminal getNonterminal() {
-        return grammar.getNonterminal(originalRuleIdx);
+        return grammar.getNonterminal(this);
     }
 
     @Override
@@ -43,27 +43,17 @@ public class NamedGrammarRule implements GrammarRule {
 
     @Override
     public HeapConfiguration getHeapConfiguration() {
-        if (isOriginalRule()) {
-            return grammar.getHeapConfiguration(originalRuleIdx);
-        } else {
-            return grammar.getCollapsedRhs(originalRuleIdx, collapsedRuleIdx).getCollapsed();
-        }
+        return grammar.getHeapConfiguration(this);
     }
 
     @Override
     public CollapsedHeapConfiguration getCollapsedHeapConfiguration() {
-        if (isOriginalRule()) {
-            HeapConfiguration hc = getHeapConfiguration();
-            return new CollapsedHeapConfiguration(hc, hc, null);
-        } else {
-            return grammar.getCollapsedRhs(originalRuleIdx, collapsedRuleIdx);
-        }
+        return grammar.getCollapsedHeapConfiguration(this);
     }
 
     @Override
     public boolean deactivatedForAbstraction() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return grammar.isRuleDeactivated(this);
     }
 
     @Override
