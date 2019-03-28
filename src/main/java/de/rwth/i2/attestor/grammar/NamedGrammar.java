@@ -46,26 +46,30 @@ public class NamedGrammar extends Grammar {
 
         int originalRuleIdx = 0;
         for(Map.Entry<Nonterminal, Set<HeapConfiguration>> entry : rules.entrySet()) {
-
             Nonterminal nonterminal = entry.getKey();
             boolean[] reductionTentacles = new boolean[nonterminal.getRank()];
-            for(int i=0; i < nonterminal.getRank(); i++) {
+            for (int i=0; i < nonterminal.getRank(); i++) {
                 reductionTentacles[i] = nonterminal.isReductionTentacle(i);
             }
 
-            for(HeapConfiguration hc : entry.getValue()) {
-                // Add original rule
-                OriginalRule newOriginalRule = new OriginalRule(nonterminal, hc);
+            // Add original rules
+            for (HeapConfiguration originalHC : entry.getValue()) {
+                OriginalRule newOriginalRule = new OriginalRule(nonterminal, originalHC);
                 originalRules.put(originalRuleIdx, newOriginalRule);
+
                 // Add collapsed rules
                 int collapsedRuleIdx = 0;
-                ExternalNodesPartitioner partitioner = new ExternalNodesPartitioner(hc, reductionTentacles);
-                for(TIntArrayList extIndexPartition : partitioner.getPartitions()) {
-                    HeapConfiguration collapsedHc = hc.clone().builder().mergeExternals(extIndexPartition).build();
-                    CollapsedHeapConfiguration collapsed = new CollapsedHeapConfiguration(hc, collapsedHc, extIndexPartition);
+                ExternalNodesPartitioner partitioner = new ExternalNodesPartitioner(originalHC, reductionTentacles);
+                for (TIntArrayList extIndexPartition : partitioner.getPartitions()) {
+                    HeapConfiguration collapsedHc = originalHC.clone().builder().mergeExternals(extIndexPartition).build();
+                    CollapsedHeapConfiguration collapsed = new CollapsedHeapConfiguration(originalHC, collapsedHc, extIndexPartition);
                     newOriginalRule.collapsedHeapConfigurationMap.put(collapsedRuleIdx, collapsed);
+                    collapsedRuleIdx++;
                 }
+
+                originalRuleIdx++;
             }
+
         }
         MorphismOptions options = new AbstractionOptions()
                 .setAdmissibleAbstraction(false)
@@ -75,15 +79,6 @@ public class NamedGrammar extends Grammar {
         EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
         CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
         canonicalizationStrategy = new GeneralCanonicalizationStrategy(this, canonicalizationHelper);
-    }
-
-    public int numberOriginalRules() {
-        return originalRules.size();
-    }
-
-    @Deprecated
-    public int numberCollapsedRules(int originalRuleIdx) {
-        return originalRules.get(originalRuleIdx).collapsedHeapConfigurationMap.size();
     }
 
     @Deprecated
@@ -110,42 +105,36 @@ public class NamedGrammar extends Grammar {
         return grammarName;
     }
 
-    @Deprecated
-    public List<Pair<Integer, Integer>> getAllRuleIdPairs() {
-        List<Pair<Integer, Integer>> individualGrammarRules = new ArrayList<>();
-        for (int originalRuleId = 0; originalRuleId < numberOriginalRules(); originalRuleId++) {
-            individualGrammarRules.add(new Pair<>(originalRuleId, null));
-            for (int collapsedRuleId = 0; collapsedRuleId < numberCollapsedRules(originalRuleId); collapsedRuleId++) {
-                individualGrammarRules.add(new Pair<>(originalRuleId, collapsedRuleId));
-            }
-        }
-        return individualGrammarRules;
-    }
-
-    @Deprecated
-    public Pair<Nonterminal, CollapsedHeapConfiguration> getRule(Pair<Integer, Integer> ruleIds) {
-        if (ruleIds.second() == null) {
-            Pair<Nonterminal, HeapConfiguration> rule = getOriginalRule(ruleIds.first());
-            CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(rule.second(), rule.second(), null);
-            return new Pair<>(rule.first(), collapsedHeapConfiguration);
-        } else {
-            Nonterminal nonterminal = getOriginalRule(ruleIds.first()).first();
-            return new Pair<>(nonterminal, getCollapsedRhs(ruleIds.first(), ruleIds.second()));
-        }
-    }
-
     public CanonicalizationStrategy getCanonicalizationStrategy() {
         return canonicalizationStrategy;
     }
 
 
-    public Collection<GrammarRule> getGrammarRules() {
-        Collection<GrammarRule> result = new ArrayList<>();
-        for (Map.Entry<Integer, OriginalRule> originalRuleEntry : originalRules.entrySet()) {
-            result.add(new NamedGrammarRule(this, originalRuleEntry.getKey()));
-            for (Map.Entry<Integer, CollapsedHeapConfiguration> collapsedHCEntry : originalRuleEntry.getValue().collapsedHeapConfigurationMap.entrySet()) {
-                result.add(new NamedGrammarRule(this, originalRuleEntry.getKey(), collapsedHCEntry.getKey()));
+    public Collection<NamedGrammarRule> getAllGrammarRules() {
+        Collection<NamedGrammarRule> result = new ArrayList<>();
+        for (int originalRuleIdx : new TreeSet<>(originalRules.keySet())) {
+            result.add(new NamedGrammarRule(this, originalRuleIdx));
+            OriginalRule originalRule = originalRules.get(originalRuleIdx);
+            for (int collapsedRuleIdx : new TreeSet<>(originalRule.collapsedHeapConfigurationMap.keySet())) {
+                result.add(new NamedGrammarRule(this, originalRuleIdx, collapsedRuleIdx));
             }
+        }
+        return result;
+    }
+
+    public Collection<NamedGrammarRule> getOriginalGrammarRules() {
+        Collection<NamedGrammarRule> result = new ArrayList<>();
+        for (int originalRuleIdx : new TreeSet<>(originalRules.keySet())) {
+            result.add(new NamedGrammarRule(this, originalRuleIdx));
+        }
+        return result;
+    }
+
+    public Collection<NamedGrammarRule> getCollapsedGrammarRules(NamedGrammarRule originalRule) {
+        Collection<NamedGrammarRule> result = new ArrayList<>();
+        Map<Integer, CollapsedHeapConfiguration> collapsedHeapConfigurationMap = originalRules.get(originalRule.getOriginalRuleIdx()).collapsedHeapConfigurationMap;
+        for (int collapsedRuleIdx : new TreeSet<>(collapsedHeapConfigurationMap.keySet())) {
+            result.add(new NamedGrammarRule(this, originalRule.getOriginalRuleIdx(), collapsedRuleIdx));
         }
         return result;
     }

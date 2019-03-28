@@ -72,7 +72,7 @@ public class CriticalPairFinderTest {
         NamedGrammar grammar = getSimpleDLLGrammar();
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
-        assertEquals(86812900, criticalPairSet.hashCode());
+        assertEquals(-404838014, criticalPairSet.hashCode());
     }
 
 
@@ -81,37 +81,37 @@ public class CriticalPairFinderTest {
         NamedGrammar balancedTreeGrammar = new NamedGrammar(new BalancedTreeGrammar(sceneObject).getGrammar(), "Balanced Tree");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(balancedTreeGrammar);
         Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
-        assertEquals(544915858, criticalPairSet.hashCode());
+        assertEquals(-952351054, criticalPairSet.hashCode());
     }
 
     @Test
     public void testDefaultGrammar_BT_conf() {
-        testGrammar("BT_conf", 1302461630);
+        testGrammar("BT_conf", 460807666);
     }
 
     @Test
     public void testDefaultGrammar_BT() {
-        testGrammar("BT", 1205480388);
+        testGrammar("BT", -726291248);
     }
 
     @Test
     public void testDefaultGrammar_DLList() {
-        testGrammar("DLList", 1999555369);
+        testGrammar("DLList", 1265649489);
     }
 
     @Test
     public void testDefaultGrammar_SLList() {
-        testGrammar("SLList", 446081815);
+        testGrammar("SLList", 1768819506);
     }
 
     @Test
     public void testDefaultGrammar_DLList_one_way() {
-        testGrammar("DLList_simple_one_way", 298312679);
+        testGrammar("DLList_simple_one_way", -1935232851);
     }
 
     @Test
     public void testDefaultGrammar_DLList_two_way() {
-        testGrammar("DLList_simple_two_way", 541222743);
+        testGrammar("DLList_simple_two_way", 517180831);
     }
 
 

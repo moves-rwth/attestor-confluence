@@ -112,20 +112,11 @@
     \fi
 }
 
-\newcommand{\AttestorCriticalPairRule}[1]{%
-    \def\true{true}%
-    \pgfkeys{#1/original rule idx/.get=\originalRuleIdx}%
-    \pgfkeys{#1/is original rule/.get=\isOriginalRule}%
-    \ifx\isOriginalRule\true
-        R \originalRuleIdx
-    \else
-        \pgfkeys{#1/collapsed rule idx/.get=\collapsedRuleIdx}%
-        R \originalRuleIdx.\collapsedRuleIdx
-    \fi
-}
-
 \newcommand{\AttestorCriticalPairReport}{
     \pgfkeys{/attestor/joinability result/.get=\joinabilityResult}
+    \pgfkeys{/attestor/rule 1/label/.get=\ruleALabel}
+    \pgfkeys{/attestor/rule 2/label/.get=\ruleBLabel}
+
     \edef\criticalPairTitle{Critical Pair (\AttestorJoinabilityResultString{\joinabilityResult})}
     \subsection{\criticalPairTitle}
     
@@ -144,8 +135,8 @@
         \path (canonical1) -- node[sloped, allow upside down] {\LARGE \AttestorJoinabilityResultSymbol} (canonical2);
         \node[inner sep=0pt,anchor=north east] at (arrow1.north east)  {\large $*$};
         \node[inner sep=0pt,anchor=north west] at (arrow2.north west)  {\large $*$};
-        \node[inner sep=1pt,anchor=south east] at (arrow3.north)  {\AttestorCriticalPairRule{/attestor/rule 1}};
-        \node[inner sep=1pt,anchor=south west] at (arrow4.north)  {\AttestorCriticalPairRule{/attestor/rule 2}};
+        \node[inner sep=1pt,anchor=south east] at (arrow3.north)  {\ruleALabel};
+        \node[inner sep=1pt,anchor=south west] at (arrow4.north)  {\ruleALabel};
         
     \end{tikzpicture}
 

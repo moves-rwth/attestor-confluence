@@ -1,7 +1,9 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
+import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.NamedGrammarRule;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeOverlapping;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.HeapConfigurationContext;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
@@ -20,14 +22,14 @@ import java.util.Objects;
 public class CriticalPair {
     private final NamedGrammar grammar;
     private final JointHeapConfiguration jointHeapConfiguration;
-    private final Pair<Integer, Integer> r1ID, r2ID;
+    private final GrammarRule r1, r2;
     private final HeapConfigurationContext context;
     private final Joinability joinability;
 
-    public CriticalPair(NodeOverlapping nodeOverlapping, EdgeOverlapping edgeOverlapping, NamedGrammar grammar, Pair<Integer, Integer> r1ID, Pair<Integer, Integer> r2ID) {
+    public CriticalPair(NodeOverlapping nodeOverlapping, EdgeOverlapping edgeOverlapping, NamedGrammar grammar, GrammarRule r1, GrammarRule r2) {
         this.grammar = grammar;
-        this.r1ID = r1ID;
-        this.r2ID = r2ID;
+        this.r1 = r1;
+        this.r2 = r2;
         this.context = nodeOverlapping.getContext();
         VF2IsomorphismChecker checker = new VF2IsomorphismChecker();
         // 1. Compute the joint graph
@@ -77,8 +79,7 @@ public class CriticalPair {
      */
     public HeapConfiguration getRule1Applied() {
         TIntArrayList externalIndicesMap = context.getCollapsedHc1().getOriginalToCollapsedExternalIndices();
-        Pair<Nonterminal, CollapsedHeapConfiguration> rule1 = grammar.getRule(r1ID);
-        return applyMatching(rule1.first(), jointHeapConfiguration.getMatching1(), externalIndicesMap);
+        return applyMatching(r1.getNonterminal(), jointHeapConfiguration.getMatching1(), externalIndicesMap);
     }
 
     /**
@@ -86,8 +87,7 @@ public class CriticalPair {
      */
     public HeapConfiguration getRule2Applied() {
         TIntArrayList externalIndicesMap = context.getCollapsedHc2().getOriginalToCollapsedExternalIndices();
-        Pair<Nonterminal, CollapsedHeapConfiguration> rule2 = grammar.getRule(r2ID);
-        return applyMatching(rule2.first(), jointHeapConfiguration.getMatching2(), externalIndicesMap);
+        return applyMatching(r2.getNonterminal(), jointHeapConfiguration.getMatching2(), externalIndicesMap);
     }
 
     public HeapConfiguration getCanonical1() {
@@ -120,17 +120,17 @@ public class CriticalPair {
         return builder.build();
     }
 
-    public Pair<Integer, Integer> getR1ID() {
-        return r1ID;
+    public GrammarRule getR1() {
+        return r1;
     }
 
-    public Pair<Integer, Integer> getR2ID() {
-        return r2ID;
+    public GrammarRule getR2() {
+        return r2;
     }
 
     @Override
     public int hashCode() {
         // Note: Should also include the joint head configuration and its two rule applications, but then hash code does not stay the same over multiple runs
-        return Objects.hash(r1ID.first(), r1ID.second(), r2ID.first(), r2ID.second(), joinability.getValue());
+        return Objects.hash(r1, r2, joinability.getValue());
     }
 }

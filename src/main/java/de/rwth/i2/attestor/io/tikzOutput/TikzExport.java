@@ -1,23 +1,15 @@
 package de.rwth.i2.attestor.io.tikzOutput;
 
-import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
-import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.*;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
-import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
-import de.rwth.i2.attestor.grammar.confluence.jointMorphism.NodeGraphElement;
-import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
-import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.main.Attestor;
-import de.rwth.i2.attestor.main.scene.SceneObject;
-import de.rwth.i2.attestor.types.GeneralType;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
@@ -149,21 +141,19 @@ public class TikzExport {
         writer.newLine();
     }
 
-    public void exportCriticalPairs(Collection<CriticalPair> criticalPairs, Joinability joinability) throws IOException {
+    public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
         writer.write("\\section{Critical Pair Report}");
         writer.newLine();
         int i = 0;
         // Start new scope
         for (CriticalPair criticalPair : criticalPairs) {
-            if (criticalPair.getJoinability().getValue() <= joinability.getValue()) {
-                i++;
-                pgfSingleValues = new ArrayList<>();
-                pgfListValues = new ArrayList<>();
-                writer.write("% Critical Pair: " + i);
-                writer.newLine();
-                addCriticalPair(BASE_PATH, criticalPair);
-                writeCurrentReportToFile("\\AttestorCriticalPairReport");
-            }
+            i++;
+            pgfSingleValues = new ArrayList<>();
+            pgfListValues = new ArrayList<>();
+            writer.write("% Critical Pair: " + i);
+            writer.newLine();
+            addCriticalPair(BASE_PATH, criticalPair);
+            writeCurrentReportToFile("\\AttestorCriticalPairReport");
         }
         pgfSingleValues = null;
         pgfListValues = null;
@@ -177,10 +167,10 @@ public class TikzExport {
         String grammarName = grammar.getGrammarName();
         writer.write(String.format("\\section{Grammar Report (%s)}", escapeString(grammarName)));
         writer.newLine();
-        for (int originalRuleIdx=0; originalRuleIdx<grammar.numberOriginalRules(); originalRuleIdx++) {
-            Pair<Nonterminal, HeapConfiguration> originalRule = grammar.getOriginalRule(originalRuleIdx);
-            Nonterminal nonterminal = originalRule.first();
-            HeapConfiguration originalRhs = originalRule.second();
+        for (NamedGrammarRule originalRule : grammar.getOriginalGrammarRules()) {
+            int originalRuleIdx = originalRule.getOriginalRuleIdx();
+            Nonterminal nonterminal = originalRule.getNonterminal();
+            HeapConfiguration originalRhs = originalRule.getHeapConfiguration();
             // Create new report element
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
@@ -194,17 +184,17 @@ public class TikzExport {
             writeCurrentReportToFile("\\AttestorGrammarReport");
             if (exportCollapsedRules) {
                 // Export collapsed rules
-                int numberCollapsedRules = grammar.numberCollapsedRules(originalRuleIdx);
-                for (int collapsedRuleIdx=0; collapsedRuleIdx < numberCollapsedRules; collapsedRuleIdx++) {
+                for (NamedGrammarRule collapsedRule : grammar.getCollapsedGrammarRules(originalRule)) {
                     pgfSingleValues = new ArrayList<>();
                     pgfListValues = new ArrayList<>();
+                    int collapsedRuleIdx = collapsedRule.getCollapsedRuleIdx();
                     writer.write(String.format("%% Grammar %s Rule %d.%d", escapeString(grammarName), originalRuleIdx+1, collapsedRuleIdx+1));
                     writer.newLine();
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx+1)));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/collapsed rule idx", Integer.toString(collapsedRuleIdx+1)));
-                    addGrammarRule(BASE_PATH, nonterminal, grammar.getCollapsedRhs(originalRuleIdx, collapsedRuleIdx));
+                    addGrammarRule(BASE_PATH, nonterminal, collapsedRule.getCollapsedHeapConfiguration());
                     writeCurrentReportToFile("\\AttestorGrammarReport");
                 }
             }
@@ -255,20 +245,12 @@ public class TikzExport {
     }
 
     private void addCriticalPair(String pgfPath, CriticalPair criticalPair) {
-        Pair<Integer, Integer> r1 = criticalPair.getR1ID();
-        Pair<Integer, Integer> r2 = criticalPair.getR2ID();
+        GrammarRule r1 = criticalPair.getR1();
+        GrammarRule r2 = criticalPair.getR2();
         pgfSingleValues.add(new Pair<>(pgfPath + "/joinability result", criticalPair.getJoinability().toString()));
         // Set rules
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/original rule idx", Integer.toString(r1.first() + 1)));
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/is original rule", r1.second()==null?"true":"false"));
-        if (r1.second() != null) {
-            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/collapsed rule idx", Integer.toString(r1.second() + 1)));
-        }
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/original rule idx", Integer.toString(r2.first()+1)));
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/is original rule", r2.second()==null?"true":"false"));
-        if (r2.second() != null) {
-            pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/collapsed rule idx", Integer.toString(r2.second() + 1)));
-        }
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/label", r1.toString()));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/label", r2.toString()));
 
         addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
 

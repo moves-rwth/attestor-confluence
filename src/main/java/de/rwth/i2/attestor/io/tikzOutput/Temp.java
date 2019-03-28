@@ -28,12 +28,12 @@ import java.util.Collection;
 public class Temp {
 
     public static void main(String args[]) {
-        exportDefaultGrammar("BT_conf");
-        exportDefaultGrammar("BT");
+        //exportDefaultGrammar("BT_conf");
+        //exportDefaultGrammar("BT");
         exportDefaultGrammar("DLList");
-        exportDefaultGrammar("SLList");
-        exportDefaultGrammar("DLList_simple_one_way");
-        exportDefaultGrammar("DLList_simple_two_way");
+        //exportDefaultGrammar("SLList");
+        //exportDefaultGrammar("DLList_simple_one_way");
+        //exportDefaultGrammar("DLList_simple_two_way");
     }
 
     public static void exportDefaultGrammar(String defaultGrammarName) {
@@ -46,10 +46,10 @@ public class Temp {
             System.err.println("IO Exception occurred");
         }
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
-        Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairs();
+        Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE);
         try {
             TikzExport exporter = new TikzExport("reports/" + defaultGrammarName + "-critical-pair-report.tex", true);
-            exporter.exportCriticalPairs(criticalPairs, Joinability.WEAKLY_JOINABLE);
+            exporter.exportCriticalPairs(criticalPairs);
             exporter.finishExport();
         } catch (IOException e) {
             System.err.println("IO Exception occurred");

@@ -1,24 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import de.rwth.i2.attestor.grammar.AbstractionOptions;
-import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
-import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
-import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationHelper;
-import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationStrategy;
-import de.rwth.i2.attestor.grammar.canonicalization.EmbeddingCheckerProvider;
-import de.rwth.i2.attestor.grammar.canonicalization.GeneralCanonicalizationStrategy;
-import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
+import de.rwth.i2.attestor.grammar.*;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
-import de.rwth.i2.attestor.graph.Nonterminal;
-import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
-import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
-import de.rwth.i2.attestor.graph.heap.Matching;
-import de.rwth.i2.attestor.graph.morphism.Graph;
-import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
-import de.rwth.i2.attestor.graph.morphism.checkers.VF2IsomorphismChecker;
-import de.rwth.i2.attestor.util.Pair;
-import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
 
@@ -54,20 +37,15 @@ public class CriticalPairFinder {
     private void computeAllCriticalPairs() {
         // Add critical pairs for all combinations of rules
 
-        // 1. Create a list with all *individual* grammar rules (first integer refers to originalRuleId, second to collapsedRuleID (may be null))
-        List<Pair<Integer, Integer>> individualGrammarRules = new ArrayList<>();
-        for (int originalRuleId = 0; originalRuleId < underlyingGrammar.numberOriginalRules(); originalRuleId++) {
-            individualGrammarRules.add(new Pair<>(originalRuleId, null));
-            for (int collapsedRuleId = 0; collapsedRuleId < underlyingGrammar.numberCollapsedRules(originalRuleId); collapsedRuleId++) {
-                individualGrammarRules.add(new Pair<>(originalRuleId, collapsedRuleId));
-            }
-        }
+        // 1. Convert to a list to reference each rule by one index
+        List<GrammarRule> individualGrammarRules = new ArrayList<>(underlyingGrammar.getAllGrammarRules());
 
         // 2. Iterate over all pairs of individual grammar rules and add the critical pairs for each pair
+
         for (int i = 0; i < individualGrammarRules.size(); i++) {
             for (int j = i; j < individualGrammarRules.size(); j++) {
-                Pair<Integer, Integer> r1 = individualGrammarRules.get(i);
-                Pair<Integer, Integer> r2 = individualGrammarRules.get(j);
+                GrammarRule r1 = individualGrammarRules.get(i);
+                GrammarRule r2 = individualGrammarRules.get(j);
                 addCriticalPairsForCollapsedRule(r1, r2);
             }
         }
@@ -80,15 +58,13 @@ public class CriticalPairFinder {
      * for the two right hand sides (l1, l2) of the rules r1, r2.
      * For each of these morphisms we check if it induces a critical pair.
      *
-     * @param r1Ids The ids of the first rule
-     * @param r2Ids The ids of the second rule
+     * @param r1 The first rule
+     * @param r2 The second rule
      */
-    private void addCriticalPairsForCollapsedRule(Pair<Integer, Integer> r1Ids,
-                                                  Pair<Integer, Integer> r2Ids) {
-        Pair<Nonterminal, CollapsedHeapConfiguration> r1 = underlyingGrammar.getRule(r1Ids);
-        Pair<Nonterminal, CollapsedHeapConfiguration> r2 = underlyingGrammar.getRule(r2Ids);
-        CollapsedHeapConfiguration hc1 = r1.second();
-        CollapsedHeapConfiguration hc2 = r2.second();
+    private void addCriticalPairsForCollapsedRule(GrammarRule r1,
+                                                  GrammarRule r2) {
+        CollapsedHeapConfiguration hc1 = r1.getCollapsedHeapConfiguration();
+        CollapsedHeapConfiguration hc2 = r2.getCollapsedHeapConfiguration();
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
 
@@ -102,7 +78,7 @@ public class CriticalPairFinder {
 
                     // Check that the rule applications are not independent (They should share at least one internal node)
                     if (!nodeOverlapping.isNodeOverlappingIndependent()) {
-                        CriticalPair newCriticalPair = new CriticalPair(nodeOverlapping, edgeOverlapping, underlyingGrammar, r1Ids, r2Ids);
+                        CriticalPair newCriticalPair = new CriticalPair(nodeOverlapping, edgeOverlapping, underlyingGrammar, r1, r2);
                         criticalPairs.add(newCriticalPair);
                         joinabilityResult = joinabilityResult.getCollectiveJoinability(newCriticalPair.getJoinability());
                     }

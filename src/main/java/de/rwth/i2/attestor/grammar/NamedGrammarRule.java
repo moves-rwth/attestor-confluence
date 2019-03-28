@@ -3,6 +3,8 @@ package de.rwth.i2.attestor.grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
+import java.util.Objects;
+
 public class NamedGrammarRule implements GrammarRule {
     public final int NO_COLLAPSED_RULE_IDX = -1;
     private final int originalRuleIdx;
@@ -67,9 +69,14 @@ public class NamedGrammarRule implements GrammarRule {
     @Override
     public String toString() {
         if (isOriginalRule()) {
-            return grammar.getGrammarName() + " R" + originalRuleIdx;
+            return Integer.toString(originalRuleIdx);
         } else {
-            return grammar.getGrammarName() + " R" + originalRuleIdx + "." + collapsedRuleIdx;
+            return originalRuleIdx + "." + collapsedRuleIdx;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(grammar.getGrammarName(), originalRuleIdx, collapsedRuleIdx);
     }
 }

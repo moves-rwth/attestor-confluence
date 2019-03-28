@@ -3,6 +3,8 @@ package de.rwth.i2.attestor.grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
+import java.util.Objects;
+
 public class StandaloneGrammarRule implements GrammarRule {
     private CollapsedHeapConfiguration collapsedHeapConfiguration;
     private Nonterminal nonterminal;
