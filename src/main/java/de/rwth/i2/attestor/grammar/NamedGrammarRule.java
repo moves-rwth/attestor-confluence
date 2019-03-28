@@ -59,6 +59,12 @@ public class NamedGrammarRule implements GrammarRule {
     }
 
     @Override
+    public boolean deactivatedForAbstraction() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String toString() {
         if (isOriginalRule()) {
             return grammar.getGrammarName() + " R" + originalRuleIdx;

@@ -9,6 +9,8 @@ import java.util.Collection;
  * the deactivated rule, but might introduce other critical pairs.
  * Therefore when a rule restriction heuristic is used ALL critical pairs have to be recomputed
  * (because removing a rule means strongly joinable rule might not be joinable now).
+ *
+ * TODO: Should we also try to reactivate rules? Maybe a possible parameter to the heuristic?
  */
 public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
 

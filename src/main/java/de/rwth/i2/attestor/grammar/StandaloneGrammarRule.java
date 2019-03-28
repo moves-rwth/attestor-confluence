@@ -38,6 +38,12 @@ public class StandaloneGrammarRule implements GrammarRule {
     }
 
     @Override
+    public boolean deactivatedForAbstraction() {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String toString() {
         return "Standalone(" + this.hashCode() + ")";
     }
