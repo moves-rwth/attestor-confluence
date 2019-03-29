@@ -15,6 +15,8 @@ import java.util.Collections;
  *
  * Requires that all critical pairs are recomputed
  *
+ * Usage notes: This heuristic should be used if there are problematic concrete critical pairs that do not occur during any analysis.
+ *
  * TODO: Add option to block only one critical pair in one step
  * TODO: Add option to unblock critical pairs
  * TODO: Add optimization to check if block HC is subgraph of other block HC
