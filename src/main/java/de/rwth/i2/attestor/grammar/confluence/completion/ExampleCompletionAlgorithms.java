@@ -10,11 +10,10 @@ public class ExampleCompletionAlgorithms {
 
     public CompletionState algorithm1(NamedGrammar inputGrammar) {
         return new CompletionAlgorithm()
-                .setMaxSearchDepth(0)
-                .setCompletionStrategy(new GreedyCompletion())
+                .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new AddRulesNewNonterminalHeuristic())
-                .addHeuristic(new CompletionRuleRestrictionHeuristic())
+                .addHeuristic(new CompletionRuleRestrictionHeuristic(false))
                 .runCompletionAlgorithm(inputGrammar);
     }
 

@@ -9,7 +9,7 @@ import java.util.*;
 
 public class CompletionState {
     private final NamedGrammar grammar;
-    private final Collection<CriticalPair> criticalPairs;
+    private final Collection<CriticalPair> criticalPairs;  // Does not contain strongly joinable critical pairs
 
     /**
      * Initializes an initial completion state for the given grammar
@@ -20,6 +20,9 @@ public class CompletionState {
         this.criticalPairs = criticalPairFinder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE);
     }
 
+    /**
+     * @param criticalPairs  Must not include strongly joinable critical pairs
+     */
     public CompletionState(NamedGrammar grammar, Collection<CriticalPair> criticalPairs) {
         this.grammar = grammar;
         this.criticalPairs = criticalPairs;

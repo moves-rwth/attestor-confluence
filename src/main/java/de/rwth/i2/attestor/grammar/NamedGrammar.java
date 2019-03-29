@@ -144,6 +144,10 @@ public class NamedGrammar {
         return getRules(rule -> rule.isRuleActive());
     }
 
+    public Collection<GrammarRule> getInactiveRules() {
+        return getRules(rule -> !rule.isRuleActive());
+    }
+
     public Iterable<GrammarRuleOriginal> getOriginalGrammarRules() {
         return originalRules;
     }

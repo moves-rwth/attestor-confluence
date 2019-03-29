@@ -24,19 +24,12 @@ public class CompletionAlgorithm {
     private List<CompletionHeuristic> heuristics;
     private CompletionStateLoss completionStateLoss;
     private CompletionStrategy completionStrategy;
-    private int maxSearchDepth;
 
     public CompletionAlgorithm() {
         this.heuristics = new ArrayList<>();
-        this.maxSearchDepth = 0;
     }
 
     // Builder style setters
-
-    public CompletionAlgorithm setMaxSearchDepth(int maxSearchDepth) {
-        this.maxSearchDepth = maxSearchDepth;
-        return this;
-    }
 
     public CompletionAlgorithm setCompletionStateLoss(CompletionStateLoss penalty) {
         this.completionStateLoss = penalty;
@@ -65,10 +58,6 @@ public class CompletionAlgorithm {
 
     public CompletionStrategy getCompletionStrategy() {
         return completionStrategy;
-    }
-
-    public int getMaxSearchDepth() {
-        return maxSearchDepth;
     }
 
     // Run algorithm

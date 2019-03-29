@@ -120,4 +120,16 @@ public class GrammarRuleOriginal implements GrammarRule {
     public int hashCode() {
         return Objects.hash(grammarName, originalRuleIdx, -1);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GrammarRuleOriginal) {
+            GrammarRuleCollapsed otherRule = (GrammarRuleCollapsed) o;
+            return getGrammarName() == otherRule.getGrammarName()
+                    && getOriginalRuleIdx() == otherRule.getOriginalRuleIdx()
+                    && getRuleStatus() == otherRule.getRuleStatus();
+        } else {
+            return false;
+        }
+    }
 }

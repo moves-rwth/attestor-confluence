@@ -73,6 +73,19 @@ public class GrammarRuleCollapsed implements GrammarRule {
         return Objects.hash(getGrammarName(), getOriginalRuleIdx(), getCollapsedRuleIdx());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GrammarRuleCollapsed) {
+            GrammarRuleCollapsed otherRule = (GrammarRuleCollapsed) o;
+            return getGrammarName() == otherRule.getGrammarName()
+                    && getOriginalRuleIdx() == otherRule.getOriginalRuleIdx()
+                    && getCollapsedRuleIdx() == otherRule.getCollapsedRuleIdx()
+                    && getRuleStatus() == otherRule.getRuleStatus();
+        } else {
+            return false;
+        }
+    }
+
     public int getCollapsedRuleIdx() {
         return collapsedRuleIdx;
     }

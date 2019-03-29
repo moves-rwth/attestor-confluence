@@ -11,6 +11,14 @@ import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLos
  * Cycles as long as improvements are possible.
  */
 public class GreedyCompletion implements CompletionStrategy {
+    final int maxSearchDepth;
+
+    /**
+     * @param maxSearchDepth The maximum number of successful heuristic applications (no maximum if set to 0)
+     */
+    public GreedyCompletion(int maxSearchDepth) {
+        this.maxSearchDepth = maxSearchDepth;
+    }
 
     @Override
     public CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
@@ -44,7 +52,7 @@ public class GreedyCompletion implements CompletionStrategy {
                             madeProgress = true;
                             // Increment the search depth and check if we have to abort
                             currentSearchDepth++;
-                            if (currentSearchDepth >= completionSettings.getMaxSearchDepth()) {
+                            if (currentSearchDepth >= maxSearchDepth) {
                                 return currentState;
                             }
                             // Reinitialize possible next states for the current heuristic
