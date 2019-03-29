@@ -38,7 +38,7 @@ public class CriticalPairFinder {
         // Add critical pairs for all combinations of rules
 
         // 1. Convert to a list to reference each rule by one index
-        List<GrammarRule> individualGrammarRules = new ArrayList<>(underlyingGrammar.getAllGrammarRules());
+        List<GrammarRule> individualGrammarRules = new ArrayList<>(underlyingGrammar.getActiveRules());
 
         // 2. Iterate over all pairs of individual grammar rules and add the critical pairs for each pair
 
@@ -79,8 +79,11 @@ public class CriticalPairFinder {
                     // Check that the rule applications are not independent (They should share at least one internal node)
                     if (!nodeOverlapping.isNodeOverlappingIndependent()) {
                         CriticalPair newCriticalPair = new CriticalPair(nodeOverlapping, edgeOverlapping, underlyingGrammar, r1, r2);
-                        criticalPairs.add(newCriticalPair);
-                        joinabilityResult = joinabilityResult.getCollectiveJoinability(newCriticalPair.getJoinability());
+                        if (!underlyingGrammar.blockHeapAbstraction(newCriticalPair.getJointHeapConfiguration().getHeapConfiguration())) {
+                            // This is only a critical pair if the abstraction is not blocked by the grammar
+                            criticalPairs.add(newCriticalPair);
+                            joinabilityResult = joinabilityResult.getCollectiveJoinability(newCriticalPair.getJoinability());
+                        }
                     }
                 }
             }
