@@ -25,7 +25,7 @@ public interface GrammarRule {
      */
     CollapsedHeapConfiguration getCollapsedHeapConfiguration();
 
-    NamedGrammar getGrammar();
+    String getGrammarName();
 
     int getOriginalRuleIdx();
 }

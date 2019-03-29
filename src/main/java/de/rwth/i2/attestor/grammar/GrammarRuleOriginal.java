@@ -6,9 +6,7 @@ import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import java.util.*;
 
 public class GrammarRuleOriginal implements GrammarRule {
-
-
-    private final NamedGrammar grammar;
+    private final String grammarName;
     private final int originalRuleIdx;
     private final Nonterminal nonterminal;
     private final HeapConfiguration hc;
@@ -17,9 +15,11 @@ public class GrammarRuleOriginal implements GrammarRule {
 
     /**
      * Creates a new rule that does not belong to any grammar.
+     * TODO: How should new rules creation work?
      */
-    public GrammarRuleOriginal(Nonterminal nonterminal, HeapConfiguration hc) {
-        this.grammar = null;
+    @Deprecated
+    public GrammarRuleOriginal(String grammarName, Nonterminal nonterminal, HeapConfiguration hc) {
+        this.grammarName = grammarName;
         this.originalRuleIdx = -1;
         this.nonterminal = nonterminal;
         this.hc = hc;
@@ -27,8 +27,8 @@ public class GrammarRuleOriginal implements GrammarRule {
         ruleStatus = RuleStatus.CONFLUENCE_GENERATED;
     }
 
-    GrammarRuleOriginal(NamedGrammar grammar, int originalRuleIdx, Nonterminal nonterminal, HeapConfiguration hc, List<GrammarRuleCollapsed> collapsedRules, RuleStatus ruleStatus) {
-        this.grammar = grammar;
+    GrammarRuleOriginal(String grammarName, int originalRuleIdx, Nonterminal nonterminal, HeapConfiguration hc, List<GrammarRuleCollapsed> collapsedRules, RuleStatus ruleStatus) {
+        this.grammarName = grammarName;
         this.originalRuleIdx = originalRuleIdx;
         this.nonterminal = nonterminal;
         this.hc = hc;
@@ -40,12 +40,14 @@ public class GrammarRuleOriginal implements GrammarRule {
         return Collections.unmodifiableList(collapsedRules);
     }
 
-    public GrammarRuleOriginal changeRuleActivation(NamedGrammar newNamedGrammar, Collection<GrammarRule> flipActivation) {
-        List<GrammarRuleCollapsed> newCollapsedRules = new ArrayList<>();
-        GrammarRuleOriginal newOriginalRule;
+    public GrammarRuleOriginal changeRuleActivation(Collection<GrammarRule> flipActivation) {
+        if (flipActivation.size() == 0) {
+            return this;
+        }
+
+        RuleStatus newStatus;
 
         if (flipActivation.contains(this)) {
-            RuleStatus newStatus;
             // Deactivate or remove rule
             switch (getRuleStatus()) {
                 case ACTIVE:
@@ -61,32 +63,24 @@ public class GrammarRuleOriginal implements GrammarRule {
                     throw new IllegalStateException();
 
             }
-            newOriginalRule = new GrammarRuleOriginal(newNamedGrammar, originalRuleIdx, nonterminal, hc, newCollapsedRules, newStatus);
         } else {
-            // Don't change activation status, just attach to new grammar
-            newOriginalRule = this.attachToGrammar(newNamedGrammar, originalRuleIdx);
+            // Don't change activation status
+            newStatus = getRuleStatus();
         }
+
+        List<GrammarRuleCollapsed> newCollapsedRules = new ArrayList<>();
+        GrammarRuleOriginal newOriginalRule = new GrammarRuleOriginal(getGrammarName(), originalRuleIdx, nonterminal, hc, newCollapsedRules, newStatus);
 
         for (GrammarRuleCollapsed oldCollapsedRule : collapsedRules) {
             if (flipActivation.contains(oldCollapsedRule)) {
-                newCollapsedRules.add(oldCollapsedRule.flipActivation(newOriginalRule));
+                newCollapsedRules.add(oldCollapsedRule.flipActivation());
             } else {
-                // Don't change activation status, just attach to new original rule
-                newCollapsedRules.add(oldCollapsedRule.attachToOriginalRule(newOriginalRule));
+                // Don't change activation status
+                newCollapsedRules.add(oldCollapsedRule);
             }
         }
 
         return newOriginalRule;
-    }
-
-    /**
-     * Returns a grammar rule that is attached to a different grammar. Only supported for CONFLUENCE_GENERATED rules without any collapsed rules
-     */
-    public GrammarRuleOriginal attachToGrammar(NamedGrammar grammar, int originalRuleIdx) {
-        if (ruleStatus != RuleStatus.CONFLUENCE_GENERATED || collapsedRules.size() != 0) {
-            throw new IllegalArgumentException();
-        }
-        return new GrammarRuleOriginal(grammar, originalRuleIdx, nonterminal, hc, Collections.emptyList(), RuleStatus.CONFLUENCE_GENERATED);
     }
 
     @Override
@@ -115,17 +109,17 @@ public class GrammarRuleOriginal implements GrammarRule {
     }
 
     @Override
-    public NamedGrammar getGrammar() {
-        return grammar;
-    }
-
-    @Override
     public String toString() {
         return Integer.toString(originalRuleIdx);
     }
 
     @Override
+    public String getGrammarName() {
+        return grammarName;
+    }
+
+    @Override
     public int hashCode() {
-        return Objects.hash(grammar.getGrammarName(), originalRuleIdx, -1);
+        return Objects.hash(grammarName, originalRuleIdx, -1);
     }
 }

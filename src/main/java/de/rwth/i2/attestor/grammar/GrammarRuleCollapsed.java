@@ -2,15 +2,15 @@ package de.rwth.i2.attestor.grammar;
 
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import org.apache.commons.codec.language.bm.Rule;
 
 import java.util.Objects;
 
 public class GrammarRuleCollapsed implements GrammarRule {
-    private final GrammarRuleOriginal originalRule;
+    private final GrammarRuleOriginal originalRule;  // Note: this is does not have to be same rule object that contains this rule
     private final CollapsedHeapConfiguration collapsedHeapConfiguration;
     private final int collapsedRuleIdx;
     private final RuleStatus status;
-
 
     public GrammarRuleCollapsed(GrammarRuleOriginal originalRule, int collapsedRuleIdx, CollapsedHeapConfiguration cHC, RuleStatus status) {
         if (status == RuleStatus.CONFLUENCE_GENERATED) {
@@ -22,7 +22,7 @@ public class GrammarRuleCollapsed implements GrammarRule {
         this.status = status;
     }
 
-    GrammarRuleCollapsed flipActivation(GrammarRuleOriginal newOriginal) {
+    GrammarRuleCollapsed flipActivation() {
         RuleStatus newStatus;
         switch (status) {
             case ACTIVE:  // Rule should be inactivated
@@ -36,11 +36,7 @@ public class GrammarRuleCollapsed implements GrammarRule {
             default:
                 throw new IllegalStateException("Invalid status");
         }
-        return new GrammarRuleCollapsed(newOriginal, collapsedRuleIdx, collapsedHeapConfiguration, newStatus);
-    }
-
-    GrammarRuleCollapsed attachToOriginalRule(GrammarRuleOriginal newOriginal) {
-        return new GrammarRuleCollapsed(newOriginal, collapsedRuleIdx, collapsedHeapConfiguration, status);
+        return new GrammarRuleCollapsed(originalRule, collapsedRuleIdx, collapsedHeapConfiguration, newStatus);
     }
 
     @Override
@@ -64,8 +60,8 @@ public class GrammarRuleCollapsed implements GrammarRule {
     }
 
     @Override
-    public NamedGrammar getGrammar() {
-        return originalRule.getGrammar();
+    public String getGrammarName() {
+        return originalRule.getGrammarName();
     }
 
     @Override
@@ -75,7 +71,7 @@ public class GrammarRuleCollapsed implements GrammarRule {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGrammar().getGrammarName(), getOriginalRuleIdx(), getCollapsedRuleIdx());
+        return Objects.hash(getGrammarName(), getOriginalRuleIdx(), getCollapsedRuleIdx());
     }
 
     public int getCollapsedRuleIdx() {

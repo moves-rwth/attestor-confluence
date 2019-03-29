@@ -16,33 +16,29 @@ import java.util.*;
 
 /**
  * A grammar with a name, where each rule is numbered.
- *
+ * TODO: How to integrate with attestor? Maybe extend Grammar class and behave like the concretization grammar
  */
 public class NamedGrammar {
     final private String grammarName;
     final private Grammar abstractionGrammar, concretizationGrammar;
     final private List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
 
+    // TODO: Add methods to access / set this attribute
+    final private Collection<HeapConfiguration> abstractionBlockingHeapConfigurations;
+
     final CanonicalizationStrategy canonicalizationStrategy;
 
     private NamedGrammar(NamedGrammar oldGrammar, List<GrammarRuleOriginal> newOriginalRules) {
-        this.concretizationGrammar = oldGrammar.concretizationGrammar;
         this.grammarName = oldGrammar.grammarName;
         this.originalRules = newOriginalRules;
         Map<Nonterminal, Set<HeapConfiguration>> abstractionOriginalRules = new HashMap<>();
         Map<Nonterminal, Set<CollapsedHeapConfiguration>> abstractionCollapsedRules = new HashMap<>();
 
-        for (GrammarRuleOriginal originalRule : originalRules) {
-            switch (originalRule.getRuleStatus()) {
-                case ACTIVE:
-                case CONFLUENCE_GENERATED:
-                    Set<HeapConfiguration> originalRules = abstractionOriginalRules.computeIfAbsent(originalRule.getNonterminal(), HashSet::new);
-            }
-        }
-        // TODO: Compute the abstraction rules
+        this.abstractionGrammar = getGrammar(newOriginalRules, true);
+        this.concretizationGrammar = getGrammar(newOriginalRules, false);
 
-        this.abstractionGrammar = new Grammar(abstractionOriginalRules, abstractionCollapsedRules);
         this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
     }
 
     public NamedGrammar(Grammar grammar, String name) {
@@ -62,7 +58,7 @@ public class NamedGrammar {
             for (HeapConfiguration originalHC : entry.getValue()) {
                 int originalRuleIdx = originalRules.size();
                 List<GrammarRuleCollapsed> collapsedRules = new ArrayList<>();
-                GrammarRuleOriginal originalRule = new GrammarRuleOriginal(this, originalRuleIdx, nonterminal, originalHC, collapsedRules, GrammarRule.RuleStatus.ACTIVE);
+                GrammarRuleOriginal originalRule = new GrammarRuleOriginal(grammarName, originalRuleIdx, nonterminal, originalHC, collapsedRules, GrammarRule.RuleStatus.ACTIVE);
                 originalRules.add(originalRule);
 
                 // Add collapsed rules
@@ -75,7 +71,25 @@ public class NamedGrammar {
             }
         }
 
-        canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+        this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
+    }
+
+    private static Grammar getGrammar(List<GrammarRuleOriginal> grammarRules, boolean abstractionGrammar) {
+        GrammarBuilder resultingGrammar = new GrammarBuilder();
+        for (GrammarRuleOriginal originalRule : grammarRules) {
+            if (!abstractionGrammar || originalRule.getRuleStatus() == GrammarRule.RuleStatus.ACTIVE || originalRule.getRuleStatus() == GrammarRule.RuleStatus.CONFLUENCE_GENERATED) {
+                // Concretization grammars contain all rules, abstraction grammars only active (and confluence generated) rules
+                resultingGrammar.addRule(originalRule.getNonterminal(), originalRule.getHeapConfiguration());
+            }
+            for (GrammarRuleCollapsed collapsedRule : originalRule.getCollapsedRules()) {
+                if (!abstractionGrammar || originalRule.getRuleStatus() == GrammarRule.RuleStatus.ACTIVE || originalRule.getRuleStatus() == GrammarRule.RuleStatus.CONFLUENCE_GENERATED) {
+                    // Note: There actually should not be any collapsed rules that are confluence generated!
+                    resultingGrammar.addCollapsedRule(collapsedRule.getNonterminal(), collapsedRule.getCollapsedHeapConfiguration());
+                }
+            }
+        }
+        return resultingGrammar.build();
     }
 
     private static GeneralCanonicalizationStrategy createCanonicalizationStrategy(Grammar abstractionGrammar) {
@@ -118,13 +132,14 @@ public class NamedGrammar {
         return concretizationGrammar;
     }
 
+    @Deprecated
     private NamedGrammar(NamedGrammar oldGrammar, Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules) {
         this.originalRules = new ArrayList<>();
         this.grammarName = oldGrammar.grammarName;
 
         // Activate / Deactivate rules
         for (GrammarRuleOriginal oldOriginalRule : oldGrammar.originalRules) {
-            GrammarRuleOriginal newOriginalRule = oldOriginalRule.changeRuleActivation(this, flipActivation);
+            GrammarRuleOriginal newOriginalRule = oldOriginalRule.changeRuleActivation(flipActivation);
             if (newOriginalRule != null) {
                 this.originalRules.add(newOriginalRule);
             }
@@ -132,12 +147,15 @@ public class NamedGrammar {
 
         // Add new rules
         for (GrammarRuleOriginal newOriginalRule : addRules) {
-            this.originalRules.add(newOriginalRule.attachToGrammar(this, this.originalRules.size()));
+            this.originalRules.add(newOriginalRule);
         }
 
-        // TODO: Set concretizationGrammar and abstractionGrammar
+        // Set concretizationGrammar and abstractionGrammar
+        this.abstractionGrammar = getGrammar(originalRules,true);
+        this.concretizationGrammar = getGrammar(originalRules,false);
 
         this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
     }
 
     /**
