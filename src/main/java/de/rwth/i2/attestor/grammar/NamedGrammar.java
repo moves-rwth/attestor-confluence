@@ -214,4 +214,8 @@ public class NamedGrammar {
         return false;
     }
 
+    public Collection<HeapConfiguration> getAbstractionBlockingHeapConfigurations() {
+        return Collections.unmodifiableCollection(abstractionBlockingHeapConfigurations);
+    }
+
 }
