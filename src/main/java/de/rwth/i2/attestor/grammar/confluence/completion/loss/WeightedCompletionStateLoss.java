@@ -20,10 +20,10 @@ public class WeightedCompletionStateLoss implements CompletionStateLoss {
 
     @Override
     public double getLoss(CompletionState state) {
-        double loss = state.getCriticalPairs().size() * numCriticalPairWeight + state.getGrammarRules().size() * numRulesWeight;
+        double loss = state.getCriticalPairs().size() * numCriticalPairWeight + state.getGrammar().getActiveRules().size() * numRulesWeight;
         if (numExternalNodesWeight != 0) {
             int numberExternalNodes = 0;
-            for (GrammarRule rule : state.getGrammarRules()) {
+            for (GrammarRule rule : state.getGrammar().getActiveRules()) {
                 numberExternalNodes += rule.getHeapConfiguration().countExternalNodes();
             }
             loss += numExternalNodesWeight * numberExternalNodes;

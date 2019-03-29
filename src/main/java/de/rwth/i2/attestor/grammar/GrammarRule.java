@@ -28,4 +28,16 @@ public interface GrammarRule {
     String getGrammarName();
 
     int getOriginalRuleIdx();
+
+    default boolean isRuleActive() {
+        switch (getRuleStatus()) {
+            case ACTIVE:
+            case CONFLUENCE_GENERATED:
+                return true;
+            case INACTIVE:
+                return false;
+        }
+        throw new IllegalStateException();
+    }
+
 }

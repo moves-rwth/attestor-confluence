@@ -12,10 +12,12 @@ import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A grammar with a name, where each rule is numbered.
  * TODO: How to integrate with attestor? Maybe extend Grammar class and behave like the concretization grammar
+ * TODO: Better name for this class?
  */
 public class NamedGrammar {
     final private String grammarName;
@@ -27,7 +29,7 @@ public class NamedGrammar {
 
     final CanonicalizationStrategy canonicalizationStrategy;
 
-    private NamedGrammar(String grammarName, List<GrammarRuleOriginal> newOriginalRules) {
+    private NamedGrammar(String grammarName, List<GrammarRuleOriginal> newOriginalRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
         // Check that the original rule indices are in increasing order TODO: Can we just remove this sanity check?
         int currentOriginalRuleIdx = -1;
         for (GrammarRuleOriginal originalRule : newOriginalRules) {
@@ -46,7 +48,7 @@ public class NamedGrammar {
         this.concretizationGrammar = getGrammar(newOriginalRules, false);
 
         this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
-        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
+        this.abstractionBlockingHeapConfigurations = abstractionBlockingHeapConfigurations;
     }
 
     public NamedGrammar(Grammar grammar, String name) {
@@ -128,6 +130,20 @@ public class NamedGrammar {
         return result;
     }
 
+    private Collection<GrammarRule> getRules(Function<GrammarRule, Boolean> filterFunction) {
+        Collection<GrammarRule> result = new ArrayList<>();
+        for (GrammarRule rule : getAllGrammarRules()) {
+            if (filterFunction.apply(rule)) {
+                result.add(rule);
+            }
+        }
+        return result;
+    }
+
+    public Collection<GrammarRule> getActiveRules() {
+        return getRules(rule -> rule.isRuleActive());
+    }
+
     public Iterable<GrammarRuleOriginal> getOriginalGrammarRules() {
         return originalRules;
     }
@@ -145,9 +161,10 @@ public class NamedGrammar {
      *
      * @param flipActivation Rules in the grammar whose activation should be flipped
      * @param addRules  Rules that should be added to this grammar
+     * @param abstractionBlockingHeapConfigurations  All heapConfigurations that should block abstraction. If set to null the abstractionBlockingHeapConfigurations are not modified.
      * @return the resulting grammar
      */
-    public NamedGrammar getModifiedGrammar(Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules) {
+    public NamedGrammar getModifiedGrammar(Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
         List<GrammarRuleOriginal> newOriginalRules = new ArrayList<>();
 
         // Activate / Deactivate rules
@@ -162,8 +179,14 @@ public class NamedGrammar {
         for (GrammarRuleOriginal newOriginalRule : addRules) {
             newOriginalRules.add(newOriginalRule);
         }
+        Collection<HeapConfiguration> newAbstractionBlockingHeapConfigurations;
+        if (abstractionBlockingHeapConfigurations == null) {
+            newAbstractionBlockingHeapConfigurations = this.abstractionBlockingHeapConfigurations;
+        } else {
+            newAbstractionBlockingHeapConfigurations = abstractionBlockingHeapConfigurations;
+        }
 
-        return new NamedGrammar(grammarName, newOriginalRules);
+        return new NamedGrammar(grammarName, newOriginalRules, newAbstractionBlockingHeapConfigurations);
     }
 
     public int getMaxOriginalRuleIdx() {
@@ -172,6 +195,10 @@ public class NamedGrammar {
         } else {
             return originalRules.get(originalRules.size() - 1).getOriginalRuleIdx();
         }
+    }
+
+    public Collection<HeapConfiguration> getAbstractionBlockingHeapConfigurations() {
+        return Collections.unmodifiableCollection(abstractionBlockingHeapConfigurations);
     }
 
 }

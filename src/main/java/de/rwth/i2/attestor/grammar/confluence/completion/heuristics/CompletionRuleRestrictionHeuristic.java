@@ -13,9 +13,20 @@ import java.util.Collection;
  * TODO: Should we also try to reactivate rules? Maybe a possible parameter to the heuristic?
  */
 public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
+    final boolean reactivateRules;
+
+    /**
+     * @param reactivateRules If set to true rules that have been deactivated can get activated again (does not activate removed rules)
+     */
+    public CompletionRuleRestrictionHeuristic(boolean reactivateRules) {
+        this.reactivateRules = reactivateRules;
+    }
 
     @Override
     public Iterable<CompletionState> applyHeuristic(CompletionState state) {
+        // 1. Find rules that could be
+
+
         // TODO
         throw new UnsupportedOperationException();
     }
