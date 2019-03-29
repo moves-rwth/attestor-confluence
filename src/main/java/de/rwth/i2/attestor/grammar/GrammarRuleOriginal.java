@@ -14,13 +14,11 @@ public class GrammarRuleOriginal implements GrammarRule {
     private final RuleStatus ruleStatus;
 
     /**
-     * Creates a new rule that does not belong to any grammar.
-     * TODO: How should new rules creation work?
+     * Creates a new rule with the status CONFLUENCE_GENERATED
      */
-    @Deprecated
-    public GrammarRuleOriginal(String grammarName, Nonterminal nonterminal, HeapConfiguration hc) {
+    public GrammarRuleOriginal(String grammarName, Nonterminal nonterminal, HeapConfiguration hc, int originalRuleIdx) {
         this.grammarName = grammarName;
-        this.originalRuleIdx = -1;
+        this.originalRuleIdx = originalRuleIdx;
         this.nonterminal = nonterminal;
         this.hc = hc;
         this.collapsedRules = Collections.emptyList();

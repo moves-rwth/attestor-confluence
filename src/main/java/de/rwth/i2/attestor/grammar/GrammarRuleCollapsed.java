@@ -2,7 +2,6 @@ package de.rwth.i2.attestor.grammar;
 
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
-import org.apache.commons.codec.language.bm.Rule;
 
 import java.util.Objects;
 

@@ -9,7 +9,6 @@ import de.rwth.i2.attestor.grammar.util.ExternalNodesPartitioner;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
-import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
@@ -28,8 +27,17 @@ public class NamedGrammar {
 
     final CanonicalizationStrategy canonicalizationStrategy;
 
-    private NamedGrammar(NamedGrammar oldGrammar, List<GrammarRuleOriginal> newOriginalRules) {
-        this.grammarName = oldGrammar.grammarName;
+    private NamedGrammar(String grammarName, List<GrammarRuleOriginal> newOriginalRules) {
+        // Check that the original rule indices are in increasing order TODO: Can we just remove this sanity check?
+        int currentOriginalRuleIdx = -1;
+        for (GrammarRuleOriginal originalRule : newOriginalRules) {
+            if (originalRule.getOriginalRuleIdx() <= currentOriginalRuleIdx) {
+                throw new IllegalArgumentException("newOriginalRules are not in increasing order");
+            }
+            currentOriginalRuleIdx = originalRule.getOriginalRuleIdx();
+        }
+
+        this.grammarName = grammarName;
         this.originalRules = newOriginalRules;
         Map<Nonterminal, Set<HeapConfiguration>> abstractionOriginalRules = new HashMap<>();
         Map<Nonterminal, Set<CollapsedHeapConfiguration>> abstractionCollapsedRules = new HashMap<>();
@@ -46,6 +54,7 @@ public class NamedGrammar {
         this.concretizationGrammar = grammar;
         this.grammarName = name;
         this.originalRules = new ArrayList<>();
+        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
 
         for(Map.Entry<Nonterminal, Set<HeapConfiguration>> entry : grammar.rules.entrySet()) {
             Nonterminal nonterminal = entry.getKey();
@@ -72,7 +81,6 @@ public class NamedGrammar {
         }
 
         this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
-        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
     }
 
     private static Grammar getGrammar(List<GrammarRuleOriginal> grammarRules, boolean abstractionGrammar) {
@@ -132,32 +140,6 @@ public class NamedGrammar {
         return concretizationGrammar;
     }
 
-    @Deprecated
-    private NamedGrammar(NamedGrammar oldGrammar, Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules) {
-        this.originalRules = new ArrayList<>();
-        this.grammarName = oldGrammar.grammarName;
-
-        // Activate / Deactivate rules
-        for (GrammarRuleOriginal oldOriginalRule : oldGrammar.originalRules) {
-            GrammarRuleOriginal newOriginalRule = oldOriginalRule.changeRuleActivation(flipActivation);
-            if (newOriginalRule != null) {
-                this.originalRules.add(newOriginalRule);
-            }
-        }
-
-        // Add new rules
-        for (GrammarRuleOriginal newOriginalRule : addRules) {
-            this.originalRules.add(newOriginalRule);
-        }
-
-        // Set concretizationGrammar and abstractionGrammar
-        this.abstractionGrammar = getGrammar(originalRules,true);
-        this.concretizationGrammar = getGrammar(originalRules,false);
-
-        this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
-        this.abstractionBlockingHeapConfigurations = Collections.emptyList();
-    }
-
     /**
      * Creates a new grammar with the given modifications. The collections deactivateRules and activateRules should be disjoint.
      *
@@ -166,7 +148,30 @@ public class NamedGrammar {
      * @return the resulting grammar
      */
     public NamedGrammar getModifiedGrammar(Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules) {
-        return new NamedGrammar(this, flipActivation, addRules);
+        List<GrammarRuleOriginal> newOriginalRules = new ArrayList<>();
+
+        // Activate / Deactivate rules
+        for (GrammarRuleOriginal oldOriginalRule : originalRules) {
+            GrammarRuleOriginal newOriginalRule = oldOriginalRule.changeRuleActivation(flipActivation);
+            if (newOriginalRule != null) {
+                newOriginalRules.add(newOriginalRule);
+            }
+        }
+
+        // Add new rules
+        for (GrammarRuleOriginal newOriginalRule : addRules) {
+            newOriginalRules.add(newOriginalRule);
+        }
+
+        return new NamedGrammar(grammarName, newOriginalRules);
+    }
+
+    public int getMaxOriginalRuleIdx() {
+        if (originalRules.isEmpty()) {
+            return  -1;
+        } else {
+            return originalRules.get(originalRules.size() - 1).getOriginalRuleIdx();
+        }
     }
 
 }
