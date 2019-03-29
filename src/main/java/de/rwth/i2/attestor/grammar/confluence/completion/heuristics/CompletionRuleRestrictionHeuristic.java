@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
+import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.GrammarRule;
+import de.rwth.i2.attestor.grammar.GrammarRuleCollapsed;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
@@ -16,12 +18,15 @@ import java.util.*;
  */
 public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
     final boolean reactivateRules;
+    final boolean preventMainGrammarRuleDactivation;
 
     /**
      * @param reactivateRules If set to true rules that have been deactivated can get activated again (does not activate removed rules)
+     * @param preventMainGrammarRuleDactivation If set to true only collapsed rules and generated rules are deactivated
      */
-    public CompletionRuleRestrictionHeuristic(boolean reactivateRules) {
+    public CompletionRuleRestrictionHeuristic(boolean reactivateRules, boolean preventMainGrammarRuleDactivation) {
         this.reactivateRules = reactivateRules;
+        this.preventMainGrammarRuleDactivation = preventMainGrammarRuleDactivation;
     }
 
     @Override
@@ -46,9 +51,19 @@ public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
         return result;
     }
 
+    private boolean preventFlip(GrammarRule rule) {
+        if (rule instanceof GrammarRuleCollapsed) {
+            // Never prevent flip of collapsed rule
+            return false;
+        } else {
+            // Prevent a handwritten active rule from being deactivated if the corresponding option is set
+            return preventMainGrammarRuleDactivation && rule.getRuleStatus() == GrammarRule.RuleStatus.ACTIVE;
+        }
+    }
+
     private void flipRuleActivation(CompletionState state, GrammarRule ruleToFlip, Set<GrammarRule> alreadyFlippedGrammarRules, List<CompletionState> result) {
-        if (!alreadyFlippedGrammarRules.contains(ruleToFlip)) {
-            NamedGrammar modifiedGrammar = state.getGrammar().getModifiedGrammar(Collections.singleton(ruleToFlip), Collections.emptySet(), Collections.emptySet());
+        if (!preventFlip(ruleToFlip) && !alreadyFlippedGrammarRules.contains(ruleToFlip)) {
+            NamedGrammar modifiedGrammar = state.getGrammar().getModifiedGrammar(Collections.singleton(ruleToFlip), Collections.emptySet(), state.getGrammar().getAbstractionBlockingHeapConfigurations());
             // Add the new state where all critical pairs are recomputed TODO: If the rule is activated we don't need to recompute everything
             result.add(new CompletionState(modifiedGrammar));
             alreadyFlippedGrammarRules.add(ruleToFlip);
