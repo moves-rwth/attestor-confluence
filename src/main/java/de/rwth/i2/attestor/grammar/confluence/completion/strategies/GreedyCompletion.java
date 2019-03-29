@@ -44,15 +44,17 @@ public class GreedyCompletion implements CompletionStrategy {
                         // Compute loss
                         double nextLoss = completionStateLoss.getLoss(nextState);
                         if (nextLoss < currentLoss) {
-                            // Update state
+                            // Update state & loss
                             currentState = nextState;
+                            currentLoss = nextLoss;
+
                             // Try to find another possible optimization using this strategy
                             appliedHeuristic = true;
                             // Cycle through all heuristics again later
                             madeProgress = true;
                             // Increment the search depth and check if we have to abort
                             currentSearchDepth++;
-                            if (currentSearchDepth >= maxSearchDepth) {
+                            if (maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) {
                                 return currentState;
                             }
                             // Reinitialize possible next states for the current heuristic

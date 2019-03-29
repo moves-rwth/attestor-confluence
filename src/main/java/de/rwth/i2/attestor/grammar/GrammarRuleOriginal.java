@@ -124,7 +124,7 @@ public class GrammarRuleOriginal implements GrammarRule {
     @Override
     public boolean equals(Object o) {
         if (o instanceof GrammarRuleOriginal) {
-            GrammarRuleCollapsed otherRule = (GrammarRuleCollapsed) o;
+            GrammarRuleOriginal otherRule = (GrammarRuleOriginal) o;
             return getGrammarName() == otherRule.getGrammarName()
                     && getOriginalRuleIdx() == otherRule.getOriginalRuleIdx()
                     && getRuleStatus() == otherRule.getRuleStatus();
