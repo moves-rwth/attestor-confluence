@@ -1,13 +1,11 @@
 package de.rwth.i2.attestor.grammar;
 
-import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationHelper;
-import de.rwth.i2.attestor.grammar.canonicalization.CanonicalizationStrategy;
-import de.rwth.i2.attestor.grammar.canonicalization.EmbeddingCheckerProvider;
-import de.rwth.i2.attestor.grammar.canonicalization.GeneralCanonicalizationStrategy;
+import de.rwth.i2.attestor.grammar.canonicalization.*;
 import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
 import de.rwth.i2.attestor.grammar.util.ExternalNodesPartitioner;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -27,7 +25,8 @@ public class NamedGrammar {
     // TODO: Add methods to access / set this attribute
     final private Collection<HeapConfiguration> abstractionBlockingHeapConfigurations;
 
-    final CanonicalizationStrategy canonicalizationStrategy;
+    private CanonicalizationStrategy canonicalizationStrategy;
+    private EmbeddingCheckerProvider embeddingCheckerProvider;
 
     private NamedGrammar(String grammarName, List<GrammarRuleOriginal> newOriginalRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
         // Check that the original rule indices are in increasing order TODO: Can we just remove this sanity check?
@@ -46,9 +45,9 @@ public class NamedGrammar {
 
         this.abstractionGrammar = getGrammar(newOriginalRules, true);
         this.concretizationGrammar = getGrammar(newOriginalRules, false);
-
-        this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
         this.abstractionBlockingHeapConfigurations = abstractionBlockingHeapConfigurations;
+
+        createCanonicalizationStrategy();
     }
 
     public NamedGrammar(Grammar grammar, String name) {
@@ -82,7 +81,7 @@ public class NamedGrammar {
             }
         }
 
-        this.canonicalizationStrategy = createCanonicalizationStrategy(abstractionGrammar);
+        createCanonicalizationStrategy();
     }
 
     private static Grammar getGrammar(List<GrammarRuleOriginal> grammarRules, boolean abstractionGrammar) {
@@ -102,15 +101,18 @@ public class NamedGrammar {
         return resultingGrammar.build();
     }
 
-    private static GeneralCanonicalizationStrategy createCanonicalizationStrategy(Grammar abstractionGrammar) {
+    private void createCanonicalizationStrategy() {
+        if (this.abstractionGrammar == null) {
+            throw new IllegalStateException("Abstraction grammar has not been set");
+        }
         MorphismOptions options = new AbstractionOptions()
                 .setAdmissibleAbstraction(false)
                 .setAdmissibleConstants(false)
                 .setAdmissibleMarkings(false);
 
-        EmbeddingCheckerProvider provider = new EmbeddingCheckerProvider(options);
-        CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(provider);
-        return new GeneralCanonicalizationStrategy(abstractionGrammar, canonicalizationHelper);
+        embeddingCheckerProvider = new EmbeddingCheckerProvider(options);
+        CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(embeddingCheckerProvider);
+        canonicalizationStrategy = new ConfluentCanonicalizationStrategy(this, canonicalizationHelper);
     }
 
     public String getGrammarName() {
@@ -201,8 +203,15 @@ public class NamedGrammar {
         }
     }
 
-    public Collection<HeapConfiguration> getAbstractionBlockingHeapConfigurations() {
-        return Collections.unmodifiableCollection(abstractionBlockingHeapConfigurations);
+    public boolean blockHeapAbstraction(HeapConfiguration hc) {
+        for (HeapConfiguration pattern : abstractionBlockingHeapConfigurations) {
+            AbstractMatchingChecker matchingChecker = embeddingCheckerProvider.getEmbeddingChecker(hc, pattern);
+            if (matchingChecker.hasMatching()) {
+                // Don't abstract the heap configuration
+                return true;
+            }
+        }
+        return false;
     }
 
 }
