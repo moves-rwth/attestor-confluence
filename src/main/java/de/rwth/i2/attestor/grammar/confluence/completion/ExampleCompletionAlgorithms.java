@@ -10,6 +10,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPair
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.GreedyCompletion;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 
+
 public class ExampleCompletionAlgorithms {
 
     public static CompletionState algorithm1(NamedGrammar inputGrammar) {
@@ -17,7 +18,7 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                //.addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
                 .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .runCompletionAlgorithm(inputGrammar);
     }
