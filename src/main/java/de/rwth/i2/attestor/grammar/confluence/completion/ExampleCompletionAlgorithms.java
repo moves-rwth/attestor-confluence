@@ -12,6 +12,7 @@ import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 
 import java.io.IOException;
 
+
 public class ExampleCompletionAlgorithms {
 
     public static CompletionState algorithm1(NamedGrammar inputGrammar) {
@@ -19,7 +20,7 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                //.addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
                 .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .runCompletionAlgorithm(inputGrammar);
     }
