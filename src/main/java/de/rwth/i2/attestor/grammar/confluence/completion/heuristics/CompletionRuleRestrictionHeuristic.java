@@ -1,6 +1,5 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
-import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.GrammarRuleCollapsed;
 import de.rwth.i2.attestor.grammar.NamedGrammar;

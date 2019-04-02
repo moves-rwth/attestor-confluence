@@ -29,7 +29,7 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
     }
 
     @Override
-    Collection<Collection<Pair<Nonterminal, HeapConfiguration>>> addNewRules(CriticalPair criticalPair) {
+    Iterable<Collection<Pair<Nonterminal, HeapConfiguration>>> addNewRules(CriticalPair criticalPair) {
         // TODO: What to do with external nodes? How many, which nodes should be external? All combinations?
         HeapConfiguration hc1 = criticalPair.getCanonical1();
         HeapConfiguration hc2 = criticalPair.getCanonical2();

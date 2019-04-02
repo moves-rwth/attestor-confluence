@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
+import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.AddRulesNewNonterminalHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionAbstractionBlockingHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionRuleRestrictionHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPairLoss;
