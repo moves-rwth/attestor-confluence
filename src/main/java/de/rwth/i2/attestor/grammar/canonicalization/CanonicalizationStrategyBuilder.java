@@ -1,7 +1,9 @@
 package de.rwth.i2.attestor.grammar.canonicalization;
 
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.GrammarInterface;
 import de.rwth.i2.attestor.grammar.IndexMatcher;
+import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
 import de.rwth.i2.attestor.grammar.canonicalization.indexedGrammar.EmbeddingIndexChecker;
 import de.rwth.i2.attestor.grammar.canonicalization.indexedGrammar.IndexedCanonicalizationHelper;
@@ -24,7 +26,7 @@ import java.util.Set;
 public class CanonicalizationStrategyBuilder {
 
     private boolean indexedMode = false;
-    private Grammar grammar = null;
+    private GrammarInterface grammar = null;
     private MorphismOptions options;
 
     public CanonicalizationStrategy build() {
@@ -45,7 +47,14 @@ public class CanonicalizationStrategyBuilder {
         } else {
             canonicalizationHelper = new DefaultCanonicalizationHelper(checkerProvider);
         }
-        return new GeneralCanonicalizationStrategy(grammar, canonicalizationHelper);
+
+        if (grammar instanceof Grammar) {
+            return new GeneralCanonicalizationStrategy((Grammar) grammar, canonicalizationHelper);
+        } else if (grammar instanceof NamedGrammar) {
+            return new ConfluentCanonicalizationStrategy((NamedGrammar) grammar, canonicalizationHelper);
+        } else {
+            throw new IllegalStateException("Unsupported grammar class: " + grammar.getClass().getSimpleName());
+        }
     }
 
     private CanonicalizationHelper getIndexedCanonicalizationHelper(EmbeddingCheckerProvider checkerProvider) {
@@ -61,6 +70,10 @@ public class CanonicalizationStrategyBuilder {
     }
 
     private Set<String> determineNullPointerGuards() {
+        if (!(grammar instanceof Grammar)) {
+            throw new IllegalStateException("determineNullPointerGuards is only supported for Grammar class");
+        }
+        Grammar grammar = (Grammar) this.grammar;
 
         Set<String> nullPointerGuards = new LinkedHashSet<>();
 

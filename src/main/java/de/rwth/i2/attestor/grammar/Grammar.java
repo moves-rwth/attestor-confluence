@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * @author Hannah
  */
-public class Grammar {
+public class Grammar implements GrammarInterface {
 
     final Map<Nonterminal, Set<HeapConfiguration>> rules;
     final Map<Nonterminal, Set<CollapsedHeapConfiguration>> collapsedRules;

@@ -17,7 +17,7 @@ import java.util.function.Function;
  * TODO: How to integrate with attestor? Maybe extend Grammar class and behave like the concretization grammar
  * TODO: Better name for this class?
  */
-public class NamedGrammar {
+public class NamedGrammar implements GrammarInterface {
     final private String grammarName;
     final private Grammar abstractionGrammar, concretizationGrammar;
     final private List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
