@@ -19,7 +19,7 @@ import java.util.function.Function;
  */
 public class NamedGrammar {
     final private String grammarName;
-    final private Grammar abstractionGrammar, concretizationGrammar;
+    final private LegacyGrammar abstractionGrammar, concretizationGrammar;
     final private List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
 
     // TODO: Add methods to access / set this attribute
@@ -50,7 +50,7 @@ public class NamedGrammar {
         createCanonicalizationStrategy();
     }
 
-    public NamedGrammar(Grammar grammar, String name) {
+    public NamedGrammar(LegacyGrammar grammar, String name) {
         this.abstractionGrammar = grammar;
         this.concretizationGrammar = grammar;
         this.grammarName = name;
@@ -84,7 +84,7 @@ public class NamedGrammar {
         createCanonicalizationStrategy();
     }
 
-    private static Grammar getGrammar(List<GrammarRuleOriginal> grammarRules, boolean abstractionGrammar) {
+    private static LegacyGrammar getGrammar(List<GrammarRuleOriginal> grammarRules, boolean abstractionGrammar) {
         GrammarBuilder resultingGrammar = new GrammarBuilder();
         for (GrammarRuleOriginal originalRule : grammarRules) {
             if (!abstractionGrammar || originalRule.getRuleStatus() == GrammarRule.RuleStatus.ACTIVE || originalRule.getRuleStatus() == GrammarRule.RuleStatus.CONFLUENCE_GENERATED) {
@@ -154,11 +154,11 @@ public class NamedGrammar {
         return originalRules;
     }
 
-    public Grammar getAbstractionGrammar() {
+    public LegacyGrammar getAbstractionGrammar() {
         return abstractionGrammar;
     }
 
-    public Grammar getConcretizationGrammar() {
+    public LegacyGrammar getConcretizationGrammar() {
         return concretizationGrammar;
     }
 

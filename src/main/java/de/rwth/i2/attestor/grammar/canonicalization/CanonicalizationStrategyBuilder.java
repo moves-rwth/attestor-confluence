@@ -2,6 +2,8 @@ package de.rwth.i2.attestor.grammar.canonicalization;
 
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.IndexMatcher;
+import de.rwth.i2.attestor.grammar.LegacyGrammar;
+import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
 import de.rwth.i2.attestor.grammar.canonicalization.indexedGrammar.EmbeddingIndexChecker;
 import de.rwth.i2.attestor.grammar.canonicalization.indexedGrammar.IndexedCanonicalizationHelper;
@@ -17,6 +19,7 @@ import de.rwth.i2.attestor.programState.indexedState.index.IndexCanonizationStra
 import de.rwth.i2.attestor.types.Types;
 import gnu.trove.iterator.TIntIterator;
 
+import javax.naming.Name;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -45,7 +48,13 @@ public class CanonicalizationStrategyBuilder {
         } else {
             canonicalizationHelper = new DefaultCanonicalizationHelper(checkerProvider);
         }
-        return new GeneralCanonicalizationStrategy(grammar, canonicalizationHelper);
+        if (grammar instanceof LegacyGrammar) {
+            return new GeneralCanonicalizationStrategy((LegacyGrammar) grammar, canonicalizationHelper);
+        } else if (grammar instanceof NamedGrammar) {
+            return new GeneralCanonicalizationStrategy((LegacyGrammar) grammar, canonicalizationHelper);
+        } else {
+            throw new IllegalStateException("CanonicalizationStrategyBuilder does not support the grammar class: " + grammar.getClass().getName());
+        }
     }
 
     private CanonicalizationHelper getIndexedCanonicalizationHelper(EmbeddingCheckerProvider checkerProvider) {
@@ -61,6 +70,10 @@ public class CanonicalizationStrategyBuilder {
     }
 
     private Set<String> determineNullPointerGuards() {
+        if (!(grammar instanceof LegacyGrammar)) {
+            throw new IllegalStateException("determineNullPointerGuards only supported for LegacyGrammar");
+        }
+        LegacyGrammar grammar = (LegacyGrammar) this.grammar;
 
         Set<String> nullPointerGuards = new LinkedHashSet<>();
 

@@ -2,16 +2,17 @@ package de.rwth.i2.attestor.grammar.canonicalization;
 
 import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.LegacyGrammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 
 public class GeneralCanonicalizationStrategy implements CanonicalizationStrategy {
 
-    private final Grammar grammar;
+    private final LegacyGrammar grammar;
     private final CanonicalizationHelper canonicalizationHelper;
 
-    public GeneralCanonicalizationStrategy(Grammar grammar,
+    public GeneralCanonicalizationStrategy(LegacyGrammar grammar,
                                            CanonicalizationHelper canonicalizationHelper) {
 
         this.grammar = grammar;
