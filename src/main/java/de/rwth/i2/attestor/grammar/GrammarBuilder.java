@@ -19,9 +19,9 @@ public class GrammarBuilder {
     final Map<Nonterminal, Set<HeapConfiguration>> rules = new LinkedHashMap<>();
     final Map<Nonterminal, Set<CollapsedHeapConfiguration>> collapsedRules = new LinkedHashMap<>();
 
-    public LegacyGrammar build() {
+    public Grammar build() {
 
-        return new LegacyGrammar(rules, collapsedRules);
+        return new Grammar(rules, collapsedRules);
     }
 
     private void computeCollapsedRules() {
@@ -81,7 +81,7 @@ public class GrammarBuilder {
         return this;
     }
 
-    public GrammarBuilder addRules(LegacyGrammar grammar) {
+    public GrammarBuilder addRules(Grammar grammar) {
 
         rules.putAll(grammar.rules);
         return this;
