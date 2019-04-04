@@ -51,7 +51,7 @@ public class CanonicalizationStrategyBuilder {
         if (grammar instanceof LegacyGrammar) {
             return new GeneralCanonicalizationStrategy((LegacyGrammar) grammar, canonicalizationHelper);
         } else if (grammar instanceof NamedGrammar) {
-            return new GeneralCanonicalizationStrategy((LegacyGrammar) grammar, canonicalizationHelper);
+            return new ConfluentCanonicalizationStrategy((NamedGrammar) grammar, canonicalizationHelper);
         } else {
             throw new IllegalStateException("CanonicalizationStrategyBuilder does not support the grammar class: " + grammar.getClass().getName());
         }
