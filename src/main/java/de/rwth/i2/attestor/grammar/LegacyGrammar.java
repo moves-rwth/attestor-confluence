@@ -14,12 +14,12 @@ import java.util.Set;
  *
  * @author Hannah
  */
-public class Grammar {
+public class LegacyGrammar implements Grammar {
 
     final Map<Nonterminal, Set<HeapConfiguration>> rules;
     final Map<Nonterminal, Set<CollapsedHeapConfiguration>> collapsedRules;
 
-    Grammar(Map<Nonterminal, Set<HeapConfiguration>> rules,
+    LegacyGrammar(Map<Nonterminal, Set<HeapConfiguration>> rules,
             Map<Nonterminal, Set<CollapsedHeapConfiguration>> collapsedRules) {
 
         this.rules = rules;
