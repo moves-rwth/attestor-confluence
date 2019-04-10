@@ -218,4 +218,23 @@ public class NamedGrammar implements GrammarInterface {
         return Collections.unmodifiableCollection(abstractionBlockingHeapConfigurations);
     }
 
+    /**
+     * Returns true if this grammar in addition to the newRules is locally concretisable assuming that the grammar was
+     * locally concretisable beforehand.
+     *
+     * Note: Can return false even though the grammar actually remains locally concretisable
+     */
+    public boolean doesGrammarRemainLocallyConcretizable(Collection<GrammarRuleOriginal> newRules) {
+        // TODO
+        // For all tentacles of all LHS of newRules:
+        // 1. Calculate the selector sets for each RHS at the current tentacle
+        // 2. If there is a selector edge that is not in one RHS, check if the RHS can create the selector edge using further rule applications -> violation
+
+
+
+
+    }
+
+
+
 }

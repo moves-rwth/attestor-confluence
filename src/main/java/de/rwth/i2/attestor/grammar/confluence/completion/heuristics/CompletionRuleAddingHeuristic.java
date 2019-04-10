@@ -15,6 +15,8 @@ import java.util.Iterator;
 
 /**
  * Abstract class for all heuristics that try to add one or more rules for every critical pair.
+ *
+ * TODO: Check that the added rules do not violate the local concretisation property.
  */
 public abstract class CompletionRuleAddingHeuristic implements CompletionHeuristic {
 
@@ -49,6 +51,10 @@ public abstract class CompletionRuleAddingHeuristic implements CompletionHeurist
                             newGrammarRules.add(new GrammarRuleOriginal(grammar.getGrammarName(), nt, rhs, originialRuleIdx));
                             originialRuleIdx++;
                         }
+
+                        // TODO: Check if still local concretisable
+                        grammar.doesGrammarRemainLocallyConcretizable(newGrammarRules); // TODO: Use this result
+
 
                         // Add state with the new rules
                         NamedGrammar newGrammar = grammar.getModifiedGrammar(Collections.EMPTY_LIST, newGrammarRules, grammar.getAbstractionBlockingHeapConfigurations());
