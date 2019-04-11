@@ -1,7 +1,14 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.validity;
 
+import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import de.rwth.i2.attestor.graph.Nonterminal;
+import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * TODO: Can removing rules lead to not local concretizability?
@@ -19,16 +26,20 @@ public class LocalConcretizability implements GrammarValidity {
     @Override
     public boolean isValid(CompletionState oldCompletionState, CompletionState newCompletionState) {
         NamedGrammar oldGrammar = oldCompletionState.getGrammar();
-        NamedGrammar newGrammar = newCompletionState.getGrammar();
-        if (oldGrammar.getOriginalGrammarRules().size() < newGrammar.getOriginalGrammarRules().size()) {
-            // Some rules were added -> Check if they keep local concretizability
+        Collection<GrammarRuleOriginal> newGrammarRules = GrammarValidity.getNewRules(oldCompletionState, newCompletionState);
+        if (newGrammarRules.size() == 0) {
+            // No rules were added -> Local concretizability remains intact (TODO is this correct?)
+        } else {
+            // Some rules were added -> Check if they don't violate local concretizability
+            Map<Nonterminal, Collection<HeapConfiguration>> rulesByNonterminal = new HashMap<>();
+
+            for (GrammarRuleOriginal rule : newGrammarRules) {
+                // TODO: Fill rulesByNonterminal
+            }
 
             // TODO: Implement
 
             throw new UnsupportedOperationException("Not implemented yet");
-        } else {
-            // No rules were added -> Local concretizability remains intact (TODO is this correct?)
-            return true;
         }
     }
 }
