@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
+import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
 
 /**
  * Applies one heuristic as long as no further improvements can be made then moves to the next.
@@ -44,21 +45,32 @@ public class GreedyCompletion implements CompletionStrategy {
                         // Compute loss
                         double nextLoss = completionStateLoss.getLoss(nextState);
                         if (nextLoss < currentLoss) {
-                            // Update state & loss
-                            currentState = nextState;
-                            currentLoss = nextLoss;
-
-                            // Try to find another possible optimization using this strategy
-                            appliedHeuristic = true;
-                            // Cycle through all heuristics again later
-                            madeProgress = true;
-                            // Increment the search depth and check if we have to abort
-                            currentSearchDepth++;
-                            if (maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) {
-                                return currentState;
+                            // Check if the new completion state is valid
+                            boolean isValid = true;
+                            for (GrammarValidity validityCheck : completionSettings.getValidityChecks()) {
+                                if (!validityCheck.isValid(currentState, nextState)) {
+                                    isValid = false;
+                                    break;
+                                }
                             }
-                            // Reinitialize possible next states for the current heuristic
-                            break;
+
+                            if (isValid) {
+                                // Update state & loss
+                                currentState = nextState;
+                                currentLoss = nextLoss;
+
+                                // Try to find another possible optimization using this strategy
+                                appliedHeuristic = true;
+                                // Cycle through all heuristics again later
+                                madeProgress = true;
+                                // Increment the search depth and check if we have to abort
+                                currentSearchDepth++;
+                                if (maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) {
+                                    return currentState;
+                                }
+                                // Reinitialize possible next states for the current heuristic
+                                break;
+                            }
                         }
                     }
                 }

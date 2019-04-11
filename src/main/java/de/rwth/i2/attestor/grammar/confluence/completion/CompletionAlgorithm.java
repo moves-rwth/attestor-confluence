@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.CompletionStrategy;
+import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,14 +20,18 @@ import java.util.List;
  * - setCompletionStrategy
  * - addHeuristic (at least once, but it is possible to add multiple heuristics)
  *
+ * Optionally it is possible to call 'addGrammarValidityCheck' to rule out grammars that don't fulfill some conditions.
+ *
  */
 public class CompletionAlgorithm {
-    private List<CompletionHeuristic> heuristics;
+    private final List<CompletionHeuristic> heuristics;
+    private final List<GrammarValidity> validityChecks;
     private CompletionStateLoss completionStateLoss;
     private CompletionStrategy completionStrategy;
 
     public CompletionAlgorithm() {
         this.heuristics = new ArrayList<>();
+        this.validityChecks = new ArrayList<>();
     }
 
     // Builder style setters
@@ -46,10 +51,19 @@ public class CompletionAlgorithm {
         return this;
     }
 
+    public CompletionAlgorithm addGrammarValidityCheck(GrammarValidity validityCheck) {
+        this.validityChecks.add(validityCheck);
+        return this;
+    }
+
     // Getters
 
     public List<CompletionHeuristic> getHeuristics() {
         return Collections.unmodifiableList(heuristics);
+    }
+
+    public List<GrammarValidity> getValidityChecks() {
+        return Collections.unmodifiableList(validityChecks);
     }
 
     public CompletionStateLoss getCompletionStateLoss() {

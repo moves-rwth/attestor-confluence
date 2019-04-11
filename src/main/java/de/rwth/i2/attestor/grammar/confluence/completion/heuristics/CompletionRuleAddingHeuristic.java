@@ -4,14 +4,12 @@ import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Abstract class for all heuristics that try to add one or more rules for every critical pair.
@@ -51,10 +49,6 @@ public abstract class CompletionRuleAddingHeuristic implements CompletionHeurist
                             newGrammarRules.add(new GrammarRuleOriginal(grammar.getGrammarName(), nt, rhs, originialRuleIdx));
                             originialRuleIdx++;
                         }
-
-                        // TODO: Check if still local concretisable
-                        grammar.doesGrammarRemainLocallyConcretizable(newGrammarRules); // TODO: Use this result
-
 
                         // Add state with the new rules
                         NamedGrammar newGrammar = grammar.getModifiedGrammar(Collections.EMPTY_LIST, newGrammarRules, grammar.getAbstractionBlockingHeapConfigurations());
