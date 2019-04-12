@@ -12,7 +12,6 @@ import java.util.*;
  * A class to express the type of one tentacle.
  */
 public class TentacleType {
-    private final GrammarTypedness grammarTypedness;
     private final Nonterminal nonterminal;
     private final int tentacle;
     private final List<TentacleType> dependencies;  // This type depends on those types which have not yet been fully calculated
@@ -23,7 +22,6 @@ public class TentacleType {
 
     public TentacleType(GrammarTypedness grammarTypedness, Nonterminal nt, int tentacle) {
         this.calculationInProgress = false;
-        this.grammarTypedness = grammarTypedness;
         this.nonterminal = nt;
         this.tentacle = tentacle;
         this.allTypes = null;  // Compute only when needed
