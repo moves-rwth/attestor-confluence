@@ -5,10 +5,13 @@ import de.rwth.i2.attestor.grammar.GrammarBuilder;
 import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,18 +36,32 @@ public class LocalConcretizability implements GrammarValidity {
             return true;
         } else {
             // Some rules were added -> Check if they don't violate local concretizability
-            Grammar oldRules = getGrammarFromOriginalRules(oldCompletionState.getGrammar().getOriginalGrammarRules());
+            Grammar newGrammar = getGrammarFromOriginalRules(newCompletionState.getGrammar().getOriginalGrammarRules());
+            GrammarTypedness newTypes = new GrammarTypedness(newGrammar);
+
             Grammar newRules = getGrammarFromOriginalRules(newGrammarRules);
+
             for (Nonterminal nt : newRules.getAllLeftHandSides()) {
                 for (int tentacle=0; tentacle < nt.getRank(); tentacle++) {
-                    Set<SelectorLabel> directReachableSelectors = new HashSet<>();
-                    Set<SelectorLabel>
+                    Set<SelectorLabel> allSelectors = newTypes.getTentacleType(nt, tentacle).getAllTypes();
+                    for (HeapConfiguration newRhs : newRules.getRightHandSidesFor(nt)) {
+                        int node = newRhs.externalNodeAt(tentacle);
+                        Set<SelectorLabel> directNewSelectors = new HashSet<>(newRhs.selectorLabelsOf(node));
+                        if (!allSelectors.equals(directNewSelectors)) {
+                            Set<SelectorLabel> missingSelectors = new HashSet<>(allSelectors);
+                            missingSelectors.removeAll(directNewSelectors);
+                            // All missing selectors should not be creatable at 'node'
+                            Set<SelectorLabel> recursiveNewSelectors = newTypes.getTypesAtNode(newRhs, node);
+                            if (!Collections.disjoint(missingSelectors, recursiveNewSelectors)) {
+                                return false;
+                            }
+
+                        }
+                    }
                 }
             }
 
-            // TODO: Implement
-
-            throw new UnsupportedOperationException("Not implemented yet");
+            return true;
         }
     }
 
@@ -58,21 +75,5 @@ public class LocalConcretizability implements GrammarValidity {
         }
         return builder.build();
     }
-
-    /**
-     * Returns a set of all possible outgoing selector edges that can be created at the given tentacle
-     */
-    private static Set<SelectorLabel> getType(Grammar grammar, Nonterminal nt, int tentacle) {
-
-    }
-
-    private static Set<SelectorLabel> getImmediateSelectors(Grammar grammar, Nonterminal nt, int tentacle) {
-        Set<SelectorLabel> result = new HashSet<>();
-        for (Grammar grammar : grammar.)
-        return result;
-    }
-
-
-
 
 }
