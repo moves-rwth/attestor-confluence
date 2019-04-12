@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
@@ -32,21 +33,9 @@ public class TentacleType {
         this.dependencies = new ArrayList<>();
         for (HeapConfiguration rhs : grammar.getRightHandSidesFor(nt)) {
             int node = rhs.externalNodeAt(tentacle);
-            immediateReachable.addAll(rhs.selectorLabelsOf(node));
-            rhs.attachedNonterminalEdgesOf(node).forEach(ntEdge-> {
-                Nonterminal ntDependency = rhs.labelOf(ntEdge);
-                TIntArrayList attachedNodes = rhs.attachedNodesOf(ntEdge);
-                int offset = 0;
-                while (offset != -1) {
-                    offset = attachedNodes.indexOf(offset, node);
-                    if (offset != -1) {
-                        // attachedNodes[offset] == node
-                        dependencies.add(grammarTypedness.getTentacleType(nt, offset));
-                        offset++;  // Search following indices
-                    }
-                }
-                return true;
-            });
+            for (Pair<Nonterminal, Integer> ntTentacle : GrammarTypedness.getConnectedTentacles(rhs, node)) {
+                dependencies.add(grammarTypedness.getTentacleType(ntTentacle.first(), ntTentacle.second()));
+            }
         }
 
     }

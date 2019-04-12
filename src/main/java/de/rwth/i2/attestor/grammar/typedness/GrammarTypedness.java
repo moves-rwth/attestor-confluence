@@ -6,10 +6,9 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
+import gnu.trove.list.array.TIntArrayList;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A class that stores for each non terminal in the grammar, which outgoing selectors can be generated at each outgoing selector
@@ -33,7 +32,39 @@ public class GrammarTypedness {
     }
 
     public Set<SelectorLabel> getTypesAtNode(HeapConfiguration hc, int node) {
-        // TODO: Implement
-        throw new UnsupportedOperationException();
+        Set<SelectorLabel> result = new HashSet<>();
+        // Add immediate selectors
+        result.addAll(hc.selectorLabelsOf(node));
+
+        // Add recursive selectors
+        for (Pair<Nonterminal, Integer> ntTentacle : GrammarTypedness.getConnectedTentacles(hc, node)) {
+            Set<SelectorLabel> recursiveSelectors = getTentacleType(ntTentacle.first(), ntTentacle.second()).getAllTypes();
+            result.addAll(recursiveSelectors);
+        }
+
+        return result;
     }
+
+    // TODO: Might move this method in some util class (or directly to HeapConfiguration)
+    public static Collection<Pair<Nonterminal, Integer>> getConnectedTentacles(HeapConfiguration hc, int node) {
+        Collection<Pair<Nonterminal, Integer>> result = new ArrayList<>();
+
+        hc.attachedNonterminalEdgesOf(node).forEach(ntEdge-> {
+            Nonterminal nt = hc.labelOf(ntEdge);
+            TIntArrayList attachedNodes = hc.attachedNodesOf(ntEdge);
+            int offset = 0;
+            while (offset != -1) {
+                offset = attachedNodes.indexOf(offset, node);
+                if (offset != -1) {
+                    // attachedNodes[offset] == node
+                    result.add(new Pair<>(nt, offset));
+                    offset++;  // Search following indices
+                }
+            }
+            return true;
+        });
+
+        return result;
+    }
+
 }
