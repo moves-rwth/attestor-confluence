@@ -8,14 +8,8 @@ import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
 
-import static javax.print.attribute.standard.MediaSizeName.C;
-
 /**
- * A class to express that the type of one tentacle.
- * The types are calculated once the ??? method is called. The types are calculated by a fixed point iteration on a spanning tree of the dependency graph.
- *
- * TODO: This can be optimized by calculating a spanning tree first and saving intermediate results for subtrees that do not have backedges
- *
+ * A class to express the type of one tentacle.
  */
 public class TentacleType {
     private final GrammarTypedness grammarTypedness;
