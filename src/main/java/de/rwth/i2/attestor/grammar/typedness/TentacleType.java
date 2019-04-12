@@ -6,21 +6,24 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import gnu.trove.list.array.TIntArrayList;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
+import static javax.print.attribute.standard.MediaSizeName.C;
 
 /**
- * A class to express that the type of one tentacle
+ * A class to express that the type of one tentacle.
+ * The types are calculated once the ??? method is called. The types are calculated by a fixed point iteration on a spanning tree of the dependency graph.
+ *
+ * TODO: This can be optimized by calculating a spanning tree first and saving intermediate results for subtrees that do not have backedges
+ *
  */
 public class TentacleType {
     private final GrammarTypedness grammarTypedness;
     private final Nonterminal nonterminal;
     private final int tentacle;
-    private final Set<TentacleType> unterminatedDependencies;  // This type depends on those types which have not yet been fully calculated
+    private final List<TentacleType> dependencies;  // This type depends on those types which have not yet been fully calculated
     private final Set<SelectorLabel> immediateReachable;  // All types that can get generated through a single rule application
-    private final Set<SelectorLabel> allTypes;
+    private Set<SelectorLabel> allTypes;
     private boolean calculationInProgress;  // Used to resolve recursive dependency loops
 
 
@@ -29,12 +32,12 @@ public class TentacleType {
         this.grammarTypedness = grammarTypedness;
         this.nonterminal = nt;
         this.tentacle = tentacle;
-        this.immediateReachable = new HashSet<>();
-        this.unterminatedDependencies = new HashSet<>();
+        this.allTypes = null;  // Compute only when needed
 
-        // Initialize direct types and dependencies
+        // Initialize immediateReachable and dependencies
         Grammar grammar = grammarTypedness.getGrammar();
-
+        this.immediateReachable = new HashSet<>();
+        this.dependencies = new ArrayList<>();
         for (HeapConfiguration rhs : grammar.getRightHandSidesFor(nt)) {
             int node = rhs.externalNodeAt(tentacle);
             immediateReachable.addAll(rhs.selectorLabelsOf(node));
@@ -46,7 +49,7 @@ public class TentacleType {
                     offset = attachedNodes.indexOf(offset, node);
                     if (offset != -1) {
                         // attachedNodes[offset] == node
-                        unterminatedDependencies.add(grammarTypedness.getTentacleType(nt, offset));
+                        dependencies.add(grammarTypedness.getTentacleType(nt, offset));
                         offset++;  // Search following indices
                     }
                 }
@@ -54,31 +57,37 @@ public class TentacleType {
             });
         }
 
-        this.allTypes = new HashSet<>(immediateReachable);
+    }
+
+    public Nonterminal getNonterminal() {
+        return nonterminal;
+    }
+
+    public int getTentacle() {
+        return tentacle;
     }
 
     public Set<SelectorLabel> getImmediateReachable() {
-        return immediateReachable;
+        return Collections.unmodifiableSet(immediateReachable);
     }
 
-    public Set<SelectorLabel> getAllCurrentTypes() {
-        return allTypes;
+    public Set<SelectorLabel> getAllTypes() {
+        if (allTypes == null) {
+            allTypes = new HashSet<>();
+            addDependencyTypes(allTypes);
+        }
+        return Collections.unmodifiableSet(allTypes);
+
     }
 
-    /**
-     * @return set of new types at tentacle
-     */
-    public Set<TentacleType> recalculateDependencies() {
-        if (calculationInProgress) {
-            // Don't start another re-computation to ensure termination
-            return null;
-        } else {
+    private void addDependencyTypes(Set<SelectorLabel> selectorLabels) {
+        if (!calculationInProgress) {  // Resolve cyclic dependencies
             calculationInProgress = true;
 
-            for (TentacleType dependency : unterminatedDependencies) {
-
+            selectorLabels.addAll(getImmediateReachable());
+            for (TentacleType dependency : dependencies) {
+                dependency.addDependencyTypes(selectorLabels);
             }
-
 
             calculationInProgress = false;
         }
