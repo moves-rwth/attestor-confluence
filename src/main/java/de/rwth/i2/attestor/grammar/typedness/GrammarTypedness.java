@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.util.Pair;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +16,8 @@ public class GrammarTypedness {
 
 
     public GrammarTypedness(Grammar grammar) {
-
+        this.grammar = grammar;
+        this.types = new HashMap<>();
     }
 
     public Grammar getGrammar() {

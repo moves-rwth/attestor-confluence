@@ -14,7 +14,7 @@ import java.util.*;
 public class TentacleType {
     private final Nonterminal nonterminal;
     private final int tentacle;
-    private final List<TentacleType> dependencies;  // This type depends on those types which have not yet been fully calculated
+    private final List<TentacleType> dependencies;
     private final Set<SelectorLabel> immediateReachable;  // All types that can get generated through a single rule application
     private Set<SelectorLabel> allTypes;
     private boolean calculationInProgress;  // Used to resolve recursive dependency loops
