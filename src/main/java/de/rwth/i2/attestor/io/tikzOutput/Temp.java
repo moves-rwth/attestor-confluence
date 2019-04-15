@@ -34,6 +34,21 @@ public class Temp {
         //exportDefaultGrammar("SLList");
         //exportDefaultGrammar("DLList_simple_one_way");
         //exportDefaultGrammar("DLList_simple_two_way");
+        try {
+            NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar(), "SimpleDLL");
+
+            TikzExport exporter = new TikzExport("reports/simple-dll-list-grammar-report.tex", true);
+            exporter.exportGrammar(grammar, true);
+            exporter.finishExport();
+
+            exporter = new TikzExport("reports/simple-dll-list-critical-pair-report.tex", true);
+            CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
+            Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE);
+            exporter.exportCriticalPairs(criticalPairs);
+            exporter.finishExport();
+        } catch (Exception e) {
+            System.err.println("Error occurred");
+        }
     }
 
     public static void exportDefaultGrammar(String defaultGrammarName) {
