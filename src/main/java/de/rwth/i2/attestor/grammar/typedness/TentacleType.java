@@ -5,7 +5,6 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
-import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
 
@@ -13,10 +12,11 @@ import java.util.*;
  * A class to express the type of one tentacle.
  */
 public class TentacleType {
+    private final GrammarTypedness grammarTypedness;
     private final Nonterminal nonterminal;
     private final int tentacle;
-    private final List<TentacleType> dependencies;
-    private final Set<SelectorLabel> immediateReachable;  // All types that can get generated through a single rule application
+    private Set<TentacleType> dependencies;
+    private Set<SelectorLabel> immediateReachable;  // All types that can get generated through a single rule application
     private Set<SelectorLabel> allTypes;
     private boolean calculationInProgress;  // Used to resolve recursive dependency loops
 
@@ -26,18 +26,25 @@ public class TentacleType {
         this.nonterminal = nt;
         this.tentacle = tentacle;
         this.allTypes = null;  // Compute only when needed
+        this.grammarTypedness = grammarTypedness;
+        this.dependencies = null;
+        this.immediateReachable = null;
+    }
 
-        // Initialize immediateReachable and dependencies
-        Grammar grammar = grammarTypedness.getGrammar();
-        this.immediateReachable = new HashSet<>();
-        this.dependencies = new ArrayList<>();
-        for (HeapConfiguration rhs : grammar.getRightHandSidesFor(nt)) {
-            int node = rhs.externalNodeAt(tentacle);
-            for (Pair<Nonterminal, Integer> ntTentacle : GrammarTypedness.getConnectedTentacles(rhs, node)) {
-                dependencies.add(grammarTypedness.getTentacleType(ntTentacle.first(), ntTentacle.second()));
+    private void initializeDependencies() {
+        if (dependencies == null) {
+            // Initialize immediateReachable and dependencies
+            Grammar grammar = grammarTypedness.getGrammar();
+            immediateReachable = new HashSet<>();
+            dependencies = new HashSet<>();
+            for (HeapConfiguration rhs : grammar.getRightHandSidesFor(nonterminal)) {
+                int node = rhs.externalNodeAt(tentacle);
+                immediateReachable.addAll(rhs.selectorLabelsOf(node));
+                for (Pair<Nonterminal, Integer> ntTentacle : GrammarTypedness.getConnectedTentacles(rhs, node)) {
+                    dependencies.add(grammarTypedness.getTentacleType(ntTentacle.first(), ntTentacle.second()));
+                }
             }
         }
-
     }
 
     public Nonterminal getNonterminal() {
@@ -65,6 +72,7 @@ public class TentacleType {
         if (!calculationInProgress) {  // Resolve cyclic dependencies
             calculationInProgress = true;
 
+            initializeDependencies();
             selectorLabels.addAll(getImmediateReachable());
             for (TentacleType dependency : dependencies) {
                 dependency.addDependencyTypes(selectorLabels);
@@ -74,4 +82,18 @@ public class TentacleType {
         }
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(nonterminal.hashCode(), tentacle);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof TentacleType) {
+            TentacleType otherTentacleType = (TentacleType) o;
+            return nonterminal.equals(otherTentacleType.nonterminal) && tentacle == otherTentacleType.tentacle;
+        } else {
+            return false;
+        }
+    }
 }

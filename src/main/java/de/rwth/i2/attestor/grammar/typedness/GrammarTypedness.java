@@ -1,7 +1,7 @@
 package de.rwth.i2.attestor.grammar.typedness;
 
 import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
@@ -65,6 +65,16 @@ public class GrammarTypedness {
         });
 
         return result;
+    }
+
+    public static void main(String[] args) {
+        Grammar grammar = ConfluenceTool.parseGrammar("DLList").getConcretizationGrammar();
+        GrammarTypedness typedness = new GrammarTypedness(grammar);
+        Nonterminal nt = grammar.getAllLeftHandSides().iterator().next();
+        System.out.println(typedness.getTentacleType(nt, 0).getAllTypes());
+        System.out.println(typedness.getTentacleType(nt, 1).getAllTypes());
+        System.out.println(typedness.getTentacleType(nt, 2).getAllTypes());
+        System.out.println(typedness.getTentacleType(nt, 3).getAllTypes());
     }
 
 }

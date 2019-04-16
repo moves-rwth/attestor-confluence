@@ -8,6 +8,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionAb
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionRuleRestrictionHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPairLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.GreedyCompletion;
+import de.rwth.i2.attestor.grammar.confluence.completion.validity.LocalConcretizability;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 
@@ -23,6 +24,7 @@ public class ExampleCompletionAlgorithms {
                 .addHeuristic(new CompletionAbstractionBlockingHeuristic())
                 .addHeuristic(new AddRulesNewNonterminalHeuristic())
                 .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addGrammarValidityCheck(new LocalConcretizability())
                 .runCompletionAlgorithm(inputGrammar);
     }
 
