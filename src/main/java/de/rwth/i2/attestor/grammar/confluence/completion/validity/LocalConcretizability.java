@@ -3,7 +3,6 @@ package de.rwth.i2.attestor.grammar.confluence.completion.validity;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
 import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
 import de.rwth.i2.attestor.graph.Nonterminal;

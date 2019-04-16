@@ -35,9 +35,13 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
     private int numberNonterminals; // Keep track of the number of nonterminals to give unique names
 
     public AddRulesNewNonterminalHeuristic() {
+        this(1, UNLIMITED_NUMBER_EXTERNALS);
+    }
+
+    public AddRulesNewNonterminalHeuristic(int minNumberExternals, int maxNumberExternals) {
         this.scene = new DefaultScene();
-        this.minNumberExternals = 1;
-        this.maxNumberExternals = UNLIMITED_NUMBER_EXTERNALS;
+        this.minNumberExternals = minNumberExternals;
+        this.maxNumberExternals = maxNumberExternals;
         this.numberNonterminals = 0;
     }
 
@@ -100,7 +104,11 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
 
     private Collection<Pair<Nonterminal, HeapConfiguration>> getRules(HeapConfiguration hc1, HeapConfiguration hc2, List<Integer> hc1Externals, List<Integer> hc2Externals) {
         numberNonterminals++;
-        Nonterminal newNonterminal = scene.createNonterminal("X" + numberNonterminals, 1, new boolean[] {true});
+        boolean[] reductionTentacles = new boolean[hc1Externals.size()];
+        for (int i = 0; i < reductionTentacles.length; i++) {
+            reductionTentacles[i] = false;
+        }
+        Nonterminal newNonterminal = scene.createNonterminal("X" + numberNonterminals, hc1Externals.size(), reductionTentacles);
         Collection<Pair<Nonterminal, HeapConfiguration>> newRules = new ArrayList<>();
         newRules.add(new Pair<>(newNonterminal, makeNodesExternal(hc1, hc1Externals)));
         newRules.add(new Pair<>(newNonterminal, makeNodesExternal(hc2, hc2Externals)));

@@ -55,6 +55,7 @@ public class GreedyCompletion implements CompletionStrategy {
                             }
 
                             if (isValid) {
+                                System.out.println("Current number critical pairs: " + nextState.getCriticalPairs().size());
                                 // Update state & loss
                                 currentState = nextState;
                                 currentLoss = nextLoss;
