@@ -23,7 +23,7 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new CompletionAbstractionBlockingHeuristic())
                 .addHeuristic(new AddRulesNewNonterminalHeuristic(1, 1))
-                .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                //.addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new LocalConcretizability())
                 .runCompletionAlgorithm(inputGrammar);
     }
