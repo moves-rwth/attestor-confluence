@@ -49,6 +49,22 @@ public class Temp {
         } catch (Exception e) {
             System.err.println("Error occurred");
         }
+
+        try {
+            NamedGrammar grammar = new NamedGrammar(getTernaryGrammar(), "Ternary");
+
+            TikzExport exporter = new TikzExport("reports/ternary-grammar-report.tex", true);
+            exporter.exportGrammar(grammar, true);
+            exporter.finishExport();
+
+            exporter = new TikzExport("reports/ternary-critical-pair-report.tex", true);
+            CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
+            Collection<CriticalPair> criticalPairs = criticalPairFinder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE);
+            exporter.exportCriticalPairs(criticalPairs);
+            exporter.finishExport();
+        } catch (Exception e) {
+            System.err.println("Error occurred");
+        }
     }
 
     public static void exportDefaultGrammar(String defaultGrammarName) {
@@ -96,6 +112,41 @@ public class Temp {
                 .addSelector(nodesHc2.get(1), previousPointer, nodesHc2.get(0));
 
         int nonTerminalEdge = hc2Builder.addNonterminalEdgeAndReturnId(list, TIntArrayList.wrap(new int[] {nodesHc2.get(1), nodesHc2.get(2)}));
+        HeapConfiguration hc2 = hc2Builder.build();
+
+        return new GrammarBuilder()
+                .addRule(list, hc1)
+                .addRule(list, hc2)
+                .updateCollapsedRules()
+                .build();
+    }
+
+    private static Grammar getTernaryGrammar() {
+        BasicNonterminal.Factory factory = new BasicNonterminal.Factory();
+        Nonterminal list = factory.create("N", 3, new boolean[]{false, false, false});
+        BasicSelectorLabel.Factory factory1 = new BasicSelectorLabel.Factory();
+        SelectorLabel pointer = factory1.get("a");
+        SelectorLabel pointer2 = factory1.get("b");
+        GeneralType.Factory factory2 = new GeneralType.Factory();
+        Type listElement = factory2.get("Element");
+        TIntArrayList nodesHc1 = new TIntArrayList(3);
+        HeapConfiguration hc1 = new InternalHeapConfiguration().builder()
+                .addNodes(listElement, 3, nodesHc1)
+                .setExternal(nodesHc1.get(0)).setExternal(nodesHc1.get(1)).setExternal(nodesHc1.get(2))
+                .addSelector(nodesHc1.get(0), pointer, nodesHc1.get(1))
+                .addSelector(nodesHc1.get(1), pointer, nodesHc1.get(2))
+                .addSelector(nodesHc1.get(2), pointer2, nodesHc1.get(0))
+                .build();
+
+        TIntArrayList nodesHc2 = new TIntArrayList(6);
+        HeapConfigurationBuilder hc2Builder = new InternalHeapConfiguration().builder()
+                .addNodes(listElement, 6, nodesHc2)
+                .setExternal(nodesHc2.get(3)).setExternal(nodesHc2.get(4)).setExternal(nodesHc2.get(5))
+                .addSelector(nodesHc2.get(0), pointer, nodesHc2.get(3))
+                .addSelector(nodesHc2.get(1), pointer, nodesHc2.get(4))
+                .addSelector(nodesHc2.get(2), pointer, nodesHc2.get(5));
+
+        int nonTerminalEdge = hc2Builder.addNonterminalEdgeAndReturnId(list, TIntArrayList.wrap(new int[] {nodesHc2.get(0), nodesHc2.get(1), nodesHc2.get(2)}));
         HeapConfiguration hc2 = hc2Builder.build();
 
         return new GrammarBuilder()

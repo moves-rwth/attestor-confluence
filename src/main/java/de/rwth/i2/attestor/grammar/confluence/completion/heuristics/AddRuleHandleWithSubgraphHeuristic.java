@@ -1,13 +1,22 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
+import de.rwth.i2.attestor.grammar.AbstractionOptions;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.util.SimpleIterator;
+import de.rwth.i2.attestor.graph.BasicNonterminal;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.heap.Matching;
+import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
+import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
+import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.array.TIntArrayList;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -18,7 +27,7 @@ import java.util.Iterator;
  * The algorithm for a given critical pair works the following:
  * For all nonterminals N in HC1:
  *   1: Compute G1 = HC1 \ N
- *   2: Compute G2 = embedding(HC2, G1)  (if no embedding try next nonterminal)
+ *   2: For all embeddings: G2 = embedding(HC2, G1)  (if no embedding try next nonterminal)
  *   3: Compute RHS = HC2 \ G2     (N => RHS is new rule)
  *
  * Repeat with HC1 and HC2 switched
@@ -26,6 +35,15 @@ import java.util.Iterator;
  *
  */
 public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeuristic {
+    private final MorphismOptions morphismOptions;
+
+    public AddRuleHandleWithSubgraphHeuristic() {
+        morphismOptions = new AbstractionOptions()
+                .setAdmissibleAbstraction(false)
+                .setAdmissibleConstants(false)
+                .setAdmissibleMarkings(false);
+    }
+
     @Override
     Iterable<Collection<Pair<Nonterminal, HeapConfiguration>>> addNewRules(CriticalPair criticalPair) {
         HeapConfiguration hc1 = criticalPair.getCanonical1();
@@ -58,12 +76,95 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
         };
     }
 
-    private static Collection<Pair<Nonterminal, HeapConfiguration>> getRule(HeapConfiguration hc1, HeapConfiguration hc2, int hc1Nonterminal) {
+    private Collection<Pair<Nonterminal, HeapConfiguration>> getRule(HeapConfiguration hc1, HeapConfiguration hc2, int hc1Nonterminal) {
         // 1. Compute G1 = HC1 \ N
-        
+        HeapConfiguration g1 = hc1.clone().builder().removeNonterminalEdge(hc1Nonterminal).build();
+        // Make all nodes external (so they don't get removed automatically later)
+        HeapConfigurationBuilder g1Builder = g1.builder();
+        TIntArrayList g1Nodes = g1.nodes();
+        g1Nodes.forEach(node -> {
+            g1Builder.setExternal(node);
+            return true;
+        });
+        g1 = g1Builder.build();
 
-        // 2. Compute G2 = embedding(HC2, G1)
+        // 2. Compute matching = embedding(HC2, G1)
+        AbstractMatchingChecker matchingChecker = hc2.getEmbeddingsOf(g1, morphismOptions);
+        if (!matchingChecker.hasMatching()) {
+            // No matching was found
+            return null;
+        }
+        Matching matching = matchingChecker.getMatching();
 
-        // 3. Compute RHS = HC2 \ G2
+        // 3. Compute RHS = HC2 \ matching
+        Nonterminal tempNonterminal = new BasicNonterminal.Factory().create(null, g1.countExternalNodes(), new boolean[g1.countExternalNodes()]);
+        HeapConfiguration rhs = hc2.clone().builder().replaceMatching(matching, tempNonterminal).build();  // Some nonterminal is required
+        TIntArrayList nonterminalEdges = rhs.nonterminalEdges();
+        for (int i = 0; i < nonterminalEdges.size(); i++) {
+            if (rhs.labelOf(nonterminalEdges.get(i)) == tempNonterminal) {
+                // Found the newly added nonterminal
+                rhs = rhs.builder().removeNonterminalEdge(nonterminalEdges.get(i)).build();
+                break;
+            }
+        }
+        // Remove isolated nodes
+        rhs = removeIsolatedNodes(rhs);
+        if (!isSingleComponent(rhs)) {
+            // rhs must be a single component
+            return null;
+        }
+
+        Nonterminal nt = hc1.labelOf(hc1Nonterminal);
+
+        if (nt.getRank() > rhs.countNodes()) {
+            return null;
+        }
+
+        // Set some nodes as external TODO: Iterate all possible combinations
+        TIntArrayList rhsNodes = rhs.nodes();
+        HeapConfigurationBuilder rhsBuilder = rhs.builder();
+        for (int i = 0; i < nt.getRank(); i++) {
+            rhsBuilder.setExternal(rhsNodes.get(i));
+        }
+        rhs = rhsBuilder.build();
+
+        if (!isGrowingRule(rhs)) {
+            // We don't want to add collapsed rules (might change later)
+            return null;
+        }
+
+        return Collections.singleton(new Pair<>(nt, rhs));
+    }
+
+    private static HeapConfiguration removeIsolatedNodes(HeapConfiguration hc) {
+        HeapConfigurationBuilder builder = hc.builder();
+        TIntArrayList nodes = hc.nodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            int node = nodes.get(i);
+            if (hc.attachedNonterminalEdgesOf(node).isEmpty() && hc.predecessorNodesOf(node).isEmpty() && hc.selectorLabelsOf(node).isEmpty()) {
+                builder.removeNode(node);
+            }
+        }
+        return builder.build();
+    }
+
+    private static boolean isSingleComponent(HeapConfiguration hc) {
+        // TODO
+        return true;
+    }
+
+    private static boolean isGrowingRule(HeapConfiguration rhs) {
+        if (rhs.countNonterminalEdges() > 1) {
+            return true;
+        }
+        TIntArrayList nodes = rhs.nodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            int node = nodes.get(i);
+            if (!rhs.selectorLabelsOf(node).isEmpty() || !rhs.isExternalNode(node)) {
+                return true;
+            }
+        }
+        return false;
+
     }
 }

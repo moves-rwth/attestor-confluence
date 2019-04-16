@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
+import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.AddRuleHandleWithSubgraphHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.AddRulesNewNonterminalHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionAbstractionBlockingHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionRuleRestrictionHeuristic;
@@ -21,8 +22,9 @@ public class ExampleCompletionAlgorithms {
         return new CompletionAlgorithm()
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
-                .addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                .addHeuristic(new AddRulesNewNonterminalHeuristic(1, 1))
+                .addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
+                //.addHeuristic(new CompletionAbstractionBlockingHeuristic())
+                //.addHeuristic(new AddRulesNewNonterminalHeuristic(1, 1))
                 //.addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new LocalConcretizability())
                 .runCompletionAlgorithm(inputGrammar);
