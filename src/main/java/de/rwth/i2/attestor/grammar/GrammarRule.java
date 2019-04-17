@@ -32,6 +32,8 @@ public interface GrammarRule {
 
     int getOriginalRuleIdx();
 
+    void addToGrammarBuilder(GrammarBuilder builder);
+
     default boolean isRuleActive() {
         switch (getRuleStatus()) {
             case ACTIVE:
