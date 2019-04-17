@@ -1,23 +1,24 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
 import de.rwth.i2.attestor.grammar.AbstractionOptions;
+import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
 import de.rwth.i2.attestor.graph.Nonterminal;
+import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.Matching;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
+import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * If one of the fully abstracted heap configurations of the critical pair contains a handle and a subgraph that is
@@ -149,7 +150,57 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
     }
 
     private static boolean isSingleComponent(HeapConfiguration hc) {
-        // TODO
+        if (hc.countNodes() == 0) {
+            // There is no component
+            return false;
+        }
+        // Convert to graph for easier computation
+        Set<Integer> visitedNodes = new HashSet<>();
+        Stack<Integer> unvisitedNodes = new Stack<>();
+        unvisitedNodes.add(hc.nodes().get(0));
+        while (!unvisitedNodes.isEmpty()) {
+            int node = unvisitedNodes.pop();
+            // Check if node was already visited
+            if (!visitedNodes.contains(node)) {
+                visitedNodes.add(node);
+                Set<Integer> connectedNodes = new HashSet<>();
+
+                // Calculate all nodes that are connected to node
+
+                // 1. Connected through outgoing selectors
+                for (SelectorLabel label: hc.selectorLabelsOf(node)) {
+                    connectedNodes.add(hc.selectorTargetOf(node, label));
+                }
+
+                // 2. Connected through incoming selectors
+                hc.predecessorNodesOf(node).forEach(predNode -> {
+                    connectedNodes.add(predNode);
+                    return true;
+                });
+
+
+                // 3. Connected through nonterminal
+                hc.attachedNonterminalEdgesOf(node).forEach(ntEdge -> {
+                    hc.attachedNodesOf(ntEdge).forEach(connectedNode -> {
+                        connectedNodes.add(connectedNode);
+                        return true;
+                    });
+                    return true;
+                });
+
+                connectedNodes.removeAll(visitedNodes);
+                unvisitedNodes.addAll(connectedNodes);
+            }
+        }
+
+        TIntArrayList nodes = hc.nodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            if (!visitedNodes.contains(nodes.get(i))) {
+                // The current node has never been visited -> is a separate component
+                return false;
+            }
+        }
+
         return true;
     }
 
