@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
 import de.rwth.i2.attestor.grammar.AbstractionOptions;
+import de.rwth.i2.attestor.grammar.CollapsedHeapConfiguration;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.util.SimpleIterator;
@@ -10,9 +11,7 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.Matching;
-import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
-import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.iterator.TIntIterator;
@@ -81,12 +80,14 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
     }
 
     private Collection<Pair<Nonterminal, HeapConfiguration>> getRule(HeapConfiguration hc1, HeapConfiguration hc2, int hc1Nonterminal) {
-        // Check that nonterminal is not collapsed in hc1 (TODO: Support this case)
+        // Determine if the nonterminal is collapsed in hc1
         TIntArrayList attachedNodes = hc1.attachedNodesOf(hc1Nonterminal);
+        boolean collapsedNonterminal = false;
         for (int i = 0; i < attachedNodes.size(); i++) {
             if (attachedNodes.subList(0, i).contains(attachedNodes.get(i))) {
-                // The nonterminal is connected to the same node twice -> collapsed nonterminal
-                return null;
+                // The nonterminal is connected to the same node twice
+                collapsedNonterminal = true;
+                break;
             }
         }
 
@@ -122,7 +123,7 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
             }
         }
 
-        // Remove isolated nodes
+        // 4. Remove isolated nodes
         rhs = removeIsolatedNodes(rhs);
         if (!isSingleComponent(rhs)) {
             // rhs must be a single component
@@ -143,12 +144,19 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
         rhs = rhsBuilder.build();
 
         if (!isGrowingRule(rhs)) {
-            // We don't want to add collapsed rules (might change later)
+            // The rule is not growing
             return null;
         }
 
         Nonterminal nt = hc1.labelOf(hc1Nonterminal);
         return Collections.singleton(new Pair<>(nt, rhs));
+    }
+
+    /**
+     * Sets the external nodes correctly and creates a collapsed heap configuration
+     */
+    private static CollapsedHeapConfiguration getCollapsedHeapConfiguration(HeapConfiguration rhs, TIntArrayList attachedNodes) {
+
     }
 
     private static HeapConfiguration removeIsolatedNodes(HeapConfiguration hc) {

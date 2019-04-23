@@ -85,6 +85,10 @@ public class GrammarRuleOriginal implements GrammarRule {
         return newOriginalRule;
     }
 
+    public boolean isCollapsedRule() {
+        return hc.getOriginalToCollapsedExternalIndices() != null;
+    }
+
     @Override
     public int getOriginalRuleIdx() {
         return originalRuleIdx;
@@ -102,12 +106,12 @@ public class GrammarRuleOriginal implements GrammarRule {
 
     @Override
     public HeapConfiguration getHeapConfiguration() {
-        return hc;
+        return hc.getCollapsed();
     }
 
     @Override
     public CollapsedHeapConfiguration getCollapsedHeapConfiguration() {
-        return new CollapsedHeapConfiguration(hc, hc, null);
+        return hc;
     }
 
     @Override

@@ -32,8 +32,6 @@ public interface GrammarRule {
 
     int getOriginalRuleIdx();
 
-    void addToGrammarBuilder(GrammarBuilder builder);
-
     default boolean isRuleActive() {
         switch (getRuleStatus()) {
             case ACTIVE:
@@ -43,11 +41,6 @@ public interface GrammarRule {
                 return false;
         }
         throw new IllegalStateException();
-    }
-
-    default Collection<SelectorLabel> getLocalOutgoingSelectorLabels(int tentacle) {
-        HeapConfiguration hc = getCollapsedHeapConfiguration().getOriginal();
-        return hc.selectorLabelsOf(hc.externalNodeAt(tentacle));
     }
 
 }
