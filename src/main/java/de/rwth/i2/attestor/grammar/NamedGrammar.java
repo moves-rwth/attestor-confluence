@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.grammar;
 
 import de.rwth.i2.attestor.grammar.canonicalization.*;
 import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
+import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.GeneratedNonterminal;
 import de.rwth.i2.attestor.grammar.util.ExternalNodesPartitioner;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
@@ -216,6 +217,10 @@ public class NamedGrammar implements GrammarInterface {
 
     public Collection<HeapConfiguration> getAbstractionBlockingHeapConfigurations() {
         return Collections.unmodifiableCollection(abstractionBlockingHeapConfigurations);
+    }
+
+    public NamedGrammar joinGeneratedNonterminals(GeneratedNonterminal nt1, GeneratedNonterminal nt2) {
+        throw new IllegalStateException();
     }
 
 }
