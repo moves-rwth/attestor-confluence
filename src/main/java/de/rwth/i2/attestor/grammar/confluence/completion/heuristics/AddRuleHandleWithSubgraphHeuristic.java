@@ -81,12 +81,10 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
     private Collection<Pair<Nonterminal, HeapConfiguration>> getRule(HeapConfiguration hc1, HeapConfiguration hc2, int hc1Nonterminal) {
         // Determine if the nonterminal is collapsed in hc1
         TIntArrayList attachedNodes = hc1.attachedNodesOf(hc1Nonterminal);
-        boolean collapsedNonterminal = false;
         for (int i = 0; i < attachedNodes.size(); i++) {
             if (attachedNodes.subList(0, i).contains(attachedNodes.get(i))) {
                 // The nonterminal is connected to the same node twice
-                collapsedNonterminal = true;
-                break;
+                return null;
             }
         }
 

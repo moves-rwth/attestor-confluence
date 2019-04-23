@@ -24,7 +24,7 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 //.addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
                 //.addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                .addHeuristic(new AddRulesNewNonterminalHeuristic(1, 1))
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
                 //.addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new LocalConcretizability())
                 .runCompletionAlgorithm(inputGrammar);
