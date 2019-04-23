@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
 import de.rwth.i2.attestor.graph.Nonterminal;
+import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.Matching;
@@ -15,9 +16,7 @@ import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * If one of the fully abstracted heap configurations of the critical pair contains a handle and a subgraph that is
@@ -31,6 +30,9 @@ import java.util.Iterator;
  *   3: Compute RHS = HC2 \ G2     (N => RHS is new rule)
  *
  * Repeat with HC1 and HC2 switched
+ *
+ * We only generate rules where the RHS is growing and a single component
+ *
  *
  *
  */
@@ -77,6 +79,17 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
     }
 
     private Collection<Pair<Nonterminal, HeapConfiguration>> getRule(HeapConfiguration hc1, HeapConfiguration hc2, int hc1Nonterminal) {
+        // Determine if the nonterminal is collapsed in hc1
+        TIntArrayList attachedNodes = hc1.attachedNodesOf(hc1Nonterminal);
+        boolean collapsedNonterminal = false;
+        for (int i = 0; i < attachedNodes.size(); i++) {
+            if (attachedNodes.subList(0, i).contains(attachedNodes.get(i))) {
+                // The nonterminal is connected to the same node twice
+                collapsedNonterminal = true;
+                break;
+            }
+        }
+
         // 1. Compute G1 = HC1 \ N
         HeapConfiguration g1 = hc1.clone().builder().removeNonterminalEdge(hc1Nonterminal).build();
         // Make all nodes external (so they don't get removed automatically later)
@@ -99,6 +112,7 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
         // 3. Compute RHS = HC2 \ matching
         Nonterminal tempNonterminal = new BasicNonterminal.Factory().create(null, g1.countExternalNodes(), new boolean[g1.countExternalNodes()]);
         HeapConfiguration rhs = hc2.clone().builder().replaceMatching(matching, tempNonterminal).build();  // Some nonterminal is required
+        // Remove the nonterminal edge added by the replaceMatching method
         TIntArrayList nonterminalEdges = rhs.nonterminalEdges();
         for (int i = 0; i < nonterminalEdges.size(); i++) {
             if (rhs.labelOf(nonterminalEdges.get(i)) == tempNonterminal) {
@@ -107,7 +121,8 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
                 break;
             }
         }
-        // Remove isolated nodes
+
+        // 4. Remove isolated nodes
         rhs = removeIsolatedNodes(rhs);
         if (!isSingleComponent(rhs)) {
             // rhs must be a single component
@@ -120,16 +135,20 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
             return null;
         }
 
-        // Set some nodes as external TODO: Iterate all possible combinations
-        TIntArrayList rhsNodes = rhs.nodes();
+        // Set external nodes
         HeapConfigurationBuilder rhsBuilder = rhs.builder();
-        for (int i = 0; i < nt.getRank(); i++) {
-            rhsBuilder.setExternal(rhsNodes.get(i));
+        for (int i = 0; i < attachedNodes.size(); i++) {
+            int rhsNode = matching.match(attachedNodes.get(i));
+            if (!rhs.nodes().contains(rhsNode)) {
+                // The node was removed, because it was isolated
+                return null;
+            }
+            rhsBuilder.setExternal(rhsNode);
         }
         rhs = rhsBuilder.build();
 
         if (!isGrowingRule(rhs)) {
-            // We don't want to add collapsed rules (might change later)
+            // The rule is not growing
             return null;
         }
 
@@ -149,7 +168,57 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
     }
 
     private static boolean isSingleComponent(HeapConfiguration hc) {
-        // TODO
+        if (hc.countNodes() == 0) {
+            // There is no component
+            return false;
+        }
+        // Convert to graph for easier computation
+        Set<Integer> visitedNodes = new HashSet<>();
+        Stack<Integer> unvisitedNodes = new Stack<>();
+        unvisitedNodes.add(hc.nodes().get(0));
+        while (!unvisitedNodes.isEmpty()) {
+            int node = unvisitedNodes.pop();
+            // Check if node was already visited
+            if (!visitedNodes.contains(node)) {
+                visitedNodes.add(node);
+                Set<Integer> connectedNodes = new HashSet<>();
+
+                // Calculate all nodes that are connected to node
+
+                // 1. Connected through outgoing selectors
+                for (SelectorLabel label: hc.selectorLabelsOf(node)) {
+                    connectedNodes.add(hc.selectorTargetOf(node, label));
+                }
+
+                // 2. Connected through incoming selectors
+                hc.predecessorNodesOf(node).forEach(predNode -> {
+                    connectedNodes.add(predNode);
+                    return true;
+                });
+
+
+                // 3. Connected through nonterminal
+                hc.attachedNonterminalEdgesOf(node).forEach(ntEdge -> {
+                    hc.attachedNodesOf(ntEdge).forEach(connectedNode -> {
+                        connectedNodes.add(connectedNode);
+                        return true;
+                    });
+                    return true;
+                });
+
+                connectedNodes.removeAll(visitedNodes);
+                unvisitedNodes.addAll(connectedNodes);
+            }
+        }
+
+        TIntArrayList nodes = hc.nodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            if (!visitedNodes.contains(nodes.get(i))) {
+                // The current node has never been visited -> is a separate component
+                return false;
+            }
+        }
+
         return true;
     }
 
