@@ -39,6 +39,11 @@ public class GrammarRuleCollapsed implements GrammarRule {
     }
 
     @Override
+    public String getRuleIdentifier() {
+        return originalRule.getRuleIdentifier() + "." + Integer.toString(getCollapsedRuleIdx() + 1);
+    }
+
+    @Override
     public RuleStatus getRuleStatus() {
         return status;
     }

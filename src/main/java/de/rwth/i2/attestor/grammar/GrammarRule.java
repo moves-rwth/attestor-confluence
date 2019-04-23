@@ -30,6 +30,8 @@ public interface GrammarRule {
 
     String getGrammarName();
 
+    String getRuleIdentifier();
+
     int getOriginalRuleIdx();
 
     default boolean isRuleActive() {
@@ -41,6 +43,11 @@ public interface GrammarRule {
                 return false;
         }
         throw new IllegalStateException();
+    }
+
+    default Collection<SelectorLabel> getLocalOutgoingSelectorLabels(int tentacle) {
+        HeapConfiguration hc = getCollapsedHeapConfiguration().getOriginal();
+        return hc.selectorLabelsOf(hc.externalNodeAt(tentacle));
     }
 
 }

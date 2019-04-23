@@ -22,9 +22,9 @@ public class ExampleCompletionAlgorithms {
         return new CompletionAlgorithm()
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
-                .addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
+                //.addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
                 //.addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                //.addHeuristic(new AddRulesNewNonterminalHeuristic(1, 1))
+                .addHeuristic(new AddRulesNewNonterminalHeuristic(1, 1))
                 //.addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new LocalConcretizability())
                 .runCompletionAlgorithm(inputGrammar);
@@ -42,6 +42,14 @@ public class ExampleCompletionAlgorithms {
         try {
             TikzExport exporter = new TikzExport("reports/remaining-critical-pairs-DLList.tex", true);
             exporter.exportCriticalPairs(resultingState.getCriticalPairs());
+            exporter.finishExport();
+        } catch (IOException e) {
+            System.err.println("IO Exception occurred");
+        }
+
+        try {
+            TikzExport exporter = new TikzExport("reports/DLList-grammar-completion.tex", true);
+            exporter.exportGrammar(resultingState.getGrammar(), true);
             exporter.finishExport();
         } catch (IOException e) {
             System.err.println("IO Exception occurred");

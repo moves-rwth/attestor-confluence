@@ -9,7 +9,7 @@ public class GrammarRuleOriginal implements GrammarRule {
     private final String grammarName;
     private final int originalRuleIdx;
     private final Nonterminal nonterminal;
-    private final CollapsedHeapConfiguration hc;
+    private final HeapConfiguration hc;
     private final List<GrammarRuleCollapsed> collapsedRules;
     private final RuleStatus ruleStatus;
 
@@ -17,10 +17,6 @@ public class GrammarRuleOriginal implements GrammarRule {
      * Creates a new rule with the status CONFLUENCE_GENERATED
      */
     public GrammarRuleOriginal(String grammarName, Nonterminal nonterminal, HeapConfiguration hc, int originalRuleIdx) {
-        this(grammarName, nonterminal, new CollapsedHeapConfiguration(hc, hc, null), originalRuleIdx);
-    }
-
-    public GrammarRuleOriginal(String grammarName, Nonterminal nonterminal, CollapsedHeapConfiguration hc, int originalRuleIdx) {
         this.grammarName = grammarName;
         this.originalRuleIdx = originalRuleIdx;
         this.nonterminal = nonterminal;
@@ -29,7 +25,7 @@ public class GrammarRuleOriginal implements GrammarRule {
         ruleStatus = RuleStatus.CONFLUENCE_GENERATED;
     }
 
-    GrammarRuleOriginal(String grammarName, int originalRuleIdx, Nonterminal nonterminal, CollapsedHeapConfiguration hc, List<GrammarRuleCollapsed> collapsedRules, RuleStatus ruleStatus) {
+    GrammarRuleOriginal(String grammarName, int originalRuleIdx, Nonterminal nonterminal, HeapConfiguration hc, List<GrammarRuleCollapsed> collapsedRules, RuleStatus ruleStatus) {
         this.grammarName = grammarName;
         this.originalRuleIdx = originalRuleIdx;
         this.nonterminal = nonterminal;
@@ -85,10 +81,6 @@ public class GrammarRuleOriginal implements GrammarRule {
         return newOriginalRule;
     }
 
-    public boolean isCollapsedRule() {
-        return hc.getOriginalToCollapsedExternalIndices() != null;
-    }
-
     @Override
     public int getOriginalRuleIdx() {
         return originalRuleIdx;
@@ -106,17 +98,17 @@ public class GrammarRuleOriginal implements GrammarRule {
 
     @Override
     public HeapConfiguration getHeapConfiguration() {
-        return hc.getCollapsed();
-    }
-
-    @Override
-    public CollapsedHeapConfiguration getCollapsedHeapConfiguration() {
         return hc;
     }
 
     @Override
-    public String toString() {
-        return Integer.toString(originalRuleIdx);
+    public CollapsedHeapConfiguration getCollapsedHeapConfiguration() {
+        return new CollapsedHeapConfiguration(hc, hc, null);
+    }
+
+    @Override
+    public String getRuleIdentifier() {
+        return Integer.toString(originalRuleIdx + 1);
     }
 
     @Override

@@ -248,8 +248,8 @@ public class TikzExport {
         GrammarRule r2 = criticalPair.getR2();
         pgfSingleValues.add(new Pair<>(pgfPath + "/joinability result", criticalPair.getJoinability().toString()));
         // Set rules
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/label", r1.toString()));
-        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/label", r2.toString()));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 1/label", r1.getRuleIdentifier()));
+        pgfSingleValues.add(new Pair<>(pgfPath + "/rule 2/label", r2.getRuleIdentifier()));
 
         addCriticalPairDebugTable(pgfPath + "/debug table", criticalPair);
 
@@ -424,7 +424,7 @@ public class TikzExport {
     }
 
     private String escapeString(String string) {
-        return string.replaceAll("[^a-zA-Z0-9/, ]+", "");
+        return string.replaceAll("[^a-zA-Z0-9/,. ]+", "");
     }
 
 }
