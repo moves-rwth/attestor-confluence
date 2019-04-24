@@ -35,7 +35,7 @@ public class CriticalPairFinder {
     }
 
     private void computeAllCriticalPairs() {
-        // Add critical pairs for all combinations of rules
+        // Add critical pairs for all getCombinations of rules
 
         // 1. Convert to a list to reference each rule by one index
         List<GrammarRule> individualGrammarRules = new ArrayList<>(underlyingGrammar.getActiveRules());

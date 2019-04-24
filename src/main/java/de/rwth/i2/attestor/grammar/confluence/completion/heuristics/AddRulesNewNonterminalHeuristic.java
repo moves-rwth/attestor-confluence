@@ -5,14 +5,11 @@ import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
-import de.rwth.i2.attestor.main.scene.DefaultScene;
-import de.rwth.i2.attestor.main.scene.Scene;
+import de.rwth.i2.attestor.util.Combinations;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * For a critical pair this method adds two new rules that introduce a new nonterminal.
@@ -20,7 +17,7 @@ import java.util.stream.IntStream;
  *
  * Use as few external nodes as possible to discourage rule application during canonicalization.
  *
- * TODO: Should we return different rule combinations for every combination on how to choose external nodes
+ * TODO: Should we return different rule getCombinations for every combination on how to choose external nodes
  *
  * TODO: What to do when one side is a handle? If we only add one rule from the handle to the other graph then we have more external nodes
  *
@@ -84,13 +81,13 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
                                 // Try using more external nodes
                                 currentNumberExternalNodes++;
                                 if (currentNumberExternalNodes > maxNumberExternalsHere) {
-                                    // No further possible combinations
+                                    // No further possible getCombinations
                                     return null;
                                 }
-                                hc1ExternalNodeCombinations = combinations(hc1.countNodes(), currentNumberExternalNodes).iterator();
+                                hc1ExternalNodeCombinations = Combinations.getCombinations(hc1.countNodes(), currentNumberExternalNodes).iterator();
                             }
                             currentHc1ExternalNodeCombination = hc1ExternalNodeCombinations.next();
-                            hc2ExternalNodeCombinations = combinations(hc2.countNodes(), currentNumberExternalNodes).iterator();
+                            hc2ExternalNodeCombinations = Combinations.getCombinations(hc2.countNodes(), currentNumberExternalNodes).iterator();
                         }
                         List<Integer> currentHc2ExternalNodeCombination = hc2ExternalNodeCombinations.next();
                         return getRules(hc1, hc2, currentHc1ExternalNodeCombination, currentHc2ExternalNodeCombination);
@@ -120,63 +117,5 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
             builder.setExternal(nodes.get(nodeIdx));
         }
         return builder.build();
-    }
-
-    /**
-     * Returns all subsets of length k of integers in the interval [0, n-1]
-     * The iterator does not compute all combinations at once.
-     *
-     * TODO: Maybe put this in some util package
-     *
-     */
-    private static Iterable<List<Integer>> combinations(int n, int k) {
-        if (k == 0) {
-            return Collections.singleton(new ArrayList<>());
-        } else if (k == n) {
-            return Collections.singleton(IntStream.range(0, n).boxed().collect(Collectors.toCollection(ArrayList::new)));
-        } else if (k > n) {
-            throw new IllegalArgumentException("k must be smaller than n");
-        } else {
-            return new Iterable<List<Integer>>() {
-                @Override
-                public Iterator<List<Integer>> iterator() {
-                    return new Iterator<List<Integer>>() {
-                        private Iterator<List<Integer>> combinationsWithNewElement = null;
-                        private Iterator<List<Integer>> combinationsWithoutNewElement = null;
-
-                        private Iterator<List<Integer>> getCombinationsWithNewElement() {
-                            if (combinationsWithNewElement == null) {
-                                combinationsWithNewElement = combinations(n-1, k - 1).iterator();
-                            }
-                            return combinationsWithNewElement;
-                        }
-
-                        private Iterator<List<Integer>> getCombinationsWithoutNewElement() {
-                            if (combinationsWithoutNewElement == null) {
-                                combinationsWithoutNewElement = combinations(n-1, k).iterator();
-                            }
-                            return combinationsWithoutNewElement;
-                        }
-
-                        @Override
-                        public boolean hasNext() {
-                            return getCombinationsWithoutNewElement().hasNext() || getCombinationsWithNewElement().hasNext();
-                        }
-
-                        @Override
-                        public List<Integer> next() {
-                            if (getCombinationsWithoutNewElement().hasNext()) {
-                                return getCombinationsWithoutNewElement().next();
-                            } else {
-                                List<Integer> currrentCombination = getCombinationsWithNewElement().next();
-                                // Add new element
-                                currrentCombination.add(n-1);
-                                return currrentCombination;
-                            }
-                        }
-                    };
-                }
-            };
-        }
     }
 }

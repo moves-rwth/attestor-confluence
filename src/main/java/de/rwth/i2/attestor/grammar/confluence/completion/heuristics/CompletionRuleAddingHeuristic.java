@@ -4,7 +4,6 @@ import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
-import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.util.Pair;
@@ -78,8 +77,4 @@ public abstract class CompletionRuleAddingHeuristic implements CompletionHeurist
      */
     abstract Iterable<Collection<Pair<Nonterminal, HeapConfiguration>>> addNewRules(CriticalPair criticalPair);
 
-
-    static boolean isHandle(HeapConfiguration hc) {
-        return hc.countNonterminalEdges() == 1 && hc.countNonterminalEdges() == 0;
-    }
 }

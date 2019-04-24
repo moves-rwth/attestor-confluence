@@ -11,11 +11,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Iterator;
 
 /**
- * A heuristic that tries to resolve issues for critical pairs where one fully abstracted HC is a single nonterminal.
- *
- * - If both fully abstractes HCs are newly introduced nonterminals of the same rank -> Try to join them
- *
- * TODO: Move the second part into a new heuristic
+ * If both fully abstracted HCs are handles of newly introduced nonterminals of the same rank -> Try to join them
  *
  */
 public class JoinGeneratedNonterminalsHeuristic implements CompletionHeuristic {
@@ -78,6 +74,7 @@ public class JoinGeneratedNonterminalsHeuristic implements CompletionHeuristic {
             // Check that the number of nodes matches the nonterminal rank
             Nonterminal nt = hc.labelOf(hc.nonterminalEdges().get(0));
             if (nt instanceof GeneratedNonterminal && nodes.size() == nt.getRank()) {
+                // The heap configuration is a handle of a generated
                 return (GeneratedNonterminal) nt;
             } else {
                 return null;
