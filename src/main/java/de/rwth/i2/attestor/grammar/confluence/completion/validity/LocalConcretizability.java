@@ -15,7 +15,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TODO: Can removing rules lead to not local concretizability?
+ * Ensures that the modified grammar is still local concretisable, given that the input grammar is local concretisable.
+ *
+ * The check might produce false negatives (returning not local concretisable, even if the grammar is local concretisable)
+ *
+ * It is recommended to use this class only in conjunction with the "AddRulesNewNonterminalHeuristic",
+ * "JoinGeneratedNonterminalsHeuristic" and "SingleNonterminalRuleAddingHeuristic".
+ *
  */
 public class LocalConcretizability implements GrammarValidity {
 
@@ -39,7 +45,6 @@ public class LocalConcretizability implements GrammarValidity {
             GrammarTypedness newTypes = new GrammarTypedness(newGrammar);
 
             Grammar newRules = getGrammarFromOriginalRules(newGrammarRules);
-
             for (Nonterminal nt : newRules.getAllLeftHandSides()) {
                 for (int tentacle=0; tentacle < nt.getRank(); tentacle++) {
                     Set<SelectorLabel> allSelectors = newTypes.getTentacleType(nt, tentacle).getAllTypes();

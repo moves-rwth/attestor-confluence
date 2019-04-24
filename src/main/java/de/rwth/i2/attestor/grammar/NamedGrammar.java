@@ -10,7 +10,6 @@ import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import gnu.trove.list.array.TIntArrayList;
-import soot.jimple.parser.node.TInt;
 
 import java.util.*;
 import java.util.function.Function;

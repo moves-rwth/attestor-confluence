@@ -12,7 +12,7 @@ public class CompletionState {
     private final Collection<CriticalPair> criticalPairs;  // Does not contain strongly joinable critical pairs
 
     /**
-     * Initializes an initial completion state for the given grammar
+     * Initializes a completion state for the given grammar.
      */
     public CompletionState(NamedGrammar grammar) {
         this.grammar = grammar;
