@@ -6,9 +6,11 @@ import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.GeneratedNon
 import de.rwth.i2.attestor.grammar.util.ExternalNodesPartitioner;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import gnu.trove.list.array.TIntArrayList;
+import soot.jimple.parser.node.TInt;
 
 import java.util.*;
 import java.util.function.Function;
@@ -219,8 +221,46 @@ public class NamedGrammar implements GrammarInterface {
         return Collections.unmodifiableCollection(abstractionBlockingHeapConfigurations);
     }
 
+    /**
+     * @param nt1 The nonterminal that should be merged (must have same rank as nt2)
+     * @param nt2 All occurences of this nonterminal in the rules will be changed to nt1
+     * @return A new named grammar with nt1 and nt2 merged
+     */
     public NamedGrammar joinGeneratedNonterminals(GeneratedNonterminal nt1, GeneratedNonterminal nt2) {
-        throw new IllegalStateException();
+        List<GrammarRuleOriginal> newOriginalRules = new ArrayList<>();
+        for (GrammarRuleOriginal rule : originalRules) {
+            if (rule.getRuleStatus() == GrammarRule.RuleStatus.CONFLUENCE_GENERATED) {
+                Nonterminal newNt = rule.getNonterminal();
+                if (nt2.equals(newNt)) {
+                    newNt = nt1;
+                }
+                HeapConfiguration newHc = replaceNonterminal(rule.getHeapConfiguration(), nt1, nt2);
+                newOriginalRules.add(new GrammarRuleOriginal(grammarName, newNt, newHc, rule.getOriginalRuleIdx()));
+            }
+        }
+
+        Collection<HeapConfiguration> newAbstractionBlockingHeapConfigurations = new ArrayList<>();
+        for (HeapConfiguration hc : abstractionBlockingHeapConfigurations) {
+            newAbstractionBlockingHeapConfigurations.add(replaceNonterminal(hc, nt1, nt2));
+        }
+
+        return new NamedGrammar(grammarName, newOriginalRules, newAbstractionBlockingHeapConfigurations);
+    }
+
+    /**
+     * Replaces occurrences of nt2 with nt1 in hc. (nt1 and nt2 must have the same rank)
+     * TODO: Dont't copy hc if it does not contain nt2
+     */
+    private HeapConfiguration replaceNonterminal(HeapConfiguration hc, Nonterminal nt1, Nonterminal nt2) {
+        HeapConfigurationBuilder newHcBuilder = hc.clone().builder();
+        hc.nonterminalEdges().forEach(ntEdge -> {
+            if (nt2.equals(hc.labelOf(ntEdge))) {
+                // Replace nt2 with nt1
+                newHcBuilder.replaceNonterminal(ntEdge, nt1);
+            }
+            return true;
+        });
+        return newHcBuilder.build();
     }
 
 }
