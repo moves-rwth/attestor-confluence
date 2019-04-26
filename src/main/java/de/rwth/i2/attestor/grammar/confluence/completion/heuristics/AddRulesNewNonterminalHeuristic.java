@@ -19,7 +19,6 @@ import java.util.*;
  *
  * TODO: Should we return different rule getCombinations for every combination on how to choose external nodes
  *
- * TODO: What to do when one side is a handle? If we only add one rule from the handle to the other graph then we have more external nodes
  *
  */
 public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeuristic {

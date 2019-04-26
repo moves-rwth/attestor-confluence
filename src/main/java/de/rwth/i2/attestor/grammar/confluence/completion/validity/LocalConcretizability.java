@@ -69,9 +69,8 @@ public class LocalConcretizability implements GrammarValidity {
                         int node = newRhs.externalNodeAt(tentacle);
                         Set<SelectorLabel> directNewSelectors = new HashSet<>(newRhs.selectorLabelsOf(node));
                         Set<SelectorLabel> recursiveNewSelectors = newTypes.getTypesAtNode(newRhs, node);
-                        if (!recursiveNewSelectors.containsAll(directNewSelectors)) {
+                        if (!directNewSelectors.containsAll(recursiveNewSelectors)) {
                             // The rule can create an outgoing selector recursively, but not immediately
-                            System.out.println("Not local concretizable");
                             return false;
                         }
                     }

@@ -54,5 +54,4 @@ public class ExampleCompletionAlgorithms {
             System.err.println("IO Exception occurred");
         }
     }
-
 }

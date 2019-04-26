@@ -9,7 +9,6 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.Matching;
-import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.matching.AbstractMatchingChecker;
 import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
@@ -145,11 +144,6 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
         }
         rhs = rhsBuilder.build();
 
-        if (!isGrowingRule(rhs)) {
-            // The rule is not growing
-            return null;
-        }
-
         return Collections.singleton(new Pair<>(nt, rhs));
     }
 
@@ -218,20 +212,5 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
         }
 
         return true;
-    }
-
-    private static boolean isGrowingRule(HeapConfiguration rhs) {
-        if (rhs.countNonterminalEdges() > 1) {
-            return true;
-        }
-        TIntArrayList nodes = rhs.nodes();
-        for (int i = 0; i < nodes.size(); i++) {
-            int node = nodes.get(i);
-            if (!rhs.selectorLabelsOf(node).isEmpty() || !rhs.isExternalNode(node)) {
-                return true;
-            }
-        }
-        return false;
-
     }
 }
