@@ -235,6 +235,8 @@ public class NamedGrammar implements GrammarInterface {
                 }
                 HeapConfiguration newHc = replaceNonterminal(rule.getHeapConfiguration(), nt1, nt2);
                 newOriginalRules.add(new GrammarRuleOriginal(grammarName, newNt, newHc, rule.getOriginalRuleIdx()));
+            } else {
+                newOriginalRules.add(rule);
             }
         }
 
