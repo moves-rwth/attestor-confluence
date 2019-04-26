@@ -1,4 +1,4 @@
-package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
+package de.rwth.i2.attestor.grammar.confluence.completion;
 
 import de.rwth.i2.attestor.graph.Nonterminal;
 
@@ -13,7 +13,7 @@ public class GeneratedNonterminal implements Nonterminal {
     private final boolean[] isReductionTentacle;
 
 
-    GeneratedNonterminal(int rank, boolean[] isReductionTentacle, int id) {
+    public GeneratedNonterminal(int rank, boolean[] isReductionTentacle, int id) {
         this.rank = rank;
         this.id = id;
         this.isReductionTentacle = Arrays.copyOf(isReductionTentacle, rank);

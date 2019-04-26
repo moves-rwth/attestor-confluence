@@ -2,7 +2,7 @@ package de.rwth.i2.attestor.grammar;
 
 import de.rwth.i2.attestor.grammar.canonicalization.*;
 import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
-import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.GeneratedNonterminal;
+import de.rwth.i2.attestor.grammar.confluence.completion.GeneratedNonterminal;
 import de.rwth.i2.attestor.grammar.util.ExternalNodesPartitioner;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;

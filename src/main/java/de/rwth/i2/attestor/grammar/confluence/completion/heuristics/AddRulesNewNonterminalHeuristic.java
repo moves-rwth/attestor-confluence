@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
+import de.rwth.i2.attestor.grammar.confluence.completion.GeneratedNonterminal;
 import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
