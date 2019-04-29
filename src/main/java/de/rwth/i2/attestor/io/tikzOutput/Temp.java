@@ -6,6 +6,7 @@ import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
+import de.rwth.i2.attestor.grammar.confluence.TestGrammars;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
 import de.rwth.i2.attestor.graph.BasicSelectorLabel;
@@ -35,7 +36,7 @@ public class Temp {
         //exportDefaultGrammar("DLList_simple_one_way");
         //exportDefaultGrammar("DLList_simple_two_way");
         try {
-            NamedGrammar grammar = new NamedGrammar(getSimpleDLLGrammar(), "SimpleDLL");
+            NamedGrammar grammar = new NamedGrammar(TestGrammars.getSimpleDLList(), "SimpleDLL");
 
             TikzExport exporter = new TikzExport("reports/simple-dll-list-grammar-report.tex", true);
             exporter.exportGrammar(grammar, true);
@@ -85,40 +86,6 @@ public class Temp {
         } catch (IOException e) {
             System.err.println("IO Exception occurred");
         }
-    }
-
-
-    private static Grammar getSimpleDLLGrammar() {
-        BasicNonterminal.Factory factory = new BasicNonterminal.Factory();
-        Nonterminal list = factory.create("L", 2, new boolean[]{false, false});
-        BasicSelectorLabel.Factory factory1 = new BasicSelectorLabel.Factory();
-        SelectorLabel nextPointer = factory1.get("n");
-        SelectorLabel previousPointer = factory1.get("p");
-        GeneralType.Factory factory2 = new GeneralType.Factory();
-        Type listElement = factory2.get("ListElement");
-        TIntArrayList nodesHc1 = new TIntArrayList(2);
-        HeapConfiguration hc1 = new InternalHeapConfiguration().builder()
-                .addNodes(listElement, 2, nodesHc1)
-                .setExternal(nodesHc1.get(0)).setExternal(nodesHc1.get(1))
-                .addSelector(nodesHc1.get(0), nextPointer, nodesHc1.get(1))
-                .addSelector(nodesHc1.get(1), previousPointer, nodesHc1.get(0))
-                .build();
-
-        TIntArrayList nodesHc2 = new TIntArrayList(3);
-        HeapConfigurationBuilder hc2Builder = new InternalHeapConfiguration().builder()
-                .addNodes(listElement, 3, nodesHc2)
-                .setExternal(nodesHc2.get(0)).setExternal(nodesHc2.get(2))
-                .addSelector(nodesHc2.get(0), nextPointer, nodesHc2.get(1))
-                .addSelector(nodesHc2.get(1), previousPointer, nodesHc2.get(0));
-
-        int nonTerminalEdge = hc2Builder.addNonterminalEdgeAndReturnId(list, TIntArrayList.wrap(new int[] {nodesHc2.get(1), nodesHc2.get(2)}));
-        HeapConfiguration hc2 = hc2Builder.build();
-
-        return new GrammarBuilder()
-                .addRule(list, hc1)
-                .addRule(list, hc2)
-                .updateCollapsedRules()
-                .build();
     }
 
     private static Grammar getTernaryGrammar() {

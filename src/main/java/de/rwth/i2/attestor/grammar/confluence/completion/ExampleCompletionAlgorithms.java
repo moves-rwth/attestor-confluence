@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
+import de.rwth.i2.attestor.grammar.confluence.TestGrammars;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.*;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPairLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.GreedyCompletion;
@@ -31,7 +32,8 @@ public class ExampleCompletionAlgorithms {
 
     // TODO: Remove this method
     public static void main(String[] args) {
-        NamedGrammar grammar = ConfluenceTool.parseGrammar("DLList");
+        //NamedGrammar grammar = ConfluenceTool.parseGrammar("DLList");
+        NamedGrammar grammar = new NamedGrammar(TestGrammars.getLinkedTreeGrammar(), "LTree");
         CriticalPairFinder finder = new CriticalPairFinder(grammar);
         int numberInitialCriticalPairs = finder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
         System.out.println("Number initial critical pairs: " + numberInitialCriticalPairs);
