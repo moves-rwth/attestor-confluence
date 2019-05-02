@@ -4,7 +4,7 @@ S(node{e}, parent{e}, descendantLeft{e}, descendantRight{e})
       * node.l -> childLeft
       * node.r -> childRight
       * S(childLeft, node, descendantLeft, descendantMiddle)
-      * S(childRight, node, descendantMiddle, descendantRight);
+      * S(childRight, node, descendantMiddle, descendantRight)
 <= childRight{e} |
         node.p -> parent
       * descendantLeft.p -> node
