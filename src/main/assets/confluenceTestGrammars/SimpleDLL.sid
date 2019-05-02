@@ -1,0 +1,5 @@
+L(leftElement{e}, rightElement{e})
+<= leftElement.n -> rightElement * rightElement.p -> leftElement
+<= newElement{e} | leftElement.n -> newElement
+                        * newElement.p -> leftElement
+                        * L(newElement, rightElement);

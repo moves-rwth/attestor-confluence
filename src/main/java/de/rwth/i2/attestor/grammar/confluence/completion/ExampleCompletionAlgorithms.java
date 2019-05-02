@@ -32,16 +32,29 @@ public class ExampleCompletionAlgorithms {
 
     // TODO: Remove this method
     public static void main(String[] args) {
-        //NamedGrammar grammar = ConfluenceTool.parseGrammar("DLList");
-        NamedGrammar grammar = new NamedGrammar(TestGrammars.getLinkedTreeGrammar(), "LTree");
+        NamedGrammar grammar = null; // = ConfluenceTool.parseGrammar("DLList");
+        try {
+            grammar = TestGrammars.getSeparationLogicNamedGrammar("LinkedTree1");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         CriticalPairFinder finder = new CriticalPairFinder(grammar);
+
+        try {
+            TikzExport exporter = new TikzExport("reports/initial-critical-pairs.tex", true);
+            exporter.exportCriticalPairs(finder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE));
+            exporter.finishExport();
+        } catch (IOException e) {
+            System.err.println("IO Exception occurred");
+        }
+
         int numberInitialCriticalPairs = finder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
         System.out.println("Number initial critical pairs: " + numberInitialCriticalPairs);
         CompletionState resultingState = algorithm1(grammar);
         System.out.println("Number remaining critical pairs: " + resultingState.getCriticalPairs().size());
 
         try {
-            TikzExport exporter = new TikzExport("reports/remaining-critical-pairs-DLList.tex", true);
+            TikzExport exporter = new TikzExport("reports/remaining-critical-pairs.tex", true);
             exporter.exportCriticalPairs(resultingState.getCriticalPairs());
             exporter.finishExport();
         } catch (IOException e) {
@@ -49,7 +62,7 @@ public class ExampleCompletionAlgorithms {
         }
 
         try {
-            TikzExport exporter = new TikzExport("reports/DLList-grammar-completion.tex", true);
+            TikzExport exporter = new TikzExport("reports/grammar-completed.tex", true);
             exporter.exportGrammar(resultingState.getGrammar(), true);
             exporter.finishExport();
         } catch (IOException e) {
