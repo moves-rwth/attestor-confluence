@@ -3,8 +3,9 @@
 *.pdf
 *.out
 *.toc
-reports/*.pdf
-reports/*.tex
+reports/*/**
+
+.attach_pid*
 
 .metadata
 bin/

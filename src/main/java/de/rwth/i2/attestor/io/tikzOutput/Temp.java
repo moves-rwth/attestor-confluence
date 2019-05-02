@@ -36,7 +36,7 @@ public class Temp {
         //exportDefaultGrammar("DLList_simple_one_way");
         //exportDefaultGrammar("DLList_simple_two_way");
         try {
-            NamedGrammar grammar = new NamedGrammar(TestGrammars.getSimpleDLList(), "SimpleDLL");
+            NamedGrammar grammar = TestGrammars.getSeparationLogicNamedGrammar("SimpleDLL");
 
             TikzExport exporter = new TikzExport("reports/simple-dll-list-grammar-report.tex", true);
             exporter.exportGrammar(grammar, true);

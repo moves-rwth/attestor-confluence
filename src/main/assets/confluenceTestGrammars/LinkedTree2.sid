@@ -1,0 +1,15 @@
+S(node{e}, parent{e}, descendantLeft{e}, descendantRight{e})
+<= childLeft{e} | childRight{e} | descendantMiddle{e} |
+        node.p -> parent
+      * node.l -> childLeft
+      * node.r -> childRight
+      * S(childLeft, node, descendantLeft, descendantMiddle)
+      * S(childRight, node, descendantMiddle, descendantRight);
+<= childRight{e} |
+        node.p -> parent
+      * descendantLeft.p -> node
+      * childRight.p -> node
+      * node.l -> descendantLeft
+      * node.r -> childRight
+      * descendantLeft.n -> childRight
+      * childRight.n -> descendantRight;
