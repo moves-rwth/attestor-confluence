@@ -21,7 +21,7 @@ sidRule : sidRuleHead (RULEDELIM sidRuleBody)+ ';';
 sidRuleHead : predicateSymbol '(' freeVariableDeclaration (',' freeVariableDeclaration)* ')';
 
 // right-hand side of a rule determining the formula and declaration of existential variables
-sidRuleBody : (variableDeclaration '|')? spatial (SEP spatial)*;
+sidRuleBody : (variableDeclaration '|')* spatial (SEP spatial)*;
 
 // declaration of typed variables
 freeVariableDeclaration : REDUCTION? variableDeclaration;
