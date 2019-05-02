@@ -1,14 +1,18 @@
 package de.rwth.i2.attestor.seplog;
 
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.io.FileReader;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.json.JSONArray;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Parser to create hyperedge replacement grammars from a
@@ -31,6 +35,16 @@ public class InductivePredicatesParser extends SceneObject {
 
         return parse(
                 CharStreams.fromFileName(filename)
+        );
+    }
+
+    /**
+     * @param resource URL of the file containing a system of inductive predicate definitions.
+     * @return The constructed grammar.
+     */
+    public Grammar parseFromUrl(URL resource) throws IOException {
+        return parse(
+                CharStreams.fromStream(resource.openStream())
         );
     }
 
