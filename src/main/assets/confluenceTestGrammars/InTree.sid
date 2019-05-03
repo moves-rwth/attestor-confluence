@@ -1,0 +1,13 @@
+IT(descendant{e}, !root{e})
+<= parent.p -> root
+<= parent{e} | descendant.p -> parent * IT(parent, root)
+<= newDescendant{e} | descendant.p -> root * IT(newDescendant, root)
+<= descendantParent{e} | newDescendant{e} |
+           IT(newDescendant, descendantParent) * IT(descendantParent, root) * descendant.p -> descendantParent
+<= descendantParent{e} | newDescendant{e} |
+           descendant.p -> descendantParent * IT(descendantParent, root) * IT(newDescendant, root)
+<= fork{e} | descendantParent{e} | newDescendant{e} |
+            descendant.p -> descendantParent * IT(descendantParent, fork) * IT(fork, root)
+            * IT(newDescendant, fork);
+
+

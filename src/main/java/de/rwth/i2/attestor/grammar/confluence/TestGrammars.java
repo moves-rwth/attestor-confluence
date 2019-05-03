@@ -20,6 +20,8 @@ public class TestGrammars {
     public static void main(String[] args) {
         getReportsForGrammar("SimpleDLL");
         getReportsForGrammar("LinkedTree1");
+        getReportsForGrammar("InTree");
+        getReportsForGrammar("InTreeLinkedLeaves");
         getReportsForGrammar("LinkedTree2");
     }
 
@@ -28,6 +30,7 @@ public class TestGrammars {
      * Also outputs number of critical pairs before and after to stdout.
      */
     public static void getReportsForGrammar(String grammarName) {
+        System.out.println(grammarName);
         try {
             new File("reports/" + grammarName ).mkdirs();
             NamedGrammar grammar = getSeparationLogicNamedGrammar(grammarName);

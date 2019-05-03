@@ -1,0 +1,4 @@
+ITL(!parent{e}, leftLeaf{e}, !rightLeaf{e})
+<= leftLeaf.p -> parent * leftLeaf.n -> rightLeaf
+<= child{e} | child.p -> parent * ITL(parent, leftLeaf, rightLeaf)
+<= child{e} | ITL(parent, leftLeaf, child) * ITL(parent, child, rightLeaf);

@@ -1,4 +1,4 @@
-LT(root{e}, leftLink{e}, !rightLink{e})
+LT(root{e}, !leftLink{e}, !rightLink{e})
 <= root.l -> leftLink * root.r -> rightLink
 <= leftChild{e} | rightChild{e} | middleLinkLeft{e} | middleLinkRight{e} |
           LT(leftChild, leftLink, middleLinkLeft)

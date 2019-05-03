@@ -1,4 +1,4 @@
-S(node{e}, parent{e}, descendantLeft{e}, descendantRight{e})
+S(node{e}, !parent{e}, descendantLeft{e}, !descendantRight{e})
 <= childLeft{e} | childRight{e} | descendantMiddle{e} |
         node.p -> parent
       * node.l -> childLeft
