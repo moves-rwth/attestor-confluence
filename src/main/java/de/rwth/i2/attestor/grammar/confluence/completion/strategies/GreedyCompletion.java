@@ -23,7 +23,7 @@ public class GreedyCompletion implements CompletionStrategy {
 
     @Override
     public CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
-        CompletionState currentState = new CompletionState(inputGrammar);
+        CompletionState currentState = new CompletionState(inputGrammar, null);
         CompletionStateLoss completionStateLoss = completionSettings.getCompletionStateLoss();
         double currentLoss = completionStateLoss.getLoss(currentState);
         int currentSearchDepth = 0;
@@ -48,7 +48,7 @@ public class GreedyCompletion implements CompletionStrategy {
                             // Check if the new completion state is valid
                             boolean isValid = true;
                             for (GrammarValidity validityCheck : completionSettings.getValidityChecks()) {
-                                if (!validityCheck.isValid(currentState, nextState)) {
+                                if (!validityCheck.isValid(nextState)) {
                                     isValid = false;
                                     break;
                                 }

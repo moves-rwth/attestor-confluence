@@ -59,7 +59,7 @@ public abstract class CompletionRuleAddingHeuristic implements CompletionHeurist
                             if (allRulesAreGrowing) {
                                 // Add state with the new rules
                                 NamedGrammar newGrammar = grammar.getModifiedGrammar(Collections.EMPTY_LIST, newGrammarRules, grammar.getAbstractionBlockingHeapConfigurations());
-                                return new CompletionState(newGrammar);
+                                return new CompletionState(newGrammar, state);
                             }
                         }
                     }

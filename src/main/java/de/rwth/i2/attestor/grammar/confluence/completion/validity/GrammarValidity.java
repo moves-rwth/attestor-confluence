@@ -11,7 +11,7 @@ import java.util.Collection;
  */
 public interface GrammarValidity {
 
-    boolean isValid(CompletionState oldCompletionState, CompletionState newCompletionState);
+    boolean isValid(CompletionState newCompletionState);
 
     /**
      * @return The rules that are included in newCompletionState but not in oldCompletionState

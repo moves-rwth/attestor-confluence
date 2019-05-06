@@ -30,7 +30,7 @@ public class JoinGeneratedNonterminalsHeuristic implements CompletionHeuristic {
                             NamedGrammar newGrammar = fixCriticalPair(state, criticalPairIterator.next());
                             if (newGrammar != null) {
                                 // The current critical pair can be fixed -> Compute the following completion state
-                                return new CompletionState(newGrammar);
+                                return new CompletionState(newGrammar, state);
                             }
                         }
                         return null;

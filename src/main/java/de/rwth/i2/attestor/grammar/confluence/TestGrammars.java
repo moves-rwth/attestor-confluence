@@ -4,6 +4,9 @@ import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
+import de.rwth.i2.attestor.grammar.confluence.completion.validity.LocalConcretizability;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
+import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
 import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.main.scene.DefaultScene;
@@ -18,11 +21,27 @@ import java.util.Collection;
 public class TestGrammars {
 
     public static void main(String[] args) {
+        /*
+        temp("DLList");
+        temp("BT");
+        temp("BT_conf");
+        temp("SLList");
+         */
         getReportsForGrammar("SimpleDLL");
-        getReportsForGrammar("LinkedTree1");
         getReportsForGrammar("InTree");
         getReportsForGrammar("InTreeLinkedLeaves");
+        getReportsForGrammar("LinkedTree1");
         getReportsForGrammar("LinkedTree2");
+    }
+
+    private static void temp(String test) {
+        System.out.println(test);
+        NamedGrammar grammar = ConfluenceTool.parseGrammar(test);
+        if (LocalConcretizability.checkLocalConcretizability(grammar, new GrammarTypedness(grammar.getConcretizationGrammar()), true)) {
+            System.out.println("The grammar is local concretizable");
+        } else {
+            System.out.println("The grammar might not be local concretizable");
+        }
     }
 
     /**
@@ -36,6 +55,12 @@ public class TestGrammars {
             NamedGrammar grammar = getSeparationLogicNamedGrammar(grammarName);
             String fileName = "reports/" + grammarName + "/{0}_" + grammarName + ".tex";
             TikzExport export;
+
+            if (LocalConcretizability.checkLocalConcretizability(grammar, new GrammarTypedness(grammar.getConcretizationGrammar()), true)) {
+                System.out.println("The grammar is local concretizable");
+            } else {
+                System.out.println("The grammar might not be local concretizable");
+            }
 
             // Export initial grammar
             export = new TikzExport(MessageFormat.format(fileName, "initial_grammar"), true);

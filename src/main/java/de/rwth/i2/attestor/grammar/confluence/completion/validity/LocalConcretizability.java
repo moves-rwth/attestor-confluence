@@ -6,7 +6,6 @@ import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
-import org.jboss.util.NotImplementedException;
 
 import java.util.*;
 
@@ -49,26 +48,31 @@ public class LocalConcretizability implements GrammarValidity {
      * TODO: Are there any cases regarding collapsed rules I have not thought about?
      */
     @Override
-    public boolean isValid(CompletionState oldCompletionState, CompletionState newCompletionState) {
+    public boolean isValid(CompletionState newCompletionState) {
+        return checkLocalConcretizability(newCompletionState.getGrammar(), newCompletionState.getTypes(), false);
+    }
 
+    public static boolean checkLocalConcretizability(NamedGrammar grammar, GrammarTypedness types, boolean forceCompleteCheck) {
+        Collection<GrammarRuleOriginal> newGrammarRules;
+        if (forceCompleteCheck) {
+            newGrammarRules = grammar.getOriginalGrammarRules();
+        } else {
+            newGrammarRules = getRulesToCheck(grammar);
+        }
 
-        Collection<GrammarRuleOriginal> newGrammarRules = getRulesToCheck(newCompletionState.getGrammar());
         if (newGrammarRules.size() == 0) {
             // No rules were added -> Local concretizability remains intact
             return true;
         } else {
             // Some rules were added -> Check if they don't violate local concretizability
-            Grammar newGrammar = getGrammarFromOriginalRules(newCompletionState.getGrammar().getOriginalGrammarRules());
-            GrammarTypedness newTypes = new GrammarTypedness(newGrammar);
-
             Grammar newRules = getGrammarFromOriginalRules(newGrammarRules);
+
             for (Nonterminal nt : newRules.getAllLeftHandSides()) {
                 for (int tentacle=0; tentacle < nt.getRank(); tentacle++) {
-                    Set<SelectorLabel> allSelectors = newTypes.getTentacleType(nt, tentacle).getAllTypes();
                     for (HeapConfiguration newRhs : newRules.getRightHandSidesFor(nt)) {
                         int node = newRhs.externalNodeAt(tentacle);
                         Set<SelectorLabel> directNewSelectors = new HashSet<>(newRhs.selectorLabelsOf(node));
-                        Set<SelectorLabel> recursiveNewSelectors = newTypes.getTypesAtNode(newRhs, node);
+                        Set<SelectorLabel> recursiveNewSelectors = types.getTypesAtNode(newRhs, node);
                         if (!directNewSelectors.containsAll(recursiveNewSelectors)) {
                             // The rule can create an outgoing selector recursively, but not immediately
                             return false;
@@ -92,7 +96,7 @@ public class LocalConcretizability implements GrammarValidity {
         return builder.build();
     }
 
-    
+
     private static Collection<GrammarRuleOriginal> getRulesToCheck(NamedGrammar grammar) {
         // Compute the set of old nonterminals (don't need to check the RHS, because if a nonterminal is in the RHS it should also be a LHS)
         Set<Nonterminal> oldNonterminals = new HashSet<>();

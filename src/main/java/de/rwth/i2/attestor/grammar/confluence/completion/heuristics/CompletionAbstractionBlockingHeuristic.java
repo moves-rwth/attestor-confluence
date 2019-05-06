@@ -38,7 +38,7 @@ public class CompletionAbstractionBlockingHeuristic implements CompletionHeurist
             }
         }
         NamedGrammar newGrammar = state.getGrammar().getModifiedGrammar(Collections.emptySet(), Collections.emptySet(), blockedHCs);
-        CompletionState newState = new CompletionState(newGrammar, criticalPairs);
+        CompletionState newState = new CompletionState(newGrammar, criticalPairs, state);
         return Collections.singleton(newState);
     }
 }

@@ -64,7 +64,7 @@ public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
         if (!preventFlip(ruleToFlip) && !alreadyFlippedGrammarRules.contains(ruleToFlip)) {
             NamedGrammar modifiedGrammar = state.getGrammar().getModifiedGrammar(Collections.singleton(ruleToFlip), Collections.emptySet(), state.getGrammar().getAbstractionBlockingHeapConfigurations());
             // Add the new state where all critical pairs are recomputed TODO: If the rule is activated we don't need to recompute everything
-            result.add(new CompletionState(modifiedGrammar));
+            result.add(new CompletionState(modifiedGrammar, state));
             alreadyFlippedGrammarRules.add(ruleToFlip);
         }
     }

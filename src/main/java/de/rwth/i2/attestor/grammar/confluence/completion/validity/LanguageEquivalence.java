@@ -14,7 +14,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
  */
 public class LanguageEquivalence implements GrammarValidity {
     @Override
-    public boolean isValid(CompletionState oldCompletionState, CompletionState newCompletionState) {
+    public boolean isValid(CompletionState newCompletionState) {
         throw new UnsupportedOperationException("Language equivalence check not implemented");
     }
 }
