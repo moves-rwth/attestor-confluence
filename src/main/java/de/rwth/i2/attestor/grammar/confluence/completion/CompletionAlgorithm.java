@@ -5,6 +5,8 @@ import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHe
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.CompletionStrategy;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
+import org.json.JSONObject;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,12 +26,14 @@ import java.util.List;
  *
  */
 public class CompletionAlgorithm {
+    private final String algorithmIdentifier; // An identifier used to identify the completion
     private final List<CompletionHeuristic> heuristics;
     private final List<GrammarValidity> validityChecks;
     private CompletionStateLoss completionStateLoss;
     private CompletionStrategy completionStrategy;
 
-    public CompletionAlgorithm() {
+    public CompletionAlgorithm(String algorithmIdentifier) {
+        this.algorithmIdentifier = algorithmIdentifier;
         this.heuristics = new ArrayList<>();
         this.validityChecks = new ArrayList<>();
     }
@@ -85,6 +89,14 @@ public class CompletionAlgorithm {
             throw new IllegalStateException("The completion algorithm is missing a necessary parameter.");
         }
         return completionStrategy.executeCompletionStrategy(inputGrammar, this);
+    }
+
+    public String getAlgorithmIdentifier() {
+        return algorithmIdentifier;
+    }
+
+    public JSONObject getStatistic() {
+        throw new NotImplementedException();
     }
 
 }

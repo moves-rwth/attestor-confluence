@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,5 +41,15 @@ public class CompletionAbstractionBlockingHeuristic implements CompletionHeurist
         NamedGrammar newGrammar = state.getGrammar().getModifiedGrammar(Collections.emptySet(), Collections.emptySet(), blockedHCs);
         CompletionState newState = new CompletionState(newGrammar, criticalPairs, state);
         return Collections.singleton(newState);
+    }
+
+    @Override
+    public String getHeuristicIdentifier() {
+        return "abstractionBlocking";
+    }
+
+    @Override
+    public JSONObject getSettings() {
+        return new JSONObject();
     }
 }

@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.TestGrammars;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.*;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPairLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.GreedyCompletion;
@@ -17,8 +18,8 @@ import java.io.IOException;
 
 public class ExampleCompletionAlgorithms {
 
-    public static CompletionState algorithm1(NamedGrammar inputGrammar) {
-        return new CompletionAlgorithm()
+    public static CompletionAlgorithm algorithm1() {
+        return new CompletionAlgorithm("Algorithm1")
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 //.addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
@@ -28,15 +29,14 @@ public class ExampleCompletionAlgorithms {
                 .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
                 //.addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new LocalConcretizability())
-                .addGrammarValidityCheck(new CheckDataStructureGrammar())
-                .runCompletionAlgorithm(inputGrammar);
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
     // TODO: Remove this method
     public static void main(String[] args) {
         NamedGrammar grammar = null; // = ConfluenceTool.parseGrammar("DLList");
         try {
-            grammar = TestGrammars.getSeparationLogicNamedGrammar("LinkedTree1");
+            grammar = BenchmarkRunner.getSeparationLogicNamedGrammar("LinkedTree1");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,7 +52,7 @@ public class ExampleCompletionAlgorithms {
 
         int numberInitialCriticalPairs = finder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
         System.out.println("Number initial critical pairs: " + numberInitialCriticalPairs);
-        CompletionState resultingState = algorithm1(grammar);
+        CompletionState resultingState = algorithm1().runCompletionAlgorithm(grammar);
         System.out.println("Number remaining critical pairs: " + resultingState.getCriticalPairs().size());
 
         try {

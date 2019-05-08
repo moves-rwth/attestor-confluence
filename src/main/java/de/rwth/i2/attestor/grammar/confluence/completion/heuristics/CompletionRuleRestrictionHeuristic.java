@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.GrammarRuleCollapsed;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -17,15 +18,15 @@ import java.util.*;
  */
 public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
     final boolean reactivateRules;
-    final boolean preventMainGrammarRuleDactivation;
+    final boolean preventMainGrammarRuleDeactivation;
 
     /**
      * @param reactivateRules If set to true rules that have been deactivated can get activated again (does not activate removed rules)
-     * @param preventMainGrammarRuleDactivation If set to true only collapsed rules and generated rules are deactivated
+     * @param preventMainGrammarRuleDeactivation If set to true only collapsed rules and generated rules are deactivated
      */
-    public CompletionRuleRestrictionHeuristic(boolean reactivateRules, boolean preventMainGrammarRuleDactivation) {
+    public CompletionRuleRestrictionHeuristic(boolean reactivateRules, boolean preventMainGrammarRuleDeactivation) {
         this.reactivateRules = reactivateRules;
-        this.preventMainGrammarRuleDactivation = preventMainGrammarRuleDactivation;
+        this.preventMainGrammarRuleDeactivation = preventMainGrammarRuleDeactivation;
     }
 
     @Override
@@ -56,7 +57,7 @@ public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
             return false;
         } else {
             // Prevent a handwritten active rule from being deactivated if the corresponding option is set
-            return preventMainGrammarRuleDactivation && rule.getRuleStatus() == GrammarRule.RuleStatus.ACTIVE;
+            return preventMainGrammarRuleDeactivation && rule.getRuleStatus() == GrammarRule.RuleStatus.ACTIVE;
         }
     }
 
@@ -69,4 +70,16 @@ public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
         }
     }
 
+    @Override
+    public String getHeuristicIdentifier() {
+        return "ruleRestriction";
+    }
+
+    @Override
+    public JSONObject getSettings() {
+        JSONObject settings = new JSONObject();
+        settings.put("reactivateRules", reactivateRules);
+        settings.put("preventMainGrammarRuleDeactivation", preventMainGrammarRuleDeactivation);
+        return settings;
+    }
 }

@@ -9,6 +9,7 @@ import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.util.Combinations;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -117,5 +118,18 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
             builder.setExternal(nodes.get(nodeIdx));
         }
         return builder.build();
+    }
+
+    @Override
+    public String getHeuristicIdentifier() {
+        return "newNonterminal";
+    }
+
+    @Override
+    public JSONObject getSettings() {
+        JSONObject settings = new JSONObject();
+        settings.put("minNumberExternals", minNumberExternals);
+        settings.put("maxNumberExternals", maxNumberExternals);
+        return settings;
     }
 }

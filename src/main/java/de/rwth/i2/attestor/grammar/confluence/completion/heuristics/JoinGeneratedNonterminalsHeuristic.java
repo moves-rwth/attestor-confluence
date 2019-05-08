@@ -8,6 +8,7 @@ import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import gnu.trove.list.array.TIntArrayList;
+import org.json.JSONObject;
 
 import java.util.Iterator;
 
@@ -81,5 +82,16 @@ public class JoinGeneratedNonterminalsHeuristic implements CompletionHeuristic {
                 return null;
             }
         }
+    }
+
+    @Override
+    public String getHeuristicIdentifier() {
+        return "joinGeneratedNonterminals";
+    }
+
+    @Override
+    public JSONObject getSettings() {
+        // No settings -> Return empty json object
+        return new JSONObject();
     }
 }

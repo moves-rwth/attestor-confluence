@@ -1,17 +1,13 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.LocalConcretizability;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
 import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
-import de.rwth.i2.attestor.main.Attestor;
-import de.rwth.i2.attestor.main.scene.DefaultScene;
-import de.rwth.i2.attestor.main.scene.SceneObject;
-import de.rwth.i2.attestor.seplog.InductivePredicatesParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +48,7 @@ public class TestGrammars {
         System.out.println(grammarName);
         try {
             new File("reports/" + grammarName ).mkdirs();
-            NamedGrammar grammar = getSeparationLogicNamedGrammar(grammarName);
+            NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
             String fileName = "reports/" + grammarName + "/{0}_" + grammarName + ".tex";
             TikzExport export;
 
@@ -77,7 +73,7 @@ public class TestGrammars {
             export.finishExport();
 
             // Run completion
-            CompletionState completionResult = ExampleCompletionAlgorithms.algorithm1(grammar);
+            CompletionState completionResult = ExampleCompletionAlgorithms.algorithm1().runCompletionAlgorithm(grammar);
 
             // Get resulting critical pairs
             Collection<CriticalPair> resultingCriticalPairs = completionResult.getCriticalPairs();
@@ -96,17 +92,6 @@ public class TestGrammars {
         }
     }
 
-    public static Grammar getSeparationLogicGrammar(String grammarName) throws IOException {
-        DefaultScene scene = new DefaultScene();
-        SceneObject sceneObject = new SceneObject(scene) {};
-        InductivePredicatesParser parser = new InductivePredicatesParser(sceneObject);
-        return parser.parseFromUrl(
-                Attestor.class.getClassLoader().getResource("confluenceTestGrammars/" + grammarName + ".sid")
-        );
-    }
 
-    public static NamedGrammar getSeparationLogicNamedGrammar(String grammarName) throws IOException {
-        return new NamedGrammar(getSeparationLogicGrammar(grammarName), grammarName);
-    }
 
 }

@@ -1,7 +1,10 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.*;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.OverlappingStatisticCollector;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.StartStopTimer;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.*;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -31,6 +34,10 @@ public class CriticalPairFinder {
     private Joinability joinabilityResult;
     final private Collection<CriticalPair> criticalPairs;
     final private NamedGrammar underlyingGrammar;
+    private StartStopTimer timer; // Measure the time of the whole critical pair detection
+    private OverlappingStatisticCollector edgeOverlappingStatistic = new OverlappingStatisticCollector();
+    private OverlappingStatisticCollector nodeOverlappingStatistic = new OverlappingStatisticCollector();
+    private OverlappingStatisticCollector validOverlappingStatistic = new OverlappingStatisticCollector();
 
     public CriticalPairFinder(NamedGrammar grammar) {
         this.underlyingGrammar = grammar;
@@ -41,6 +48,9 @@ public class CriticalPairFinder {
     }
 
     private void computeAllCriticalPairs() {
+        timer = new StartStopTimer();
+        timer.startTimer();
+
         // Add critical pairs for all getCombinations of rules
 
         // 1. Convert to a list to reference each rule by one index
@@ -55,6 +65,8 @@ public class CriticalPairFinder {
                 addCriticalPairsForCollapsedRule(r1, r2);
             }
         }
+
+        timer.stopTimer();
     }
 
 
@@ -73,27 +85,45 @@ public class CriticalPairFinder {
         CollapsedHeapConfiguration hc2 = r2.getCollapsedHeapConfiguration();
         HeapConfigurationContext context = new HeapConfigurationContext(hc1, hc2);
 
+        // Start to measure time for the edge overlapping computation
+        edgeOverlappingStatistic.startTimer();
 
-        for (Overlapping eOverlapping : EdgeOverlapping.getEdgeOverlapping(context)) {
+        for (Overlapping eOverlapping : EdgeOverlapping.getEdgeOverlapping(context, edgeOverlappingStatistic)) {
             EdgeOverlapping edgeOverlapping = (EdgeOverlapping) eOverlapping;
             // Check if the current edgeOverlapping allows for compatible node overlappings
             if (edgeOverlapping.isEdgeOverlappingValid()) {
-                for (Overlapping nOverlapping : NodeOverlapping.getNodeOverlapping(edgeOverlapping)) {
+
+                // Pause edge overlapping time and start node overlapping time
+                edgeOverlappingStatistic.stopTimer();
+                nodeOverlappingStatistic.startTimer();
+                for (Overlapping nOverlapping : NodeOverlapping.getNodeOverlapping(edgeOverlapping, nodeOverlappingStatistic)) {
                     // Found a compatible overlapping
                     NodeOverlapping nodeOverlapping = (NodeOverlapping) nOverlapping;
 
                     // Check that the rule applications are not independent (They should share at least one internal node)
                     if (!nodeOverlapping.isNodeOverlappingIndependent()) {
+                        nodeOverlappingStatistic.stopTimer();
+                        validOverlappingStatistic.startTimer();
+
                         CriticalPair newCriticalPair = new CriticalPair(nodeOverlapping, edgeOverlapping, underlyingGrammar, r1, r2);
                         if (!underlyingGrammar.blockHeapAbstraction(newCriticalPair.getJointHeapConfiguration().getHeapConfiguration())) {
                             // This is only a critical pair if the abstraction is not blocked by the grammar
                             criticalPairs.add(newCriticalPair);
                             joinabilityResult = joinabilityResult.getCollectiveJoinability(newCriticalPair.getJoinability());
+                            validOverlappingStatistic.logPruning(nodeOverlapping.getLevel());
                         }
+                        validOverlappingStatistic.stopTimer();
+                        nodeOverlappingStatistic.startTimer();
                     }
                 }
+
+                // Continue edge overlapping time and stop node overlapping time
+                nodeOverlappingStatistic.stopTimer();
+                edgeOverlappingStatistic.startTimer();
             }
         }
+
+        edgeOverlappingStatistic.stopTimer();
     }
 
     public Collection<CriticalPair> getCriticalPairs() {
@@ -116,5 +146,13 @@ public class CriticalPairFinder {
 
     public Joinability getJoinabilityResult() {
         return joinabilityResult;
+    }
+
+    public JSONObject getJsonStatistic() {
+        JSONObject result = new JSONObject();
+        result.put("edgeOverlappingStatistic", edgeOverlappingStatistic.getJsonStatistic());
+        result.put("nodeOverlappingStatistic", nodeOverlappingStatistic.getJsonStatistic());
+        result.put("validOverlappingStatistic", validOverlappingStatistic.getJsonStatistic());
+        return result;
     }
 }

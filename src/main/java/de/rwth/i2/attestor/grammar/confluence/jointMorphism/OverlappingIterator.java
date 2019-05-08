@@ -1,5 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.grammar.confluence.benchmark.OverlappingStatisticCollector;
+
 import java.util.*;
 
 class OverlappingIterator<Element extends GraphElement> implements Iterator<Overlapping<Element>> {

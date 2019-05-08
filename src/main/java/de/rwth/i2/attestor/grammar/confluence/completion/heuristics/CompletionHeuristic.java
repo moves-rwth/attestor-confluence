@@ -1,10 +1,8 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
+import de.rwth.i2.attestor.grammar.confluence.benchmark.CompletionHeuristicStatisticCollector;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
-import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
-
-import java.util.Iterator;
-import java.util.List;
+import org.json.JSONObject;
 
 /**
  * Interface for all completion heuristics. A completion heuristic returns all possible ways the heuristic can be applied
@@ -15,10 +13,26 @@ import java.util.List;
  * be larger than the other original rule indices.
  */
 public interface CompletionHeuristic {
+    CompletionHeuristicStatisticCollector statistic = new CompletionHeuristicStatisticCollector();
 
     /**
      * @param state The state on which the heuristic should be applied
      * @return All possible immediate successors of the input state according to the heuristic
      */
     Iterable<CompletionState> applyHeuristic(CompletionState state);
+
+    /**
+     * @return A descriptive identifier that shows
+     */
+    String getHeuristicIdentifier();
+
+    /**
+     * @return The settings of the heuristic
+     */
+    JSONObject getSettings();
+
+    default CompletionHeuristicStatisticCollector getStatisticCollector() {
+        return statistic;
+    }
+
 }

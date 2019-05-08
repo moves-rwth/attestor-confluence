@@ -37,6 +37,7 @@ public class GreedyCompletion implements CompletionStrategy {
                 boolean appliedHeuristic = true;
                 while (appliedHeuristic) {
                     appliedHeuristic = false;
+
                     for (CompletionState nextState : heuristic.applyHeuristic(currentState)) {
                         // Check if no more problematic critical pairs
                         if (nextState.getCriticalPairs().size() == 0) {

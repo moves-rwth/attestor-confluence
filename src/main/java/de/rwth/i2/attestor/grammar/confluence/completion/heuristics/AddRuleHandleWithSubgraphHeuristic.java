@@ -14,6 +14,7 @@ import de.rwth.i2.attestor.graph.morphism.MorphismOptions;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -212,5 +213,15 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
         }
 
         return true;
+    }
+
+    @Override
+    public String getHeuristicIdentifier() {
+        return "handleWithSubgraph";
+    }
+
+    @Override
+    public JSONObject getSettings() {
+        return new JSONObject();
     }
 }

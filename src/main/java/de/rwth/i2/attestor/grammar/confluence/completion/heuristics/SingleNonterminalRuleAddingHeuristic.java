@@ -8,6 +8,7 @@ import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.util.Combinations;
 import de.rwth.i2.attestor.util.Pair;
 import gnu.trove.list.array.TIntArrayList;
+import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -100,5 +101,16 @@ public class SingleNonterminalRuleAddingHeuristic extends CompletionRuleAddingHe
         } else {
             return null;
         }
+    }
+
+    @Override
+    public String getHeuristicIdentifier() {
+        return "singleNonterminalRuleAdding";
+    }
+
+    @Override
+    public JSONObject getSettings() {
+        // No settings -> return empty json object
+        return new JSONObject();
     }
 }

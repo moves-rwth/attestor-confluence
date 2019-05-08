@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
+import de.rwth.i2.attestor.grammar.confluence.benchmark.OverlappingStatisticCollector;
 import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
@@ -15,8 +16,9 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
      */
     private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
                             Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
-                            Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1, boolean isIndependent) {
-        super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1);
+                            Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1, OverlappingStatisticCollector statisticCollector,
+                            boolean isIndependent) {
+        super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, statisticCollector);
         this.isIndependent = isIndependent;
     }
 
@@ -97,7 +99,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         return new NodeOverlapping(this, newPair);
     }
 
-    public static NodeOverlapping getNodeOverlapping(EdgeOverlapping edgeOverlapping) {
+    public static NodeOverlapping getNodeOverlapping(EdgeOverlapping edgeOverlapping, OverlappingStatisticCollector statisticCollector) {
         Collection<NodeGraphElement> hc1Remaining, hc2Remaining;
         Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2, mapHc2toHc1;
 
@@ -113,7 +115,7 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         boolean isIndependent = edgeOverlapping.isEmpty();
 
         // Return the NodeOverlapping
-        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, isIndependent);
+        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, statisticCollector, isIndependent);
     }
 
     /**

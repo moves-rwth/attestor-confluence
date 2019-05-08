@@ -7,6 +7,7 @@ import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.TestGrammars;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
 import de.rwth.i2.attestor.graph.BasicSelectorLabel;
@@ -36,7 +37,7 @@ public class Temp {
         //exportDefaultGrammar("DLList_simple_one_way");
         //exportDefaultGrammar("DLList_simple_two_way");
         try {
-            NamedGrammar grammar = TestGrammars.getSeparationLogicNamedGrammar("SimpleDLL");
+            NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar("SimpleDLL");
 
             TikzExport exporter = new TikzExport("reports/simple-dll-list-grammar-report.tex", true);
             exporter.exportGrammar(grammar, true);
