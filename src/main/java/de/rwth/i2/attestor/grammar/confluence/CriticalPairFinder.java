@@ -18,6 +18,12 @@ import java.util.*;
  *
  * TODO: Add option to early abort if critical pairs already Strong joinable or weak joinable
  *
+ * # Benchmarks:
+ *
+ * Runtime: Complete
+ * For each grammar rule combination: Runtime Edge overlapping / Node overlapping / Complete
+ * For each grammar rule combination: Pruning levels
+ *
  * @author Johannes Schulte
  */
 public class CriticalPairFinder {

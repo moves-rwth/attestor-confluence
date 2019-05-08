@@ -1,7 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.jointMorphism;
 
 import de.rwth.i2.attestor.util.Pair;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
