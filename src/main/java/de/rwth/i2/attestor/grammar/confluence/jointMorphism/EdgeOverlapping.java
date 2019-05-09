@@ -267,4 +267,8 @@ public class EdgeOverlapping extends Overlapping<EdgeGraphElement> {
         return new EdgeOverlapping(context, edgesGraph1, edgesGraph2, statisticCollector);
     }
 
+    public static EdgeOverlapping getEdgeOverlapping(HeapConfigurationContext context) {
+        return getEdgeOverlapping(context, null);
+    }
+
 }

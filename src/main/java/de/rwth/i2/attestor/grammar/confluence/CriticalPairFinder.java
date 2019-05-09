@@ -153,6 +153,7 @@ public class CriticalPairFinder {
         result.put("edgeOverlappingStatistic", edgeOverlappingStatistic.getJsonStatistic());
         result.put("nodeOverlappingStatistic", nodeOverlappingStatistic.getJsonStatistic());
         result.put("validOverlappingStatistic", validOverlappingStatistic.getJsonStatistic());
+        result.put("completeRuntime", timer.getRuntime());
         return result;
     }
 }

@@ -33,7 +33,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
 
     Overlapping(HeapConfigurationContext context, Collection<Element> hc1Remaining,
                           Collection<Element> hc2Remaining, Map<Element, Element> mapHC1toHC2,
-                          Map<Element, Element> mapHC2toHC1, OverlappingStatisticCollector statisticCollector) {
+                          Map<Element, Element> mapHC2toHC1, OverlappingStatisticCollector statisticCollector, int level) {
         this.context = context;
         this.hc1Remaining = new TreeSet<>(hc1Remaining);
         this.hc2Remaining = new TreeSet<>(hc2Remaining);
@@ -41,7 +41,7 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         this.mapHC2toHC1 = mapHC2toHC1;
         this.lastAddedEquivalence = null;
         this.statisticCollector = statisticCollector;
-        this.level = mapHC1toHC2.size();
+        this.level = level;
     }
 
     /**
@@ -146,6 +146,9 @@ public abstract class Overlapping<Element extends GraphElement> implements Itera
         while (nextNodeEquivalence != null) {
             if (this.isNextPairCompatible(nextNodeEquivalence)) {
                 result.add(getOverlapping(nextNodeEquivalence));
+            } else if (statisticCollector != null) {
+                // Keep a statistic on the level at which we were able to prune
+                statisticCollector.logPruning(this.getLevel());
             }
             nextNodeEquivalence = getNextEquivalence(nextNodeEquivalence);
         }

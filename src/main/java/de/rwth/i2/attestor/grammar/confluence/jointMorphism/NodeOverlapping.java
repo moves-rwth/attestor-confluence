@@ -17,8 +17,8 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
     private NodeOverlapping(HeapConfigurationContext context, Collection<NodeGraphElement> hc1Remaining,
                             Collection<NodeGraphElement> hc2Remaining, Map<NodeGraphElement, NodeGraphElement> mapHc1toHc2,
                             Map<NodeGraphElement, NodeGraphElement> mapHc2toHc1, OverlappingStatisticCollector statisticCollector,
-                            boolean isIndependent) {
-        super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, statisticCollector);
+                            boolean isIndependent, int level) {
+        super(context, hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, statisticCollector, level);
         this.isIndependent = isIndependent;
     }
 
@@ -115,7 +115,11 @@ public class NodeOverlapping extends Overlapping<NodeGraphElement> {
         boolean isIndependent = edgeOverlapping.isEmpty();
 
         // Return the NodeOverlapping
-        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, statisticCollector, isIndependent);
+        return new NodeOverlapping(edgeOverlapping.getContext(), hc1Remaining, hc2Remaining, mapHc1toHc2, mapHc2toHc1, statisticCollector, isIndependent, edgeOverlapping.getLevel()+1);
+    }
+
+    public static NodeOverlapping getNodeOverlapping(EdgeOverlapping edgeOverlapping) {
+        return getNodeOverlapping(edgeOverlapping, null);
     }
 
     /**

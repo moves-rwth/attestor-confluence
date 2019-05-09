@@ -135,7 +135,9 @@ public class JsonToHeapConfiguration extends SceneObject {
             int sourceNode = nodes.get(originID);
             String typeName = heapConfiguration.nodeTypeOf(sourceNode).toString();
 
-            name = renaming.getSelectorRenaming(typeName, name);
+            if (renaming != null) {
+                name = renaming.getSelectorRenaming(typeName, name);
+            }
             addSelectorLabelFunction.accept(name);
             SelectorLabel sel = scene().getSelectorLabel(name);
 
@@ -179,7 +181,9 @@ public class JsonToHeapConfiguration extends SceneObject {
         TIntArrayList nodes = new TIntArrayList();
         for (int i = 0; i < jsonNodes.length(); i++) {
             String typeName = jsonNodes.getJSONObject(i).getString("type");
-            typeName = renaming.getTypeRenaming(typeName);
+            if (renaming != null) {
+                typeName = renaming.getTypeRenaming(typeName);
+            }
             Type type = scene().getType(typeName);
             int number = jsonNodes.getJSONObject(i).getInt("number");
             builder.addNodes(type, number, nodes);
