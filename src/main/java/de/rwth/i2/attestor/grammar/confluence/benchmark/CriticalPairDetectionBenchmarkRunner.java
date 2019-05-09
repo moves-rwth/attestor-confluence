@@ -79,7 +79,7 @@ public class CriticalPairDetectionBenchmarkRunner {
 
     public static void main(String[] args) {
         JSONArray result = new JSONArray();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 20; i++) {
             //System.out.println("Run " + i);
             long time = 0;
             for (Object obj : runAllCriticalPairDetection()) {

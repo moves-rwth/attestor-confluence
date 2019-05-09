@@ -73,7 +73,7 @@ public class TestGrammars {
             export.finishExport();
 
             // Run completion
-            CompletionState completionResult = ExampleCompletionAlgorithms.algorithm1().runCompletionAlgorithm(grammar);
+            CompletionState completionResult = ExampleCompletionAlgorithms.combinedAlgorithm1().runCompletionAlgorithm(grammar);
 
             // Get resulting critical pairs
             Collection<CriticalPair> resultingCriticalPairs = completionResult.getCriticalPairs();

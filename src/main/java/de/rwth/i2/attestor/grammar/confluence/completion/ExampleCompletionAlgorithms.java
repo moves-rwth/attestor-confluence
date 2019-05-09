@@ -3,34 +3,119 @@ package de.rwth.i2.attestor.grammar.confluence.completion;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
-import de.rwth.i2.attestor.grammar.confluence.TestGrammars;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkCompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.*;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPairLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.GreedyCompletion;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.CheckDataStructureGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.LocalConcretizability;
-import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 
 import java.io.IOException;
 
-
 public class ExampleCompletionAlgorithms {
 
-    public static CompletionAlgorithm algorithm1() {
-        return new CompletionAlgorithm("Algorithm1")
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm ruleHandleWithSubgraph() {
+        return new CompletionAlgorithm("ruleHandleWithSubgraph")
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
-                //.addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
-                //.addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                .addHeuristic(new AddRulesNewNonterminalHeuristic())
-                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
-                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
-                //.addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
                 .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm completionAbstractionBlocking() {
+        return new CompletionAlgorithm("completionAbstractionBlocking")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new CompletionAbstractionBlockingHeuristic())
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm addRulesNewNonterminalHeuristic() {
+        return new CompletionAlgorithm("addRulesNewNonterminalHeuristic")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm joinGeneratedNonterminals() {
+        return new CompletionAlgorithm("joinGeneratedNonterminals")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm singleNonterminalRuleAddingHeuristic() {
+        return new CompletionAlgorithm("singleNonterminalRuleAddingHeuristic")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm ruleRestriction() {
+        return new CompletionAlgorithm("ruleRestriction")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm onlyRuleAdding() {
+        return new CompletionAlgorithm("onlyRuleAdding")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm onlyRuleAddingNotLocalConcretizable() {
+        return new CompletionAlgorithm("onlyRuleAddingNotLocalConcretizable")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm combinedAlgorithm1() {
+        return new CompletionAlgorithm("combinedAlgorithm1")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new CompletionAbstractionBlockingHeuristic())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
+                .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+
 
     // TODO: Remove this method
     public static void main(String[] args) {
@@ -52,7 +137,7 @@ public class ExampleCompletionAlgorithms {
 
         int numberInitialCriticalPairs = finder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
         System.out.println("Number initial critical pairs: " + numberInitialCriticalPairs);
-        CompletionState resultingState = algorithm1().runCompletionAlgorithm(grammar);
+        CompletionState resultingState = combinedAlgorithm1().runCompletionAlgorithm(grammar);
         System.out.println("Number remaining critical pairs: " + resultingState.getCriticalPairs().size());
 
         try {

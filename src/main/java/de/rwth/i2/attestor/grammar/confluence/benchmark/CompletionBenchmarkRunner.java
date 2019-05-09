@@ -6,10 +6,12 @@ import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgori
 import org.json.JSONArray;
 
 import java.io.IOException;
-import java.util.function.Supplier;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CompletionBenchmarkRunner {
-    String[] completionGrammarNames = new String[] {
+    static String[] completionGrammarNames = new String[] {
         "InTree",
         "InTreeLinkedLeaves",
         "LinkedTree1",
@@ -17,18 +19,31 @@ public class CompletionBenchmarkRunner {
         "SimpleDLL",
     };
 
-    Supplier<CompletionAlgorithm>[] completionAlgorithms = new Supplier[] {
-      ExampleCompletionAlgorithms::algorithm1
-    };
 
+    /**
+     * Returns all method marked with the BenchmarkCompletionAlgorithm annotation
+     */
+    private static Iterable<CompletionAlgorithm> getCompletionAlgorithms() {
+        List<CompletionAlgorithm> result = new ArrayList<>();
+        for (Method m : ExampleCompletionAlgorithms.class.getDeclaredMethods()) {
 
-    JSONArray runAllCompletionBenchmarks() {
+            if (m.isAnnotationPresent(BenchmarkCompletionAlgorithm.class)) {
+                try {
+                    result.add((CompletionAlgorithm) m.invoke(null));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    static JSONArray runAllCompletionBenchmarks() {
         JSONArray benchmarkResults = new JSONArray();
         for (String grammarName : completionGrammarNames) {
             try {
                 NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
-                for (Supplier<CompletionAlgorithm> algorithmSupplier : completionAlgorithms) {
-                    CompletionAlgorithm completionAlgorithm = algorithmSupplier.get();
+                for (CompletionAlgorithm completionAlgorithm : getCompletionAlgorithms()) {
                     completionAlgorithm.runCompletionAlgorithm(grammar);
                     benchmarkResults.put(completionAlgorithm.getStatistic());
                 }
@@ -37,6 +52,10 @@ public class CompletionBenchmarkRunner {
             }
         }
         return benchmarkResults;
+    }
+
+    public static void main(String[] args) {
+        runAllCompletionBenchmarks();
     }
 
 }
