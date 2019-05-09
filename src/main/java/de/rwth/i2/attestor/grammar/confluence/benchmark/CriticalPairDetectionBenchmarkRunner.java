@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import org.json.JSONArray;
@@ -51,11 +52,42 @@ public class CriticalPairDetectionBenchmarkRunner {
         JSONObject benchmarkResult = new JSONObject();
         benchmarkResult.put("resultData", criticalPairFinder.getJsonStatistic());
         benchmarkResult.put("grammarName", grammar.getGrammarName());
+        int numberStronglyJoinable = 0;
+        int numberWeaklyJoinable = 0;
+        int numberNotJoinable = 0;
+
+        for (CriticalPair criticalPair : criticalPairFinder.getCriticalPairs()) {
+            switch (criticalPair.getJoinability()) {
+                case WEAKLY_JOINABLE:
+                    numberWeaklyJoinable++;
+                    break;
+                case STRONGLY_JOINABLE:
+                    numberStronglyJoinable++;
+                    break;
+                case NOT_JOINABLE:
+                    numberNotJoinable++;
+                    break;
+            }
+        }
+
+        benchmarkResult.put("numberWeaklyJoinable", numberWeaklyJoinable);
+        benchmarkResult.put("numberStronglyJoinable", numberStronglyJoinable);
+        benchmarkResult.put("numberNotJoinable", numberNotJoinable);
+
         return benchmarkResult;
     }
 
     public static void main(String[] args) {
-        JSONArray result = runAllCriticalPairDetection();
+        JSONArray result = new JSONArray();
+        for (int i = 0; i < 100; i++) {
+            //System.out.println("Run " + i);
+            long time = 0;
+            for (Object obj : runAllCriticalPairDetection()) {
+                result.put((JSONObject) obj);
+                time += (long) ((JSONObject) ((JSONObject) obj).get("resultData")).get("completeRuntime");
+            }
+            System.out.println(time);
+        }
         // Output to file
         try {
             new File("reports/json").mkdirs();
