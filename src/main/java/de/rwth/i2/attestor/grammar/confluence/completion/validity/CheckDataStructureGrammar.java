@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.validity;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
@@ -7,6 +8,7 @@ import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import gnu.trove.list.array.TIntArrayList;
+import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,4 +58,12 @@ public class CheckDataStructureGrammar implements GrammarValidity {
         }
         return true;
     }
+
+    @Override
+    public JSONObject getDescription() {
+        return new JSONObject(ImmutableMap.of(
+                "name", "checkDatastructureGrammar"
+        ));
+    }
+
 }

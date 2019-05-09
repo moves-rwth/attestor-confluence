@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.CompletionHeuristicStatisticCollector;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import org.json.JSONObject;
@@ -21,15 +22,26 @@ public interface CompletionHeuristic {
      */
     Iterable<CompletionState> applyHeuristic(CompletionState state);
 
-    /**
-     * @return A descriptive identifier that shows
-     */
-    String getHeuristicIdentifier();
+    String getIdentifier();
+
+    default JSONObject getStatistic() {
+        return statistic.getJsonResult();
+    }
+
+    default JSONObject getSettings() {
+        return new JSONObject();
+    }
 
     /**
-     * @return The settings of the heuristic
+     * @return A summary of the settings of the heuristic and benchmark statistics
      */
-    JSONObject getSettings();
+    default JSONObject getSummary() {
+        return new JSONObject(ImmutableMap.of(
+                "identifier", getIdentifier(),
+                "settings", getSettings(),
+                "statistic", getStatistic()
+        ));
+    }
 
     default CompletionHeuristicStatisticCollector getStatisticCollector() {
         return statistic;

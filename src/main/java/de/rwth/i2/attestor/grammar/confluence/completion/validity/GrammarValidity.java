@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion.validity;
 
 import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,5 +29,7 @@ public interface GrammarValidity {
         }
         return newRules;
     }
+
+    JSONObject getDescription();
 
 }

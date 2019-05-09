@@ -1,11 +1,13 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.validity;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.*;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.typedness.GrammarTypedness;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -121,6 +123,13 @@ public class LocalConcretizability implements GrammarValidity {
             // Complete recalculation required
             return grammar.getOriginalGrammarRules();
         }
+    }
+
+    @Override
+    public JSONObject getDescription() {
+        return new JSONObject(ImmutableMap.of(
+                "name", "localConcretizability"
+        ));
     }
 
 }

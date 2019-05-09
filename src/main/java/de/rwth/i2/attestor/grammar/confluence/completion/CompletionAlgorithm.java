@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHe
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.CompletionStrategy;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -96,7 +97,24 @@ public class CompletionAlgorithm {
     }
 
     public JSONObject getStatistic() {
-        throw new NotImplementedException();
+        JSONObject result = new JSONObject();
+        result.put("algorithmIdentifier", algorithmIdentifier);
+        result.put("completionStateLoss", completionStateLoss.getDescription());
+        result.put("completionStrategy", completionStrategy.getDescription());
+
+        JSONArray grammarValiditySummary = new JSONArray();
+        for (GrammarValidity grammarValidity : validityChecks) {
+            grammarValiditySummary.put(grammarValidity.getDescription());
+        }
+        result.put("grammarValidity", grammarValiditySummary);
+
+        JSONArray heuristicSummary = new JSONArray();
+        for (CompletionHeuristic heuristic : heuristics) {
+            heuristicSummary.put(heuristic.getSummary());
+        }
+        result.put("heuristicSummary", heuristicSummary);
+
+        return result;
     }
 
 }

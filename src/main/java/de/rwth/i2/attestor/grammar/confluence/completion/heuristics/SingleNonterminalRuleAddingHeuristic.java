@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.Nonterminal;
@@ -104,13 +105,7 @@ public class SingleNonterminalRuleAddingHeuristic extends CompletionRuleAddingHe
     }
 
     @Override
-    public String getHeuristicIdentifier() {
+    public String getIdentifier() {
         return "singleNonterminalRuleAdding";
-    }
-
-    @Override
-    public JSONObject getSettings() {
-        // No settings -> return empty json object
-        return new JSONObject();
     }
 }

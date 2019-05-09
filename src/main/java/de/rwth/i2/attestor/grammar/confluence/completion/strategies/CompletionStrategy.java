@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion.strategies;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import org.json.JSONObject;
 
 /**
  * A completion strategy specifies how the different heuristics should be applied in order to find a completion state
@@ -15,4 +16,6 @@ public interface CompletionStrategy {
      */
     CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings);
 
+
+    JSONObject getDescription();
 }

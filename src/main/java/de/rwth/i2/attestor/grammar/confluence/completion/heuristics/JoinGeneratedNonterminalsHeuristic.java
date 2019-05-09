@@ -85,13 +85,7 @@ public class JoinGeneratedNonterminalsHeuristic implements CompletionHeuristic {
     }
 
     @Override
-    public String getHeuristicIdentifier() {
+    public String getIdentifier() {
         return "joinGeneratedNonterminals";
-    }
-
-    @Override
-    public JSONObject getSettings() {
-        // No settings -> Return empty json object
-        return new JSONObject();
     }
 }

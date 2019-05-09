@@ -44,12 +44,8 @@ public class CompletionAbstractionBlockingHeuristic implements CompletionHeurist
     }
 
     @Override
-    public String getHeuristicIdentifier() {
+    public String getIdentifier() {
         return "abstractionBlocking";
     }
 
-    @Override
-    public JSONObject getSettings() {
-        return new JSONObject();
-    }
 }

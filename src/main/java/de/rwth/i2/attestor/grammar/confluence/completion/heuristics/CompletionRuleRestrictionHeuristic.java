@@ -71,7 +71,7 @@ public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
     }
 
     @Override
-    public String getHeuristicIdentifier() {
+    public String getIdentifier() {
         return "ruleRestriction";
     }
 

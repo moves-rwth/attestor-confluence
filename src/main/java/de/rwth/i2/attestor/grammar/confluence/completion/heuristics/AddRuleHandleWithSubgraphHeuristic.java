@@ -216,12 +216,7 @@ public class AddRuleHandleWithSubgraphHeuristic extends CompletionRuleAddingHeur
     }
 
     @Override
-    public String getHeuristicIdentifier() {
+    public String getIdentifier() {
         return "handleWithSubgraph";
-    }
-
-    @Override
-    public JSONObject getSettings() {
-        return new JSONObject();
     }
 }

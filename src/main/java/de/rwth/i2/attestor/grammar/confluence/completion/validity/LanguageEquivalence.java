@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.validity;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import org.json.JSONObject;
 
 
 /**
@@ -16,5 +18,12 @@ public class LanguageEquivalence implements GrammarValidity {
     @Override
     public boolean isValid(CompletionState newCompletionState) {
         throw new UnsupportedOperationException("Language equivalence check not implemented");
+    }
+
+    @Override
+    public JSONObject getDescription() {
+        return new JSONObject(ImmutableMap.of(
+                "name", "languageEquivalence"
+        ));
     }
 }

@@ -1,11 +1,13 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.strategies;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
+import org.json.JSONObject;
 
 /**
  * Applies one heuristic as long as no further improvements can be made then moves to the next.
@@ -81,5 +83,13 @@ public class GreedyCompletion implements CompletionStrategy {
 
         // Return the result
         return currentState;
+    }
+
+    @Override
+    public JSONObject getDescription() {
+        return new JSONObject(ImmutableMap.of(
+                "name", "greedyCompletion",
+                "maxSearchDepth", maxSearchDepth
+        ));
     }
 }

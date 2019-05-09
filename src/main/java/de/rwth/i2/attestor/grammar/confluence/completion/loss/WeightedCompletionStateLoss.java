@@ -1,7 +1,9 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.loss;
 
+import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
+import org.json.JSONObject;
 
 /**
  * A customizable loss function that takes the number of critical pairs, number external nodes and number of rules into
@@ -29,5 +31,15 @@ public class WeightedCompletionStateLoss implements CompletionStateLoss {
             loss += numExternalNodesWeight * numberExternalNodes;
         }
         return loss;
+    }
+
+    @Override
+    public JSONObject getDescription() {
+        return new JSONObject(ImmutableMap.of(
+                "name", "weightedCompletionStateLoss",
+                "numCriticalPairWeight", numExternalNodesWeight,
+                "numExternalNodesWeight", numExternalNodesWeight,
+                "numRulesWeight", numRulesWeight
+        ));
     }
 }

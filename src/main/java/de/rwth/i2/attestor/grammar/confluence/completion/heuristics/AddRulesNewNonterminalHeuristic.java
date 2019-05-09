@@ -121,7 +121,7 @@ public class AddRulesNewNonterminalHeuristic extends CompletionRuleAddingHeurist
     }
 
     @Override
-    public String getHeuristicIdentifier() {
+    public String getIdentifier() {
         return "newNonterminal";
     }
 
