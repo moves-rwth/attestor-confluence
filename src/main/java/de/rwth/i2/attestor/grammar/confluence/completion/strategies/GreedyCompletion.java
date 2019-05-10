@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion.strategies;
 import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.CompletionHeuristicStatisticCollector;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.StartStopTimer;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
  */
 public class GreedyCompletion implements CompletionStrategy {
     final int maxSearchDepth;
+    final StartStopTimer completeRuntime = new StartStopTimer();
 
     /**
      * @param maxSearchDepth The maximum number of successful heuristic applications (no maximum if set to 0)
@@ -26,6 +28,7 @@ public class GreedyCompletion implements CompletionStrategy {
 
     @Override
     public CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
+        completeRuntime.startTimer();
         CompletionState currentState = new CompletionState(inputGrammar, null);
         CompletionStateLoss completionStateLoss = completionSettings.getCompletionStateLoss();
         double currentLoss = completionStateLoss.getLoss(currentState);
@@ -76,6 +79,7 @@ public class GreedyCompletion implements CompletionStrategy {
                                 // Increment the search depth and check if we have to abort
                                 currentSearchDepth++;
                                 if ((maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) || nextState.getCriticalPairs().size() == 0) {
+                                    completeRuntime.stopTimer();
                                     return currentState;
                                 }
                                 // Reinitialize possible next states for the current heuristic
@@ -94,19 +98,17 @@ public class GreedyCompletion implements CompletionStrategy {
             }
         }
 
+        completeRuntime.stopTimer();
         // Return the result
         return currentState;
-    }
-
-    private static void updateStatisticOnSuccess(CompletionHeuristicStatisticCollector statisticCollector, CompletionState oldState, CompletionState newState) {
-        // TODO
     }
 
     @Override
     public JSONObject getDescription() {
         return new JSONObject(ImmutableMap.of(
                 "name", "greedyCompletion",
-                "maxSearchDepth", maxSearchDepth
+                "maxSearchDepth", maxSearchDepth,
+                "runtime", completeRuntime.getRuntime()
         ));
     }
 }
