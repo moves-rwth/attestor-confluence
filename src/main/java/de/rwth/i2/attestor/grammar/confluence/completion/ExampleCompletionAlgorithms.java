@@ -80,6 +80,8 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
+    // Combined completion algorithms
+
     @BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm onlyRuleAdding() {
         return new CompletionAlgorithm("onlyRuleAdding")

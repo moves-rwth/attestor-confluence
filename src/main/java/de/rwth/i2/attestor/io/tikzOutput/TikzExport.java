@@ -96,32 +96,36 @@ import java.util.*;
  *
  */
 public class TikzExport {
-    private BufferedWriter writer;
+    private Writer writer;
     // TODO: Check that character encoding works on every platform
     private Collection<Pair<String, String>> pgfSingleValues;
     private Collection<Pair<String, Collection<String>>> pgfListValues;
     private final String BASE_PATH = "/attestor";
 
     public TikzExport(String destinationLocation, boolean printTableOfContents) throws IOException {
-        writer = new BufferedWriter(new FileWriter(destinationLocation));
+        this(new BufferedWriter(new FileWriter(destinationLocation)), printTableOfContents, true);
+    }
+
+    public TikzExport(Writer writer, boolean printTableOfContents, boolean outputTikzMakros) throws IOException {
+        this.writer = writer;
         URL tikzMacrosFile = Attestor.class.getClassLoader().getResource("latexTemplates/tikzMacros.tex");
         BufferedReader reader = new BufferedReader(new URLReader(tikzMacrosFile));
         String line = reader.readLine();
         while (line != null) {
             writer.write(line);
-            writer.newLine();
+            newLine();
             line = reader.readLine();
         }
-        writer.newLine();
+        newLine();
         writer.write("\\begin{document}");
-        writer.newLine();
+        newLine();
         if (printTableOfContents) {
             writer.write("\\title{Attestor Report}");
-            writer.newLine();
+            newLine();
             writer.write("\\maketitle");
-            writer.newLine();
+            newLine();
             writer.write("\\tableofcontents");
-            writer.newLine();
+            newLine();
         }
     }
 
@@ -137,12 +141,12 @@ public class TikzExport {
 
     public void createPageBreak() throws IOException {
         writer.append("\\pagebreak");
-        writer.newLine();
+        newLine();
     }
 
     public void exportCriticalPairs(Collection<CriticalPair> criticalPairs) throws IOException {
         writer.write("\\section{Critical Pair Report}");
-        writer.newLine();
+        newLine();
         int i = 0;
         // Start new scope
         for (CriticalPair criticalPair : criticalPairs) {
@@ -150,7 +154,7 @@ public class TikzExport {
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
             writer.write("% Critical Pair: " + i);
-            writer.newLine();
+            newLine();
             addCriticalPair(BASE_PATH, criticalPair);
             writeCurrentReportToFile("\\AttestorCriticalPairReport");
         }
@@ -165,7 +169,7 @@ public class TikzExport {
     public void exportGrammar(NamedGrammar grammar, boolean exportCollapsedRules) throws IOException {
         String grammarName = grammar.getGrammarName();
         writer.write(String.format("\\section{Grammar Report (%s)}", escapeString(grammarName)));
-        writer.newLine();
+        newLine();
         for (GrammarRuleOriginal originalRule : grammar.getOriginalGrammarRules()) {
             int originalRuleIdx = originalRule.getOriginalRuleIdx();
             Nonterminal nonterminal = originalRule.getNonterminal();
@@ -174,7 +178,7 @@ public class TikzExport {
             pgfSingleValues = new ArrayList<>();
             pgfListValues = new ArrayList<>();
             writer.write(String.format("%% Grammar %s Rule %d", escapeString(grammarName), originalRuleIdx+1));
-            writer.newLine();
+            newLine();
             CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(originalRhs, originalRhs, null);
             pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
             pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "true"));
@@ -188,7 +192,7 @@ public class TikzExport {
                     pgfListValues = new ArrayList<>();
                     int collapsedRuleIdx = collapsedRule.getCollapsedRuleIdx();
                     writer.write(String.format("%% Grammar %s Rule %d.%d", escapeString(grammarName), originalRuleIdx+1, collapsedRuleIdx+1));
-                    writer.newLine();
+                    newLine();
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
                     pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx+1)));
@@ -421,6 +425,10 @@ public class TikzExport {
         // Note: We set those to null and not a new initialized list so an error is thrown if this method is called too early
         pgfSingleValues = null;
         pgfListValues = null;
+    }
+
+    private void newLine() throws IOException {
+        writer.append("\n");
     }
 
     private String escapeString(String string) {

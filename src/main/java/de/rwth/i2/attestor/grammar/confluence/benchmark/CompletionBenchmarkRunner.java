@@ -2,11 +2,15 @@ package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
+import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
+import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +49,30 @@ public class CompletionBenchmarkRunner {
 
     static void runBenchmarksForGrammar(NamedGrammar grammar, JSONArray result) {
         for (CompletionAlgorithm completionAlgorithm : getCompletionAlgorithms()) {
-            completionAlgorithm.runCompletionAlgorithm(grammar);
-            result.put(completionAlgorithm.getStatistic());
+            CompletionState resultingCompletionState = completionAlgorithm.runCompletionAlgorithm(grammar);
+            JSONObject benchmarkResult = new JSONObject();
+            benchmarkResult.put("algorithmStatistic", completionAlgorithm.getStatistic());
+            try {
+                StringWriter stringWriter = new StringWriter();
+                TikzExport export = new TikzExport(stringWriter, true, false);
+                export.exportGrammar(resultingCompletionState.getGrammar(), true);
+                export.finishExport();
+                benchmarkResult.put("completedGrammarTex", stringWriter.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                StringWriter stringWriter = new StringWriter();
+                TikzExport export = new TikzExport(stringWriter, true, false);
+                export.exportCriticalPairs(resultingCompletionState.getCriticalPairs());
+                export.finishExport();
+                benchmarkResult.put("resultingCriticalPairsTex", stringWriter.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            result.put(benchmarkResult);
         }
     }
 
