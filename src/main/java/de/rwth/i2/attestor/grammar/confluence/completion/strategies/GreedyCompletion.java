@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion.strategies;
 
 import com.google.common.collect.ImmutableMap;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.benchmark.CompletionHeuristicStatisticCollector;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
@@ -36,15 +37,15 @@ public class GreedyCompletion implements CompletionStrategy {
             madeProgress = false;
 
             for (CompletionHeuristic heuristic : completionSettings.getHeuristics()) {
+                CompletionHeuristicStatisticCollector statisticCollector = heuristic.getStatisticCollector();
+                statisticCollector.startTimer();
+
                 boolean appliedHeuristic = true;
                 while (appliedHeuristic) {
                     appliedHeuristic = false;
 
+                    int heuristicLevel = 0;  // Keep track at which level the heuristic produces a success
                     for (CompletionState nextState : heuristic.applyHeuristic(currentState)) {
-                        // Check if no more problematic critical pairs
-                        if (nextState.getCriticalPairs().size() == 0) {
-                            return nextState;
-                        }
                         // Compute loss
                         double nextLoss = completionStateLoss.getLoss(nextState);
                         if (nextLoss < currentLoss) {
@@ -58,6 +59,11 @@ public class GreedyCompletion implements CompletionStrategy {
                             }
 
                             if (isValid) {
+                                // Update statistic
+                                statisticCollector.incrementNumSuccess();
+                                statisticCollector.addNumCriticalPairsRemoved(nextState.getCriticalPairs().size() - nextState.getCriticalPairs().size());
+                                statisticCollector.incrementSuccessAtLevel(heuristicLevel);
+
                                 System.out.println("Current number critical pairs: " + nextState.getCriticalPairs().size());
                                 // Update state & loss
                                 currentState = nextState;
@@ -69,20 +75,31 @@ public class GreedyCompletion implements CompletionStrategy {
                                 madeProgress = true;
                                 // Increment the search depth and check if we have to abort
                                 currentSearchDepth++;
-                                if (maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) {
+                                if ((maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) || nextState.getCriticalPairs().size() == 0) {
                                     return currentState;
                                 }
                                 // Reinitialize possible next states for the current heuristic
                                 break;
+                            } else {
+                                statisticCollector.incrementNumGrammarValidityCheckFails();
                             }
+                        } else {
+                            statisticCollector.incrementNumLossFunctionFail();
                         }
+                        heuristicLevel++;
                     }
                 }
+
+                statisticCollector.stopTimer();
             }
         }
 
         // Return the result
         return currentState;
+    }
+
+    private static void updateStatisticOnSuccess(CompletionHeuristicStatisticCollector statisticCollector, CompletionState oldState, CompletionState newState) {
+        // TODO
     }
 
     @Override
