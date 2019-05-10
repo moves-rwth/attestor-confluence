@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
+import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
@@ -9,9 +11,13 @@ import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,9 +54,14 @@ public class CompletionBenchmarkRunner {
     }
 
     static void runBenchmarksForGrammar(NamedGrammar grammar, JSONArray result) {
+        CriticalPairFinder initialCriticalPairs = new CriticalPairFinder(grammar);
+        int initialNumberCriticalPairs = initialCriticalPairs.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
+
         for (CompletionAlgorithm completionAlgorithm : getCompletionAlgorithms()) {
+            System.out.println("Start completion benchmark. Grammar: " + grammar.getGrammarName() + " Completion Algorithm: " + completionAlgorithm.getAlgorithmIdentifier());
             CompletionState resultingCompletionState = completionAlgorithm.runCompletionAlgorithm(grammar);
             JSONObject benchmarkResult = new JSONObject();
+            benchmarkResult.put("initialNumberCriticalPairs", initialNumberCriticalPairs);
             benchmarkResult.put("algorithmStatistic", completionAlgorithm.getStatistic());
             try {
                 StringWriter stringWriter = new StringWriter();
@@ -95,7 +106,15 @@ public class CompletionBenchmarkRunner {
     }
 
     public static void main(String[] args) {
-        runAllCompletionBenchmarks();
+        JSONArray result = runAllCompletionBenchmarks();
+        try {
+            new File("reports/json").mkdirs();
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("reports/json/completion.json"));
+            result.write(writer);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
