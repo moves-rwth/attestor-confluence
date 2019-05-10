@@ -16,7 +16,9 @@ import java.io.IOException;
 
 public class ExampleCompletionAlgorithms {
 
-    @BenchmarkCompletionAlgorithm
+    // Completion Algorithms with Single
+
+    //@BenchmarkCompletionAlgorithm // Does not currently work -> So it is not included in the benchmark
     public static CompletionAlgorithm ruleHandleWithSubgraph() {
         return new CompletionAlgorithm("ruleHandleWithSubgraph")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -112,6 +114,19 @@ public class ExampleCompletionAlgorithms {
                 .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
                 .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm combinedAlgorithm1NoLocalConcretizabilityCheck() {
+        return new CompletionAlgorithm("combinedAlgorithm1NoLocalConcretizabilityCheck")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new CompletionAbstractionBlockingHeuristic())
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
+                .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 

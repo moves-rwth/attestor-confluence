@@ -21,6 +21,8 @@ import java.util.*;
  *
  */
 public class LocalConcretizability implements GrammarValidity {
+    int numSuccess = 0;
+    int numFailure = 0;
 
     /**
      * Assuming the old grammar was locally concretizable is the new grammar locally concretizable?
@@ -51,7 +53,13 @@ public class LocalConcretizability implements GrammarValidity {
      */
     @Override
     public boolean isValid(CompletionState newCompletionState) {
-        return checkLocalConcretizability(newCompletionState.getGrammar(), newCompletionState.getTypes(), false);
+        if (checkLocalConcretizability(newCompletionState.getGrammar(), newCompletionState.getTypes(), false)) {
+            numSuccess++;
+            return true;
+        } else {
+            numFailure++;
+            return false;
+        }
     }
 
     public static boolean checkLocalConcretizability(NamedGrammar grammar, GrammarTypedness types, boolean forceCompleteCheck) {
@@ -128,7 +136,9 @@ public class LocalConcretizability implements GrammarValidity {
     @Override
     public JSONObject getDescription() {
         return new JSONObject(ImmutableMap.of(
-                "name", "localConcretizability"
+                "name", "localConcretizability",
+                "numSuccess", numSuccess,
+                "numFailure", numFailure
         ));
     }
 

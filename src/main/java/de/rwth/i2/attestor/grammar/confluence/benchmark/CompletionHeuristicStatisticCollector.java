@@ -29,7 +29,7 @@ public class CompletionHeuristicStatisticCollector {
 
     public void incrementNumLossFunctionFail() {
         numLossFunctionFail++;
-    }y
+    }
 
     public void incrementNumGrammarValidityCheckFails() {
         numGrammarValidityCheckFail++;

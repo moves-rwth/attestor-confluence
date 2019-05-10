@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.grammar.confluence.benchmark;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import org.json.JSONArray;
 
 import java.io.IOException;
@@ -17,6 +18,10 @@ public class CompletionBenchmarkRunner {
         "LinkedTree1",
         "LinkedTree2",
         "SimpleDLL",
+    };
+
+    static String[] predefinedGrammarNames = new String[] {
+        "DLList"
     };
 
 
@@ -38,18 +43,27 @@ public class CompletionBenchmarkRunner {
         return result;
     }
 
+    static void runBenchmarksForGrammar(NamedGrammar grammar, JSONArray result) {
+        for (CompletionAlgorithm completionAlgorithm : getCompletionAlgorithms()) {
+            completionAlgorithm.runCompletionAlgorithm(grammar);
+            result.put(completionAlgorithm.getStatistic());
+        }
+    }
+
     static JSONArray runAllCompletionBenchmarks() {
         JSONArray benchmarkResults = new JSONArray();
         for (String grammarName : completionGrammarNames) {
             try {
                 NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
-                for (CompletionAlgorithm completionAlgorithm : getCompletionAlgorithms()) {
-                    completionAlgorithm.runCompletionAlgorithm(grammar);
-                    benchmarkResults.put(completionAlgorithm.getStatistic());
-                }
+                runBenchmarksForGrammar(grammar, benchmarkResults);
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
+        }
+
+        for (String grammarName : predefinedGrammarNames) {
+            NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
+            runBenchmarksForGrammar(grammar, benchmarkResults);
         }
         return benchmarkResults;
     }

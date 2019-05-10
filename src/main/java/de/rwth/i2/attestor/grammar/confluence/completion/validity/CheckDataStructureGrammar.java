@@ -22,6 +22,9 @@ import java.util.Set;
  * for each attached tentacle does not overlap
  */
 public class CheckDataStructureGrammar implements GrammarValidity {
+    int numSuccess = 0;
+    int numFailure = 0;
+
     @Override
     public boolean isValid(CompletionState newCompletionState) {
         GrammarTypedness types = newCompletionState.getTypes();
@@ -44,7 +47,7 @@ public class CheckDataStructureGrammar implements GrammarValidity {
                             Set<SelectorLabel> recursiveOutgoingSelectors = types.getTentacleType(nonterminal, tentacle).getAllTypes();
                             // Check that the selectors are not already contained in the outgoingSelectors set
                             if (!Collections.disjoint(outgoingSelectors, recursiveOutgoingSelectors)) {
-                                System.err.println("No a data structure grammar");
+                                numFailure++;
                                 return false;
                             }
                             // Add the selectors to the set
@@ -56,13 +59,16 @@ public class CheckDataStructureGrammar implements GrammarValidity {
 
             }
         }
+        numSuccess++;
         return true;
     }
 
     @Override
     public JSONObject getDescription() {
         return new JSONObject(ImmutableMap.of(
-                "name", "checkDatastructureGrammar"
+                "name", "checkDatastructureGrammar",
+                "numSuccess", numSuccess,
+                "numFailure", numFailure
         ));
     }
 

@@ -78,7 +78,7 @@ public class GreedyCompletion implements CompletionStrategy {
                                 madeProgress = true;
                                 // Increment the search depth and check if we have to abort
                                 currentSearchDepth++;
-                                if ((maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) || nextState.getCriticalPairs().size() == 0) {
+                                if ((maxSearchDepth > 0 && currentSearchDepth >= maxSearchDepth) || currentState.getCriticalPairs().size() == 0) {
                                     completeRuntime.stopTimer();
                                     return currentState;
                                 }
@@ -98,6 +98,7 @@ public class GreedyCompletion implements CompletionStrategy {
             }
         }
 
+        System.err.println("No more progress: Abort");
         completeRuntime.stopTimer();
         // Return the result
         return currentState;
