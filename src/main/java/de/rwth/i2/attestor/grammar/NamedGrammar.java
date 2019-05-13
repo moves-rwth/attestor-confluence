@@ -122,14 +122,7 @@ public class NamedGrammar implements GrammarInterface {
     }
 
     public CanonicalizationStrategy getCanonicalizationStrategy() {
-        MorphismOptions options = new AbstractionOptions()
-                .setAdmissibleAbstraction(false)
-                .setAdmissibleConstants(false)
-                .setAdmissibleMarkings(false);
-
-        embeddingCheckerProvider = new EmbeddingCheckerProvider(options);
-        CanonicalizationHelper canonicalizationHelper = new DefaultCanonicalizationHelper(embeddingCheckerProvider);
-        return new GeneralCanonicalizationStrategy(getAbstractionGrammar(), canonicalizationHelper);
+        return canonicalizationStrategy;
     }
 
     public List<GrammarRule> getAllGrammarRules() {
