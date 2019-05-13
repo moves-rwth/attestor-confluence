@@ -4,8 +4,8 @@
 
 
     <groupId>de.rwth.i2</groupId>
-    <artifactId>attestor-johannes</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <artifactId>attestor</artifactId>
+    <version>0.4.1-johannes-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 

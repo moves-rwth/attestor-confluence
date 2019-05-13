@@ -9,7 +9,10 @@ public class VF2PreconditionChecker extends AbstractVF2MorphismChecker {
     /**
      * Specification of the algorithm used to determine isomorphisms.
      */
-    private static final VF2Algorithm matchingAlgorithm = VF2Algorithm.builder()
+    private static final ThreadLocal<VF2Algorithm> matchingAlgorithm = new ThreadLocal<VF2Algorithm>() {
+        @Override
+        protected VF2Algorithm initialValue() {
+            return VF2Algorithm.builder()
             .setMatchingCondition(new IsomorphismFound())
             .addFeasibilityCondition(new CompatiblePredecessors(true))
             .addFeasibilityCondition(new CompatibleSuccessors(true))
@@ -20,10 +23,12 @@ public class VF2PreconditionChecker extends AbstractVF2MorphismChecker {
             .addFeasibilityCondition(new IdenticalNodeTypes())
             .addFeasibilityCondition(new CompatibleEdgeLabels())
             .build();
+        }
+    };
 
 
     public VF2PreconditionChecker() {
 
-        super(matchingAlgorithm);
+        super(matchingAlgorithm.get());
     }
 }

@@ -8,7 +8,6 @@ import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
@@ -18,8 +17,12 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class CompletionBenchmarkRunner {
     static String[] completionGrammarNames = new String[] {
@@ -53,46 +56,12 @@ public class CompletionBenchmarkRunner {
         return result;
     }
 
-    static void runBenchmarksForGrammar(NamedGrammar grammar, JSONArray result) {
-        CriticalPairFinder initialCriticalPairs = new CriticalPairFinder(grammar);
-        int initialNumberCriticalPairs = initialCriticalPairs.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
-
-        for (CompletionAlgorithm completionAlgorithm : getCompletionAlgorithms()) {
-            System.out.println("Start completion benchmark. Grammar: " + grammar.getGrammarName() + " Completion Algorithm: " + completionAlgorithm.getAlgorithmIdentifier());
-            CompletionState resultingCompletionState = completionAlgorithm.runCompletionAlgorithm(grammar);
-            JSONObject benchmarkResult = new JSONObject();
-            benchmarkResult.put("initialNumberCriticalPairs", initialNumberCriticalPairs);
-            benchmarkResult.put("algorithmStatistic", completionAlgorithm.getStatistic());
-            try {
-                StringWriter stringWriter = new StringWriter();
-                TikzExport export = new TikzExport(stringWriter, true, false);
-                export.exportGrammar(resultingCompletionState.getGrammar(), true);
-                export.finishExport();
-                benchmarkResult.put("completedGrammarTex", stringWriter.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                StringWriter stringWriter = new StringWriter();
-                TikzExport export = new TikzExport(stringWriter, true, false);
-                export.exportCriticalPairs(resultingCompletionState.getCriticalPairs());
-                export.finishExport();
-                benchmarkResult.put("resultingCriticalPairsTex", stringWriter.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            result.put(benchmarkResult);
-        }
-    }
-
-    static JSONArray runAllCompletionBenchmarks() {
-        JSONArray benchmarkResults = new JSONArray();
+    static Iterable<NamedGrammar> getBenchmarkGrammars() {
+        ArrayList<NamedGrammar> grammars = new ArrayList<>();
         for (String grammarName : completionGrammarNames) {
             try {
                 NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
-                runBenchmarksForGrammar(grammar, benchmarkResults);
+                grammars.add(grammar);
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
@@ -100,21 +69,78 @@ public class CompletionBenchmarkRunner {
 
         for (String grammarName : predefinedGrammarNames) {
             NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
-            runBenchmarksForGrammar(grammar, benchmarkResults);
+            grammars.add(grammar);
         }
-        return benchmarkResults;
+        return grammars;
     }
 
-    public static void main(String[] args) {
-        JSONArray result = runAllCompletionBenchmarks();
+    static void runBenchmarkForGrammarAndAlgorithm(NamedGrammar grammar, CompletionAlgorithm algorithm) {
+        String fileName = getFileName(grammar.getGrammarName(), algorithm.getAlgorithmIdentifier());
+        CriticalPairFinder initialCriticalPairs = new CriticalPairFinder(grammar);
+        int initialNumberCriticalPairs = initialCriticalPairs.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
+
+        System.out.println("Start completion benchmark. Grammar: " + grammar.getGrammarName() + " Completion Algorithm: " + algorithm.getAlgorithmIdentifier());
+
+        // Run benchmark
+        CompletionState resultingCompletionState = algorithm.runCompletionAlgorithm(grammar);
+
+        // Get benchmark results
+        JSONObject benchmarkResult = new JSONObject();
+        benchmarkResult.put("initialNumberCriticalPairs", initialNumberCriticalPairs);
+        benchmarkResult.put("algorithmStatistic", algorithm.getStatistic());
+
+        // Save resulting grammar
+        try {
+            StringWriter stringWriter = new StringWriter();
+            TikzExport export = new TikzExport(stringWriter, true, false);
+            export.exportGrammar(resultingCompletionState.getGrammar(), true);
+            export.finishExport();
+            benchmarkResult.put("completedGrammarTex", stringWriter.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Save remaining critical pairs
+        try {
+            StringWriter stringWriter = new StringWriter();
+            TikzExport export = new TikzExport(stringWriter, true, false);
+            export.exportCriticalPairs(resultingCompletionState.getCriticalPairs());
+            export.finishExport();
+            benchmarkResult.put("resultingCriticalPairsTex", stringWriter.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Save benchmark results to file
         try {
             new File("reports/json").mkdirs();
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get("reports/json/completion.json"));
-            result.write(writer);
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("reports/json/" + fileName + ".json"));
+            benchmarkResult.write(writer);
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    static String getFileName(String grammarIdentifier, String algorithmIdentifier) {
+        String pattern = "yyyy-MM-dd_HH_mm_ss_SSS";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
+        String date = simpleDateFormat.format(new Date());
+        return grammarIdentifier + "__" + algorithmIdentifier + "__" + date;
+    }
+
+    static void runAllCompletionBenchmarks(int i) {
+        Executor executor = Executors.newFixedThreadPool(i);
+        for (NamedGrammar grammar :  getBenchmarkGrammars()) {
+            for (CompletionAlgorithm algorithm : getCompletionAlgorithms()) {
+                executor.execute(() -> runBenchmarkForGrammarAndAlgorithm(grammar, algorithm));
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        runAllCompletionBenchmarks(8);
     }
 
 }

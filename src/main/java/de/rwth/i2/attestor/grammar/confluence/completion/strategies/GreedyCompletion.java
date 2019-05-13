@@ -98,7 +98,7 @@ public class GreedyCompletion implements CompletionStrategy {
             }
         }
 
-        System.err.println("No more progress: Abort");
+        System.out.println("No more progress: Abort");
         completeRuntime.stopTimer();
         // Return the result
         return currentState;
