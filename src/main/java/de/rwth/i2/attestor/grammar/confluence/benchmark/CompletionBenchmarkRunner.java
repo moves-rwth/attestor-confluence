@@ -155,6 +155,7 @@ public class CompletionBenchmarkRunner {
 
     public static void main(String[] args) {
         if (args.length > 0) {
+            System.out.println("Starting " + args[0] + " number threads");
             runAllCompletionBenchmarks(Integer.valueOf(args[0]));
         } else {
             runAllCompletionBenchmarks(1);
