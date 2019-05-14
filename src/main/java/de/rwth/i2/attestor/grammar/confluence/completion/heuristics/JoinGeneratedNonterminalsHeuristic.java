@@ -16,7 +16,7 @@ import java.util.Iterator;
  * If both fully abstracted HCs are handles of newly introduced nonterminals of the same rank -> Try to join them
  *
  */
-public class JoinGeneratedNonterminalsHeuristic implements CompletionHeuristic {
+public class JoinGeneratedNonterminalsHeuristic extends CompletionHeuristic {
     @Override
     public Iterable<CompletionState> applyHeuristic(CompletionState state) {
         return new Iterable<CompletionState>() {

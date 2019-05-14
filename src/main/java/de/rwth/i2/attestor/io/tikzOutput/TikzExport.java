@@ -108,15 +108,17 @@ public class TikzExport {
 
     public TikzExport(Writer writer, boolean printTableOfContents, boolean outputTikzMakros) throws IOException {
         this.writer = writer;
-        URL tikzMacrosFile = Attestor.class.getClassLoader().getResource("latexTemplates/tikzMacros.tex");
-        BufferedReader reader = new BufferedReader(new URLReader(tikzMacrosFile));
-        String line = reader.readLine();
-        while (line != null) {
-            writer.write(line);
+        if (outputTikzMakros) {
+            URL tikzMacrosFile = Attestor.class.getClassLoader().getResource("latexTemplates/tikzMacros.tex");
+            BufferedReader reader = new BufferedReader(new URLReader(tikzMacrosFile));
+            String line = reader.readLine();
+            while (line != null) {
+                writer.write(line);
+                newLine();
+                line = reader.readLine();
+            }
             newLine();
-            line = reader.readLine();
         }
-        newLine();
         writer.write("\\begin{document}");
         newLine();
         if (printTableOfContents) {

@@ -22,7 +22,7 @@ import java.util.Collections;
  * TODO: Add option to unblock critical pairs
  * TODO: Add optimization to check if block HC is subgraph of other block HC
  */
-public class CompletionAbstractionBlockingHeuristic implements CompletionHeuristic {
+public class CompletionAbstractionBlockingHeuristic extends CompletionHeuristic {
 
     @Override
     public Iterable<CompletionState> applyHeuristic(CompletionState state) {

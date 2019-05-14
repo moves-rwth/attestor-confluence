@@ -16,7 +16,7 @@ import java.util.*;
  * (because removing a rule means strongly joinable rule might not be joinable now).
  *
  */
-public class CompletionRuleRestrictionHeuristic implements CompletionHeuristic {
+public class CompletionRuleRestrictionHeuristic extends CompletionHeuristic {
     final boolean reactivateRules;
     final boolean preventMainGrammarRuleDeactivation;
 

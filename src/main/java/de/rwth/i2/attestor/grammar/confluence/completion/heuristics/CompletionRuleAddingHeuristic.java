@@ -16,7 +16,7 @@ import java.util.*;
  *
  * TODO: Check that the added rules do not violate the local concretisation property.
  */
-public abstract class CompletionRuleAddingHeuristic implements CompletionHeuristic {
+public abstract class CompletionRuleAddingHeuristic extends CompletionHeuristic {
 
     @Override
     public Iterable<CompletionState> applyHeuristic(CompletionState state) {

@@ -21,8 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class CompletionBenchmarkRunner {
     static String[] completionGrammarNames = new String[] {
@@ -86,7 +87,9 @@ public class CompletionBenchmarkRunner {
 
         // Get benchmark results
         JSONObject benchmarkResult = new JSONObject();
+        benchmarkResult.put("grammarName", grammar.getGrammarName());
         benchmarkResult.put("initialNumberCriticalPairs", initialNumberCriticalPairs);
+        benchmarkResult.put("finalNumberCriticalPairs", resultingCompletionState.getCriticalPairs().size());
         benchmarkResult.put("algorithmStatistic", algorithm.getStatistic());
 
         // Save resulting grammar
@@ -131,16 +134,25 @@ public class CompletionBenchmarkRunner {
     }
 
     static void runAllCompletionBenchmarks(int i) {
-        Executor executor = Executors.newFixedThreadPool(i);
+        ExecutorService executor = Executors.newFixedThreadPool(i);
         for (NamedGrammar grammar :  getBenchmarkGrammars()) {
             for (CompletionAlgorithm algorithm : getCompletionAlgorithms()) {
                 executor.execute(() -> runBenchmarkForGrammarAndAlgorithm(grammar, algorithm));
             }
         }
+        executor.shutdown();
+        try {
+            executor.awaitTermination(-1, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static void main(String[] args) {
-        runAllCompletionBenchmarks(8);
+
+        runAllCompletionBenchmarks(1);
+
     }
 
 }

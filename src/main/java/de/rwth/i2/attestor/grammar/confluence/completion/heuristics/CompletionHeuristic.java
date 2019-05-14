@@ -13,29 +13,29 @@ import org.json.JSONObject;
  * A heuristic is not allowed to remove and add rules in the same step. If rules are added their original rule idx must
  * be larger than the other original rule indices.
  */
-public interface CompletionHeuristic {
+public abstract class CompletionHeuristic {
     CompletionHeuristicStatisticCollector statistic = new CompletionHeuristicStatisticCollector();
 
     /**
      * @param state The state on which the heuristic should be applied
      * @return All possible immediate successors of the input state according to the heuristic
      */
-    Iterable<CompletionState> applyHeuristic(CompletionState state);
+    public abstract Iterable<CompletionState> applyHeuristic(CompletionState state);
 
-    String getIdentifier();
+    public abstract String getIdentifier();
 
-    default JSONObject getStatistic() {
+    JSONObject getStatistic() {
         return statistic.getJsonResult();
     }
 
-    default JSONObject getSettings() {
+    JSONObject getSettings() {
         return new JSONObject();
     }
 
     /**
      * @return A summary of the settings of the heuristic and benchmark statistics
      */
-    default JSONObject getSummary() {
+    public JSONObject getSummary() {
         return new JSONObject(ImmutableMap.of(
                 "identifier", getIdentifier(),
                 "settings", getSettings(),
@@ -43,7 +43,7 @@ public interface CompletionHeuristic {
         ));
     }
 
-    default CompletionHeuristicStatisticCollector getStatisticCollector() {
+    public CompletionHeuristicStatisticCollector getStatisticCollector() {
         return statistic;
     }
 

@@ -47,8 +47,9 @@ public class GreedyCompletion implements CompletionStrategy {
                 while (appliedHeuristic) {
                     appliedHeuristic = false;
 
-                    int heuristicLevel = 0;  // Keep track at which level the heuristic produces a success
+                    int numHeuristicTries = 0;  // Keep track of how many times we tried to apply the heuristic
                     for (CompletionState nextState : heuristic.applyHeuristic(currentState)) {
+                        numHeuristicTries++;
                         // Compute loss
                         double nextLoss = completionStateLoss.getLoss(nextState);
                         if (nextLoss < currentLoss) {
@@ -64,8 +65,7 @@ public class GreedyCompletion implements CompletionStrategy {
                             if (isValid) {
                                 // Update statistic
                                 statisticCollector.incrementNumSuccess();
-                                statisticCollector.addNumCriticalPairsRemoved(nextState.getCriticalPairs().size() - nextState.getCriticalPairs().size());
-                                statisticCollector.incrementSuccessAtLevel(heuristicLevel);
+                                statisticCollector.saveSuccessAtTry(numHeuristicTries);
 
                                 System.out.println("Current number critical pairs: " + nextState.getCriticalPairs().size());
                                 // Update state & loss
@@ -90,7 +90,11 @@ public class GreedyCompletion implements CompletionStrategy {
                         } else {
                             statisticCollector.incrementNumLossFunctionFail();
                         }
-                        heuristicLevel++;
+                    }
+
+                    if (!appliedHeuristic) {
+                        // No heuristic could be applied
+                        statisticCollector.saveFailureAtTry(numHeuristicTries);
                     }
                 }
 
