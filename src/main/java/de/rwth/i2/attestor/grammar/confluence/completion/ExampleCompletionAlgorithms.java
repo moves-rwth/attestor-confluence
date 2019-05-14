@@ -120,6 +120,20 @@ public class ExampleCompletionAlgorithms {
     }
 
     @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm combinedAlgorithm2() {  // Main difference to combinedAlgorithm1 is that rule restriction has higher priority
+        return new CompletionAlgorithm("combinedAlgorithm2")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new CompletionAbstractionBlockingHeuristic())
+                .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
+                .addGrammarValidityCheck(new LocalConcretizability())
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm combinedAlgorithm1NoLocalConcretizabilityCheck() {
         return new CompletionAlgorithm("combinedAlgorithm1NoLocalConcretizabilityCheck")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -129,6 +143,19 @@ public class ExampleCompletionAlgorithms {
                 .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
                 .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
                 .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addGrammarValidityCheck(new CheckDataStructureGrammar());
+    }
+
+    @BenchmarkCompletionAlgorithm
+    public static CompletionAlgorithm combinedAlgorithm2NoLocalConcretizabilityCheck() {  // Main difference to combinedAlgorithm1 is that rule restriction has higher priority
+        return new CompletionAlgorithm("combinedAlgorithm2NoLocalConcretizabilityCheck")
+                .setCompletionStrategy(new GreedyCompletion(0))
+                .setCompletionStateLoss(new NumberCriticalPairLoss())
+                .addHeuristic(new CompletionAbstractionBlockingHeuristic())
+                .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
+                .addHeuristic(new AddRulesNewNonterminalHeuristic())
+                .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
+                .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
