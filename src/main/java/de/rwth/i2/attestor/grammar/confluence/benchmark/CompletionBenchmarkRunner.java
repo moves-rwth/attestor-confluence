@@ -76,7 +76,7 @@ public class CompletionBenchmarkRunner {
     }
 
     static void runBenchmarkForGrammarAndAlgorithm(NamedGrammar grammar, CompletionAlgorithm algorithm) {
-        String fileName = getFileName(grammar.getGrammarName(), algorithm.getAlgorithmIdentifier());
+        String dateTime = getDateTime();
         CriticalPairFinder initialCriticalPairs = new CriticalPairFinder(grammar);
         int initialNumberCriticalPairs = initialCriticalPairs.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
 
@@ -91,6 +91,7 @@ public class CompletionBenchmarkRunner {
         benchmarkResult.put("initialNumberCriticalPairs", initialNumberCriticalPairs);
         benchmarkResult.put("finalNumberCriticalPairs", resultingCompletionState.getCriticalPairs().size());
         benchmarkResult.put("algorithmStatistic", algorithm.getStatistic());
+        benchmarkResult.put("date", dateTime);
 
         // Save resulting grammar
         try {
@@ -117,6 +118,7 @@ public class CompletionBenchmarkRunner {
         // Save benchmark results to file
         try {
             new File("reports/json").mkdirs();
+            String fileName = getFileName(grammar.getGrammarName(), algorithm.getAlgorithmIdentifier(), dateTime);
             BufferedWriter writer = Files.newBufferedWriter(Paths.get("reports/json/" + fileName + ".json"));
             benchmarkResult.write(writer);
             writer.close();
@@ -125,12 +127,14 @@ public class CompletionBenchmarkRunner {
         }
     }
 
-    static String getFileName(String grammarIdentifier, String algorithmIdentifier) {
+    static String getFileName(String grammarIdentifier, String algorithmIdentifier, String dateTime) {
+        return grammarIdentifier + "__" + algorithmIdentifier + "__" + dateTime;
+    }
+
+    static String getDateTime() {
         String pattern = "yyyy-MM-dd_HH_mm_ss_SSS";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-
-        String date = simpleDateFormat.format(new Date());
-        return grammarIdentifier + "__" + algorithmIdentifier + "__" + date;
+        return simpleDateFormat.format(new Date());
     }
 
     static void runAllCompletionBenchmarks(int i) {

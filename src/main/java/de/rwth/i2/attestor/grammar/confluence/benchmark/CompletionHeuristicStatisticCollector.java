@@ -14,8 +14,11 @@ public class CompletionHeuristicStatisticCollector {
     private int numGrammarValidityCheckFail = 0;
 
     // Saves for each heuristic invocation how many tries were needed to successfully apply the heuristic
-    // If the heuristic could not be applied a negative value is added containing the number of tries that were checked.
-    private ArrayList<Integer> numTriesPerHeuristicInvocation = new ArrayList<>();
+    // The key is the number tries required and the value is the count of how often this occurred
+    private Map<Integer,Integer> numTriesPerSuccessfulHeuristicInvocation = new HashMap<>();
+
+    // Same as above for unsuccessful heuristic application
+    private Map<Integer,Integer> numTriesPerUnsuccessfulHeuristicInvocation = new HashMap<>();
 
     public void startTimer() {
         timer.startTimer();
@@ -38,11 +41,11 @@ public class CompletionHeuristicStatisticCollector {
     }
 
     public void saveSuccessAtTry(int numTries) {
-        numTriesPerHeuristicInvocation.add(numTries);
+        numTriesPerSuccessfulHeuristicInvocation.merge(numTries, 1, Integer::sum);
     }
 
     public void saveFailureAtTry(int numTries) {
-        numTriesPerHeuristicInvocation.add(-numTries);
+        numTriesPerUnsuccessfulHeuristicInvocation.merge(numTries, 1, Integer::sum);
     }
 
     public JSONObject getJsonResult() {
@@ -51,7 +54,8 @@ public class CompletionHeuristicStatisticCollector {
         result.put("numSuccess", numSuccess);
         result.put("numLossFunctionFail", numLossFunctionFail);
         result.put("numGrammarValidityCheckFail", numGrammarValidityCheckFail);
-        result.put("numTriesPerHeuristicInvocation", new JSONArray(numTriesPerHeuristicInvocation));
+        result.put("numTriesPerSuccessfulHeuristicInvocation", new JSONObject(numTriesPerSuccessfulHeuristicInvocation));
+        result.put("numTriesPerUnsuccessfulHeuristicInvocation", new JSONObject(numTriesPerUnsuccessfulHeuristicInvocation));
         return result;
     }
 
