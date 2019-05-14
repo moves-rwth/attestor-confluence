@@ -154,8 +154,11 @@ public class CompletionBenchmarkRunner {
     }
 
     public static void main(String[] args) {
-
-        runAllCompletionBenchmarks(1);
+        if (args.length > 0) {
+            runAllCompletionBenchmarks(Integer.valueOf(args[0]));
+        } else {
+            runAllCompletionBenchmarks(1);
+        }
 
     }
 
