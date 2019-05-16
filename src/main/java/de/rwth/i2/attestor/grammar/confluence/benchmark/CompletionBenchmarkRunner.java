@@ -91,6 +91,11 @@ public class CompletionBenchmarkRunner {
         benchmarkResult.put("initialNumberCriticalPairs", initialNumberCriticalPairs);
         benchmarkResult.put("finalNumberCriticalPairs", resultingCompletionState.getCriticalPairs().size());
         benchmarkResult.put("algorithmStatistic", algorithm.getStatistic());
+
+        benchmarkResult.put("initialNumberGrammarRules", grammar.getNumberActivatedRules());
+        benchmarkResult.put("finalNumberGrammarRules", resultingCompletionState.getGrammar().getNumberActivatedRules());
+        benchmarkResult.put("numberAbstractionBlockingRules", resultingCompletionState.getGrammar().getNumberAbstractionBlockingRules());
+
         benchmarkResult.put("date", dateTime);
 
         // Save resulting grammar

@@ -263,5 +263,38 @@ public class NamedGrammar implements GrammarInterface {
         });
         return newHcBuilder.build();
     }
+    
+    public int getNumberActivatedRules() {
+        int numberActivatedRules = 0;
+        for (GrammarRuleOriginal grammarRuleOriginal : originalRules) {
+            switch (grammarRuleOriginal.getRuleStatus()) {
+                case CONFLUENCE_GENERATED:
+                    numberActivatedRules++;
+                    break;
+                case ACTIVE:
+                    numberActivatedRules++;
+                    for (GrammarRuleCollapsed grammarRuleCollapsed : grammarRuleOriginal.getCollapsedRules()) {
+                        switch (grammarRuleCollapsed.getRuleStatus()) {
+                            case CONFLUENCE_GENERATED:
+                                numberActivatedRules++;
+                                break;
+                            case ACTIVE:
+                                numberActivatedRules++;
+                                break;
+                            case INACTIVE:
+                                break;
+                        }
+                    }
+                    break;
+                case INACTIVE:
+                    break;
+            }
+        }
+        return numberActivatedRules;
+    }
+
+    public int getNumberAbstractionBlockingRules() {
+        return abstractionBlockingHeapConfigurations.size();
+    }
 
 }
