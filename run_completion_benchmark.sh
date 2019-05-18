@@ -3,14 +3,14 @@
 NUM_CORES=$(nproc)
 NUM_THREADS=$@
 
-#mvn compile
+mvn compile
 
 for i in {1..100}
 do
 	while true
 	do
 		RUNNING_PROCESSES=$( grep procs_running /proc/stat | cut -d' ' -f2- )
-		if test $RUNNING_PROCESSES -lt $(( $NUM_CORES - $NUM_THREADS ))
+		if test $RUNNING_PROCESSES -lt $(( $NUM_CORES - 2 * $NUM_THREADS ))
 		then
 			break
 		fi
