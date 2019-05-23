@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CriticalPairDetectionBenchmarkRunner {
     static String[] grammarNames = new String[] {
@@ -77,22 +79,24 @@ public class CriticalPairDetectionBenchmarkRunner {
         return benchmarkResult;
     }
 
+    static String getDateTime() {
+        String pattern = "yyyy-MM-dd_HH_mm_ss_SSS";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        return simpleDateFormat.format(new Date());
+    }
+
     public static void main(String[] args) {
         JSONArray result = new JSONArray();
-        for (int i = 0; i < 20; i++) {
-            //System.out.println("Run " + i);
-            long time = 0;
-            for (Object obj : runAllCriticalPairDetection()) {
-                result.put((JSONObject) obj);
-                time += (long) ((JSONObject) ((JSONObject) obj).get("resultData")).get("completeRuntime");
-            }
-            System.out.println(time);
+
+        for (Object obj : runAllCriticalPairDetection()) {
+            result.put((JSONObject) obj);
         }
+
         // Output to file
         try {
-            new File("reports/json").mkdirs();
+            new File("reports/critical_pairs").mkdirs();
 
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get("reports/json/criticalPairDetection.json"));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("reports/critical_pairs/criticalPairDetection__" + getDateTime() + ".json"));
             result.write(writer);
             writer.close();
         } catch (IOException e) {
