@@ -114,12 +114,16 @@ public class CriticalPairFinder {
                         }
                         validOverlappingStatistic.stopTimer();
                         nodeOverlappingStatistic.startTimer();
+                    } else {
+                        nodeOverlappingStatistic.logPruning(nodeOverlapping.getLevel());
                     }
                 }
 
                 // Continue edge overlapping time and stop node overlapping time
                 nodeOverlappingStatistic.stopTimer();
                 edgeOverlappingStatistic.startTimer();
+            } else {
+                edgeOverlappingStatistic.logPruning(edgeOverlapping.getLevel());
             }
         }
 
