@@ -40,6 +40,9 @@ public class AggExporter implements GrammarExporter {
         Grammar sllist = ConfluenceTool.parsePredefinedGrammar("SLList");
         AggExporter exporter = new AggExporter();
         exporter.export("sllist.ggx", sllist);
+        Grammar dllist = ConfluenceTool.parsePredefinedGrammar("DLList");
+        exporter = new AggExporter();
+        exporter.export("dllist.ggx", dllist);
     }
 
     @Override
