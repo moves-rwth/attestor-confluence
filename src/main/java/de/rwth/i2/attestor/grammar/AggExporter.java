@@ -1,5 +1,7 @@
 package de.rwth.i2.attestor.grammar;
 
+import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
+import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
@@ -11,6 +13,12 @@ import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,26 +30,56 @@ import java.util.Set;
  */
 public class AggExporter implements GrammarExporter {
     private int idCounter;
-    private int maxRank;
     private Map<SelectorLabel, String> mapSelectorToAggId;
     private Map<Nonterminal, String> mapNonterminalToAggId;
     private Map<Type, String> mapNodeTypeToAggId;
     private Map<Integer, String> mapTentacleToAggId;
     private Document document;
 
+    public static void main(String[] args) {
+        Grammar sllist = ConfluenceTool.parsePredefinedGrammar("SLList");
+        AggExporter exporter = new AggExporter();
+        exporter.export("sllist.ggx", sllist);
+    }
+
     @Override
-    public void export(String directory, Grammar grammar) throws IOException {
+    public void export(String filePath, Grammar grammar) {
         resetIdMaps();
         try {
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
             document = documentBuilder.newDocument();
+            Element documentElement = document.createElement("Document");
+            documentElement.setAttribute("version", "1.0");
             Element graphTransformationSystem = document.createElement("GraphTransformationSystem");
+            setTaggedValuesForGraphTransformationSystem(graphTransformationSystem);
             graphTransformationSystem.setAttribute("ID", getNewId());
             graphTransformationSystem.setAttribute("directed", "true");
             graphTransformationSystem.setAttribute("name", "GraGra");
             graphTransformationSystem.setAttribute("parallel", "true");
-            document.appendChild(graphTransformationSystem);
+
+            for (Nonterminal nt : grammar.getAllLeftHandSides()) {
+                for (HeapConfiguration hc : grammar.getRightHandSidesFor(nt)) {
+                    graphTransformationSystem.appendChild(exportRule(nt, hc));
+                }
+                for (CollapsedHeapConfiguration collapsedHeapConfiguration : grammar.getCollapsedRightHandSidesFor(nt)) {
+                    graphTransformationSystem.appendChild(exportCollapsedRule(nt, collapsedHeapConfiguration));
+                }
+            }
+
+            graphTransformationSystem.appendChild(getAllAggTypes());
+
+            documentElement.appendChild(graphTransformationSystem);
+            document.appendChild(documentElement);
+            Transformer tr = TransformerFactory.newInstance().newTransformer();
+            tr.setOutputProperty(OutputKeys.INDENT, "yes");
+            tr.setOutputProperty(OutputKeys.METHOD, "xml");
+            tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+            // send DOM to file
+            tr.transform(new DOMSource(document),
+                    new StreamResult(new FileOutputStream(filePath)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -55,7 +93,6 @@ public class AggExporter implements GrammarExporter {
 
     private void resetIdMaps() {
         idCounter = 0;
-        maxRank = 0;
         mapSelectorToAggId = new HashMap<>();
         mapNonterminalToAggId = new HashMap<>();
         mapNodeTypeToAggId = new HashMap<>();
@@ -92,39 +129,92 @@ public class AggExporter implements GrammarExporter {
 
 
     private Node exportRule(Nonterminal nt, HeapConfiguration hc) {
+        TIntArrayList originalToCollapsed = new TIntArrayList(nt.getRank());
+        for (int i = 0; i < nt.getRank(); i++) {
+            originalToCollapsed.add(i);
+        }
+        CollapsedHeapConfiguration collapsedHeapConfiguration = new CollapsedHeapConfiguration(hc, hc, originalToCollapsed);
+        return exportCollapsedRule(nt, collapsedHeapConfiguration);
+    }
+
+    private Node exportCollapsedRule(Nonterminal nt, CollapsedHeapConfiguration collapsedHeapConfiguration) {
         Element rule = document.createElement("Rule");
         String ruleId = getNewId();
         rule.setAttribute("ID", ruleId);
         rule.setAttribute("formula", "true");
         rule.setAttribute("name", ruleId);
 
+        HeapConfiguration hc = collapsedHeapConfiguration.getCollapsed();
+
+        // 1. Export heap configuration
         Map<Integer, String> mapHCNodeIds = new HashMap<>();
+        rule.appendChild(exportHeapConfigurationAsLHS(hc, mapHCNodeIds));
+
+        // 2. Export handle
         Map<Integer, String> mapHandleNodeIds = new HashMap<>();
+        rule.appendChild(exportNonterminalAsRHS(nt, collapsedHeapConfiguration.getOriginalToCollapsedExternalIndices(), hc, mapHandleNodeIds));
 
-        // 1. Export LHS
-
-
-        // 2. Export LHS
-        // TODO
+        // 3. Add morphism (mapping handle to heap configuration)
+        Element morphism = document.createElement("Morphism");
+        morphism.setAttribute("name", ruleId);
+        for (Map.Entry<Integer, String> handleNodeEntry : mapHandleNodeIds.entrySet()) {
+            String hcAggId = mapHCNodeIds.get(handleNodeEntry.getKey());
+            Element mapping = document.createElement("Mapping");
+            mapping.setAttribute("image", handleNodeEntry.getValue());
+            mapping.setAttribute("orig", hcAggId);
+            morphism.appendChild(mapping);
+        }
+        rule.appendChild(morphism);
+        setTaggedValuesForRule(rule);
 
         return rule;
     }
 
-    private Node exportNonterminalAsRHS(Nonterminal nt, TIntArrayList originalToCollapsedExternalIndices, Map<Integer, String> mapNodeIds) {
+    /**
+     *
+     * @param nt
+     * @param originalToCollapsedExternalIndices
+     * @param hc : Still need heap configuration to figure out id and type of external nodes
+     * @param mapNodeIds : Maps public id to AGG ID (empty at start)
+     * @return
+     */
+    private Node exportNonterminalAsRHS(Nonterminal nt, TIntArrayList originalToCollapsedExternalIndices, HeapConfiguration hc, Map<Integer, String> mapNodeIds) {
         Element graph = document.createElement("Graph");
         graph.setAttribute("ID", getNewId());
         graph.setAttribute("kind", "LHS");
         graph.setAttribute("name", "Left");
 
         // Add nonterminal
-        Element newNode = document.createElement("Node");
-        String nonterminalNodeId = getNewId();
-        newNode.setAttribute("ID", nonterminalNodeId);
-        newNode.setAttribute("type", getNonterminalId(nt));
+        Element newNonterminalNode = document.createElement("Node");
+        String nonterminalAggId = getNewId();
+        newNonterminalNode.setAttribute("ID", nonterminalAggId);
+        newNonterminalNode.setAttribute("type", getNonterminalId(nt));
+        graph.appendChild(newNonterminalNode);
 
-        // Add tentacles
-        // TODO:
+        // Add external nodes and tentacles
+        for (int tentacleId = 0; tentacleId < originalToCollapsedExternalIndices.size(); tentacleId++) {
+            // Add external node if it does not already exist
+            int publicNodeId = hc.externalNodeAt(originalToCollapsedExternalIndices.get(tentacleId));
+            String connectedNodeAggId;
+            if (mapNodeIds.containsKey(publicNodeId)) {
+                connectedNodeAggId = mapNodeIds.get(publicNodeId);
+            } else {
+                connectedNodeAggId = getNewId();
+                Element connectedNode = document.createElement("Node");
+                connectedNode.setAttribute("ID", connectedNodeAggId);
+                connectedNode.setAttribute("type", getNodeTypeId(hc.nodeTypeOf(publicNodeId)));
+                mapNodeIds.put(publicNodeId, connectedNodeAggId);
+                graph.appendChild(connectedNode);
+            }
 
+            // Add tentacle edge
+            Element newTentacle = document.createElement("Edge");
+            newTentacle.setAttribute("ID", getNewId());
+            newTentacle.setAttribute("source", nonterminalAggId);
+            newTentacle.setAttribute("target", connectedNodeAggId);
+            newTentacle.setAttribute("type", getTentacleId(tentacleId));
+            graph.appendChild(newTentacle);
+        }
         return graph;
     }
 
@@ -182,5 +272,77 @@ public class AggExporter implements GrammarExporter {
         });
 
         return graph;
+    }
+
+    private Node getAllAggTypes() {
+        Element types = document.createElement("Types");
+
+        // 1. Tentacle Types
+        for (Map.Entry<Integer, String> entry : mapTentacleToAggId.entrySet()) {
+            Element edgeType = document.createElement("EdgeType");
+            edgeType.setAttribute("ID", entry.getValue());
+            edgeType.setAttribute("abstract", "false");
+            edgeType.setAttribute("name", entry.getKey() + "%:SOLID_LINE:java.awt.Color[r=0,g=0,b=0]:[EDGE]:");
+            types.appendChild(edgeType);
+        }
+
+        // 2. Selector Types
+        for (Map.Entry<SelectorLabel, String> entry : mapSelectorToAggId.entrySet()) {
+            Element edgeType = document.createElement("EdgeType");
+            edgeType.setAttribute("ID", entry.getValue());
+            edgeType.setAttribute("abstract", "false");
+            edgeType.setAttribute("name", entry.getKey().getLabel() + "%:SOLID_LINE:java.awt.Color[r=0,g=0,b=0]:[EDGE]:");
+            types.appendChild(edgeType);
+        }
+
+        // 3. Nonterminal Types
+        for (Map.Entry<Nonterminal, String> entry : mapNonterminalToAggId.entrySet()) {
+            Element nodeType = document.createElement("NodeType");
+            nodeType.setAttribute("ID", entry.getValue());
+            nodeType.setAttribute("abstract", "false");
+            nodeType.setAttribute("name", entry.getKey().getLabel() + "%:RECT:java.awt.Color[r=0,g=0,b=0]:[NODE]");
+            types.appendChild(nodeType);
+        }
+
+        // 4. Node Types
+        for (Map.Entry<Type, String> entry : mapNodeTypeToAggId.entrySet()) {
+            Element nodeType = document.createElement("NodeType");
+            nodeType.setAttribute("ID", entry.getValue());
+            nodeType.setAttribute("abstract", "false");
+            nodeType.setAttribute("name", entry.getKey() + "%:CIRCLE:java.awt.Color[r=0,g=0,b=0]:[NODE]");
+            types.appendChild(nodeType);
+        }
+
+        return types;
+    }
+
+    private void setTaggedValuesForGraphTransformationSystem(Element graphTransformationSystem) {
+        Element attrHandler = getAttributedTag("TaggedValue", "Tag", "AttrHandler", "TagValue", "Java Expr");
+        attrHandler.appendChild(getAttributedTag("TaggedValue", "Tag", "Package", "TagValue", "java.lang"));
+        attrHandler.appendChild(getAttributedTag("TaggedValue", "Tag", "Package", "TagValue", "java.util"));
+        graphTransformationSystem.appendChild(attrHandler);
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "CSP", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "injective", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "dangling", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "identification", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "NACs", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "PACs", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "GACs", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "breakAllLayer", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "showGraphAfterStep", "TagValue", "true"));
+        graphTransformationSystem.appendChild(getAttributedTag("TaggedValue", "Tag", "TypeGraphLevel", "TagValue", "DISABLED"));
+    }
+
+    private void setTaggedValuesForRule(Element rule) {
+        rule.appendChild(getAttributedTag("TaggedValue", "Tag", "layer", "TagValue", "0"));
+        rule.appendChild(getAttributedTag("TaggedValue", "Tag", "priority", "TagValue", "0"));
+    }
+
+    private Element getAttributedTag(String tag, String ...attributes) {
+        Element node = document.createElement(tag);
+        for (int i=0; i+1 <attributes.length; i += 2) {
+            node.setAttribute(attributes[i], attributes[i+1]);
+        }
+        return node;
     }
 }
