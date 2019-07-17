@@ -37,12 +37,33 @@ public class AggExporter implements GrammarExporter {
     private Document document;
 
     public static void main(String[] args) {
-        Grammar sllist = ConfluenceTool.parsePredefinedGrammar("SLList");
-        AggExporter exporter = new AggExporter();
-        exporter.export("sllist.ggx", sllist);
-        Grammar dllist = ConfluenceTool.parsePredefinedGrammar("DLList");
-        exporter = new AggExporter();
-        exporter.export("dllist.ggx", dllist);
+        exportPredefinedGrammar("SLList");
+        exportPredefinedGrammar("DLList");
+        exportPredefinedGrammar("BT");
+        exportSidGrammar("InTree");
+        exportSidGrammar("InTreeLinkedLeaves");
+        exportSidGrammar("LinkedTree1");
+        exportSidGrammar("LinkedTree2");
+        exportSidGrammar("SimpleDLL");
+    }
+
+    private static void exportPredefinedGrammar(String name) {
+        Grammar grammar = ConfluenceTool.parsePredefinedGrammar(name);
+        exportGrammar(grammar, name);
+    }
+
+    private static void exportSidGrammar(String name) {
+        try {
+            exportGrammar(BenchmarkRunner.getSeparationLogicGrammar(name), name);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+
+    private static void exportGrammar(Grammar grammar, String name) {
+        AggExporter  exporter = new AggExporter();
+        exporter.export(name+".ggx", grammar);
     }
 
     @Override

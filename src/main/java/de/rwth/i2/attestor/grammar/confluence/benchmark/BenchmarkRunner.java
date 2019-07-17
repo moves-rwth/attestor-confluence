@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
 import de.rwth.i2.attestor.grammar.Grammar;
+import de.rwth.i2.attestor.grammar.GrammarBuilder;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.main.scene.DefaultScene;
@@ -16,9 +17,13 @@ public class BenchmarkRunner {
         DefaultScene scene = new DefaultScene();
         SceneObject sceneObject = new SceneObject(scene) {};
         InductivePredicatesParser parser = new InductivePredicatesParser(sceneObject);
-        return parser.parseFromUrl(
+        Grammar grammarWithoutCollapsedRules = parser.parseFromUrl(
                 Attestor.class.getClassLoader().getResource("confluenceTestGrammars/" + grammarName + ".sid")
         );
+        GrammarBuilder grammarBuilder = Grammar.builder();
+        grammarBuilder.addRules(grammarWithoutCollapsedRules);
+        grammarBuilder.updateCollapsedRules();
+        return grammarBuilder.build();
     }
 
     public static NamedGrammar getSeparationLogicNamedGrammar(String grammarName) throws IOException {
