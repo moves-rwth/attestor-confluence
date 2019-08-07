@@ -7,8 +7,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'mvn -B clean'
-                sh 'mvn -B javadoc:javadoc'
-                step([$class: 'JavadocArchiver', javadocDir: "target/site/apidocs" , keepAll: false])
+                // sh 'mvn -B javadoc:javadoc'
+                // step([$class: 'JavadocArchiver', javadocDir: "target/site/apidocs" , keepAll: false])
                 sh 'mvn -B compile'
             }
         }
