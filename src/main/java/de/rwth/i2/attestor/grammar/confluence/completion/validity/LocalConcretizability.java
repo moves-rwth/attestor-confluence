@@ -84,7 +84,7 @@ public class LocalConcretizability implements GrammarValidity {
                         Set<SelectorLabel> directNewSelectors = new HashSet<>(newRhs.selectorLabelsOf(node));
                         Set<SelectorLabel> recursiveNewSelectors = types.getTypesAtNode(newRhs, node);
                         if (!directNewSelectors.containsAll(recursiveNewSelectors)) {
-                            // The rule can create an outgoing selector recursively, but not immediately
+                            // The rule can create an outgoing selector recursively, but not immediately (connected to non reduction tentacle)
                             return false;
                         }
                     }
@@ -110,27 +110,24 @@ public class LocalConcretizability implements GrammarValidity {
     private static Collection<GrammarRuleOriginal> getRulesToCheck(NamedGrammar grammar) {
         // Compute the set of old nonterminals (don't need to check the RHS, because if a nonterminal is in the RHS it should also be a LHS)
         Set<Nonterminal> oldNonterminals = new HashSet<>();
-        Set<Nonterminal> newLHS = new HashSet<>();
         Collection<GrammarRuleOriginal> generatedRules = new ArrayList<>();
 
         for (GrammarRuleOriginal original : grammar.getOriginalGrammarRules()) {
             if (original.getRuleStatus() == GrammarRule.RuleStatus.CONFLUENCE_GENERATED) {
-                newLHS.add(original.getNonterminal());
                 generatedRules.add(original);
             } else if (original.getRuleStatus() == GrammarRule.RuleStatus.INACTIVE) {
                 // Complete recalculation required
                 return grammar.getOriginalGrammarRules();
-            } else {
-                oldNonterminals.add(original.getNonterminal());
+            } else { // Is handwritten original rule
+                for (GrammarRuleCollapsed grammarRuleCollapsed : original.getCollapsedRules()) {
+                    if (grammarRuleCollapsed.getRuleStatus() == GrammarRule.RuleStatus.INACTIVE) {
+                        return grammar.getOriginalGrammarRules();
+                    }
+                }
             }
         }
 
-        if (Collections.disjoint(oldNonterminals, newLHS)) {
-            return generatedRules;
-        } else {
-            // Complete recalculation required
-            return grammar.getOriginalGrammarRules();
-        }
+        return generatedRules;
     }
 
     @Override

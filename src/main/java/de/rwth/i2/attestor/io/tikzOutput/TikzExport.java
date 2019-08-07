@@ -190,17 +190,19 @@ public class TikzExport {
             if (exportCollapsedRules) {
                 // Export collapsed rules
                 for (GrammarRuleCollapsed collapsedRule : originalRule.getCollapsedRules()) {
-                    pgfSingleValues = new ArrayList<>();
-                    pgfListValues = new ArrayList<>();
-                    int collapsedRuleIdx = collapsedRule.getCollapsedRuleIdx();
-                    writer.write(String.format("%% Grammar %s Rule %d.%d", escapeString(grammarName), originalRuleIdx+1, collapsedRuleIdx+1));
-                    newLine();
-                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
-                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
-                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx+1)));
-                    pgfSingleValues.add(new Pair<>(BASE_PATH + "/collapsed rule idx", Integer.toString(collapsedRuleIdx+1)));
-                    addGrammarRule(BASE_PATH, nonterminal, collapsedRule.getCollapsedHeapConfiguration());
-                    writeCurrentReportToFile("\\AttestorGrammarReport");
+                    if (collapsedRule.getRuleStatus() != GrammarRule.RuleStatus.INACTIVE) {
+                        pgfSingleValues = new ArrayList<>();
+                        pgfListValues = new ArrayList<>();
+                        int collapsedRuleIdx = collapsedRule.getCollapsedRuleIdx();
+                        writer.write(String.format("%% Grammar %s Rule %d.%d", escapeString(grammarName), originalRuleIdx + 1, collapsedRuleIdx + 1));
+                        newLine();
+                        pgfSingleValues.add(new Pair<>(BASE_PATH + "/grammar name", grammarName));
+                        pgfSingleValues.add(new Pair<>(BASE_PATH + "/is original rule", "false"));
+                        pgfSingleValues.add(new Pair<>(BASE_PATH + "/original rule idx", Integer.toString(originalRuleIdx + 1)));
+                        pgfSingleValues.add(new Pair<>(BASE_PATH + "/collapsed rule idx", Integer.toString(collapsedRuleIdx + 1)));
+                        addGrammarRule(BASE_PATH, nonterminal, collapsedRule.getCollapsedHeapConfiguration());
+                        writeCurrentReportToFile("\\AttestorGrammarReport");
+                    }
                 }
             }
         }
