@@ -24,7 +24,6 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new AddRuleHandleWithSubgraphHeuristic())
-                .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
@@ -34,7 +33,6 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new CompletionAbstractionBlockingHeuristic())
-                .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
@@ -44,7 +42,6 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new AddRulesNewNonterminalHeuristic())
-                .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
@@ -55,7 +52,6 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new AddRulesNewNonterminalHeuristic())
                 .addHeuristic(new JoinGeneratedNonterminalsHeuristic())
-                .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
@@ -66,7 +62,6 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new AddRulesNewNonterminalHeuristic())
                 .addHeuristic(new SingleNonterminalRuleAddingHeuristic())
-                .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
@@ -76,7 +71,6 @@ public class ExampleCompletionAlgorithms {
                 .setCompletionStrategy(new GreedyCompletion(0))
                 .setCompletionStateLoss(new NumberCriticalPairLoss())
                 .addHeuristic(new CompletionRuleRestrictionHeuristic(false, true))
-                .addGrammarValidityCheck(new LocalConcretizability())
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
