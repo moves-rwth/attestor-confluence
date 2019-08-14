@@ -3,7 +3,9 @@ package de.rwth.i2.attestor.grammar.confluence.benchmark;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
+import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
+import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -75,6 +77,25 @@ public class CriticalPairDetectionBenchmarkRunner {
         benchmarkResult.put("numberWeaklyJoinable", numberWeaklyJoinable);
         benchmarkResult.put("numberStronglyJoinable", numberStronglyJoinable);
         benchmarkResult.put("numberNotJoinable", numberNotJoinable);
+
+        String folder = "reports/initialPDFS/"+grammar.getGrammarName();
+        new File(folder).mkdirs();
+        try {
+            TikzExport export = new TikzExport(folder + "/all_critical_pairs_" + grammar.getGrammarName() + ".tex", true);
+            export.exportCriticalPairs(criticalPairFinder.getCriticalPairs());
+            export.finishExport();
+
+            export = new TikzExport(folder + "/problematic_critical_pairs_" + grammar.getGrammarName() + ".tex", true);
+            export.exportCriticalPairs(criticalPairFinder.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE));
+            export.finishExport();
+
+            export = new TikzExport(folder + "/initial_grammar_" + grammar.getGrammarName() + ".tex", true);
+            export.exportGrammar(grammar, true);
+            export.finishExport();
+
+        } catch (Exception e) {
+
+        }
 
         return benchmarkResult;
     }
