@@ -7,7 +7,7 @@ import de.rwth.i2.attestor.grammar.confluence.completion.strategies.CompletionSt
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+//import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.Collections;

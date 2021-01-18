@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.main;
 
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.confluence.jointMorphism.ConfluenceCheckPhase;
 import de.rwth.i2.attestor.main.AbstractAttestor;
 import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.main.scene.DefaultScene;
@@ -15,6 +16,7 @@ public class ConfluenceTool extends AbstractAttestor {
         registry
                 .addPhase(new ConfluenceCommandLinePhase(scene, args))
                 .addPhase(new ParseGrammarPhase(scene))
+                .addPhase(new ConfluenceCheckPhase(scene))
                 .execute();
     }
 

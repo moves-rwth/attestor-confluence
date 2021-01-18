@@ -8,7 +8,7 @@ import de.rwth.i2.attestor.graph.morphism.Graph;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.types.Types;
 import gnu.trove.list.array.TIntArrayList;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
+//import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
 
 import java.util.ArrayList;
 import java.util.Collection;
