@@ -67,7 +67,7 @@ public class GreedyCompletion implements CompletionStrategy {
                                 statisticCollector.incrementNumSuccess();
                                 statisticCollector.saveSuccessAtTry(numHeuristicTries);
 
-                                System.out.println("Current number critical pairs: " + nextState.getCriticalPairs().size());
+                                //System.out.println("Current number critical pairs: " + nextState.getCriticalPairs().size());
                                 // Update state & loss
                                 currentState = nextState;
                                 currentLoss = nextLoss;
@@ -102,7 +102,7 @@ public class GreedyCompletion implements CompletionStrategy {
             }
         }
 
-        System.out.println("No more progress: Abort");
+        //System.out.println("No more progress: Abort");
         completeRuntime.stopTimer();
         // Return the result
         return currentState;

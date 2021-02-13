@@ -27,7 +27,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm completionAbstractionBlocking() {
         return new CompletionAlgorithm("completionAbstractionBlocking")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -36,7 +36,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm addRulesNewNonterminalHeuristic() {
         return new CompletionAlgorithm("addRulesNewNonterminalHeuristic")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -45,7 +45,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm joinGeneratedNonterminals() {
         return new CompletionAlgorithm("joinGeneratedNonterminals")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -55,7 +55,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm singleNonterminalRuleAddingHeuristic() {
         return new CompletionAlgorithm("singleNonterminalRuleAddingHeuristic")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -65,7 +65,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm ruleRestriction() {
         return new CompletionAlgorithm("ruleRestriction")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -76,7 +76,7 @@ public class ExampleCompletionAlgorithms {
 
     // Combined completion algorithms
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm onlyRuleAdding() {
         return new CompletionAlgorithm("onlyRuleAdding")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -88,7 +88,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm onlyRuleAddingNotLocalConcretizable() {
         return new CompletionAlgorithm("onlyRuleAddingNotLocalConcretizable")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -99,7 +99,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm combinedAlgorithm1() {
         return new CompletionAlgorithm("combinedAlgorithm1")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -127,7 +127,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm combinedAlgorithm1NoLocalConcretizabilityCheck() {
         return new CompletionAlgorithm("combinedAlgorithm1NoLocalConcretizabilityCheck")
                 .setCompletionStrategy(new GreedyCompletion(0))
@@ -140,7 +140,7 @@ public class ExampleCompletionAlgorithms {
                 .addGrammarValidityCheck(new CheckDataStructureGrammar());
     }
 
-    @BenchmarkCompletionAlgorithm
+    //@BenchmarkCompletionAlgorithm
     public static CompletionAlgorithm combinedAlgorithm2NoLocalConcretizabilityCheck() {  // Main difference to combinedAlgorithm1 is that rule restriction has higher priority
         return new CompletionAlgorithm("combinedAlgorithm2NoLocalConcretizabilityCheck")
                 .setCompletionStrategy(new GreedyCompletion(0))

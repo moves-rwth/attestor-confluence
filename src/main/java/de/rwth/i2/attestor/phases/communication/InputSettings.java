@@ -53,9 +53,15 @@ public class InputSettings implements HeapConfigurationRenaming {
     private List<String> initialHeapFiles = new ArrayList<>();
     private List<String> initialSymbolicHeapFiles = new ArrayList<>();
 
+    /**
+     * array of completion heuristics to use
+     */
+    private List<String> completionHeuristics = new ArrayList<>();
+    private String completionAlgorithm = "";
+
     public String getRootPath() {
 
-        if(rootPath == "") {
+        if(rootPath.equals("")) {
             return rootPath;
         }
         return rootPath + File.separator;
@@ -246,6 +252,26 @@ public class InputSettings implements HeapConfigurationRenaming {
             result.add(getRootPath() + s);
         }
         return result;
+    }
+
+    public List<String> getCompletionHeuristics() {
+        List<String> result = new ArrayList<>();
+        for(String s : completionHeuristics) {
+            result.add(getRootPath() + s);
+        }
+        return result;
+    }
+
+    public void addCompletionHeuristic(String completionHeuristic) {
+        this.completionHeuristics.add(completionHeuristic);
+    }
+
+    public String getCompletionAlgorithm() {
+        return completionAlgorithm;
+    }
+
+    public void setCompletionAlgorithm(String algorithm) {
+        this.completionAlgorithm = algorithm;
     }
 
 

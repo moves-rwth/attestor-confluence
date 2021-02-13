@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.NamedGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
+import de.rwth.i2.attestor.grammar.confluence.TikzReporter;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceCommandLinePhase;
 import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import de.rwth.i2.attestor.main.AbstractPhase;
@@ -12,12 +13,14 @@ import de.rwth.i2.attestor.main.scene.Scene;
 import de.rwth.i2.attestor.phases.communication.InputSettings;
 import de.rwth.i2.attestor.phases.transformers.GrammarTransformer;
 import de.rwth.i2.attestor.phases.transformers.InputSettingsTransformer;
+import de.rwth.i2.attestor.util.Pair;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
-public class ConfluenceCheckPhase extends AbstractPhase {
+public class ConfluenceCheckPhase extends AbstractPhase implements TikzReporter {
 
     private int numberWeaklyJoinable = 0;
     private int numberStronglyJoinable = 0;
@@ -82,5 +85,10 @@ public class ConfluenceCheckPhase extends AbstractPhase {
                     break;
             }
         }
+    }
+
+    @Override
+    public Collection<Pair<String, TikzReporter>> getTikzExporter() {
+        return null; //TODO
     }
 }

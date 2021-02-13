@@ -22,6 +22,8 @@ public class OutputSettings {
 
     private String exportContractsPath = null;
 
+    private String exportLatexPath = null;
+
     public void setRootPath(String rootPath) {
 
         this.rootPath = rootPath;
@@ -100,5 +102,14 @@ public class OutputSettings {
             return null;
         }
         return getRootPath() + exportContractsPath;
+    }
+
+    public void setExportLatexPath(String directory) { this.exportLatexPath = directory;   }
+
+    public String getExportLatexPath() {
+        if(exportLatexPath == null) {
+            return null;
+        }
+        return getRootPath() + exportLatexPath;
     }
 }

@@ -2,18 +2,22 @@ package de.rwth.i2.attestor.grammar.confluence.main;
 
 import de.rwth.i2.attestor.main.AbstractPhase;
 import de.rwth.i2.attestor.main.scene.DefaultScene;
-import de.rwth.i2.attestor.phases.commandLineInterface.CommandLineReader;
 import de.rwth.i2.attestor.phases.communication.InputSettings;
+import de.rwth.i2.attestor.phases.communication.OutputSettings;
 import de.rwth.i2.attestor.phases.transformers.InputSettingsTransformer;
+import de.rwth.i2.attestor.phases.transformers.OutputSettingsTransformer;
 import org.apache.commons.cli.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
-public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSettingsTransformer {
+public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSettingsTransformer, OutputSettingsTransformer {
 
     private final String[] originalCommandLineArguments;
     private final InputSettings inputSettings = new InputSettings();
+    private final OutputSettings outputSettings = new OutputSettings();
 
     private final Options commandLineOptions = new Options();
 
@@ -27,6 +31,9 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
     public InputSettings getInputSettings() {
         return inputSettings;
     }
+
+    @Override
+    public OutputSettings getOutputSettings() { return outputSettings; }
 
     @Override
     public String getName() {
@@ -66,6 +73,12 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
         String optionName = option.getLongOpt();
 
         switch(optionName){
+            case "root-path":
+                String rootPath = option.getValue();
+                logger.info("root path: "+rootPath);
+                inputSettings.setRootPath(rootPath);
+                outputSettings.setRootPath(rootPath);
+                break;
             case "grammar":
                 String grammar = option.getValue();
                 logger.info("grammar: " + grammar);
@@ -89,6 +102,37 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
                 logger.info("Name: "+name);
                 inputSettings.setDescription(name);
                 break;
+            case "completion-heuristics":
+                String[] heuristics = option.getValues();
+                logger.info(" Completion Heuristic list: "+ Arrays.toString(heuristics));
+                for(String heuristic: heuristics){
+                    inputSettings.addCompletionHeuristic(heuristic);
+                }
+                break;
+            case "completion-algorithm":
+                String algorithm = option.getValue();
+                logger.info("Completion Algorithm: "+ algorithm);
+                inputSettings.setCompletionAlgorithm(algorithm);
+                break;
+            case "export-grammar":
+                String file = option.getValue();
+                logger.info("Export grammar: "+file);
+                outputSettings.setExportGrammarPath(file);
+                break;
+            case "export-latex":
+                String directory = option.getValue();
+                logger.info("Export latex directory: "+directory);
+                outputSettings.setExportLatexPath(directory);
+                break;
+            case "quit":
+                Configurator.setRootLevel(Level.OFF);
+                break;
+            case "verbose":
+                Configurator.setRootLevel(Level.INFO);
+                break;
+            case "debug":
+                Configurator.setRootLevel(Level.DEBUG);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown command line option: " + optionName);
         }
@@ -102,6 +146,22 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
 
 
     private void setupOptions() {
+        commandLineOptions.addOption(
+                Option.builder("rp")
+                        .longOpt("root-path")
+                        .hasArg()
+                        .argName("path")
+                        .desc("Determines the provided path as a common prefix for all other paths provided " +
+                                "in command line options. More precisely, affected options whose arguments are " +
+                                "concatenated with prefix <path> are: \n" +
+                                "* --grammar\n" +
+                                "* --inductive-predicates\n" +
+                                "* --export-grammar\n" +
+                                "* --export-latex\n" +
+                                "If option --root-path is not explicitly, the root path is set to the empty string.")
+                        .build()
+        );
+
         commandLineOptions.addOption(
                 Option.builder("n")
                         .longOpt("name")
@@ -142,10 +202,84 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
                         .argName("name")
                         .desc("Adds a predefined graph grammar with the provided name to the grammars " +
                                 "used in the analysis. " +
-                                "The fixed node type and selector names can be renamed using --rename " +
                                 "Please confer the list of predefined data structures for further details " +
                                 "on available predefined graph grammars.")
                         .build()
         );
+
+        commandLineOptions.addOption(
+                Option.builder("ch")
+                        .longOpt("completion-heuristics")
+                        .hasArgs()
+                        .valueSeparator(',')
+                        .argName("list")
+                        .desc("Adds a list of heuristics to complete a non-confluence grammar into a confluence " +
+                                "grammar by adding and removing grammar rules that. " +
+                                "Use ',' to separate heuristics that are applied sequential on the grammar. "+
+                                "Please confer the list of implemented completion heuristics for further details "+
+                                "on available heuristics for completion.")
+                        .build()
+        );
+
+        commandLineOptions.addOption(
+                Option.builder("ca")
+                        .longOpt("completion-algorithm")
+                        .hasArg()
+                        .argName("name")
+                        .desc("Uses a predefined completion heuristic algorithm to complete a non-confluence grammar " +
+                                "into a confluence grammar by adding and removing grammar rules. " +
+                                "Please confer the list of implemented completion algorithms for further deatails " +
+                                "on available algorithms for completion.")
+                        .build()
+        );
+
+        commandLineOptions.addOption(
+                Option.builder()
+                        .longOpt("export-grammar")
+                        .hasArg()
+                        .argName("path")
+                        .desc("Exports the graph grammars used within the analysis. " +
+                                "The exported grammar is written to a directory ROOT_PATH/<path>, where ROOT_PATH is" +
+                                " the path determined by --root-path.")
+                        .build()
+        );
+
+        commandLineOptions.addOption(
+                Option.builder("o")
+                        .longOpt("export-latex")
+                        .hasArg()
+                        .argName("directory")
+                        .desc("Defined a directory where debug output is written to. The debug output tex files. "+
+                                "The tex files heavily uses tikz pictures to display various steps in the computation, "+
+                                "namely the initial grammar, the critical pairs and their joinability, the "+
+                                "not strongly joinable critical pairs, the grammar after completion and "+
+                                "the remaining not strongly joinable critical pairs after completion.")
+                        .build()
+        );
+
+        OptionGroup debugOptions = new OptionGroup();
+
+        debugOptions.addOption(
+                Option.builder("q")
+                        .longOpt("quiet")
+                        .desc("Suppresses most output passed to the logger.")
+                        .build()
+        );
+
+        debugOptions.addOption(
+                Option.builder("v")
+                        .longOpt("verbose")
+                        .desc("Logs additional information about the execution of phases.")
+                        .build()
+        );
+
+        debugOptions.addOption(
+                Option.builder()
+                        .longOpt("debug")
+                        .desc("Logs additional debug data about the execution of phases.")
+                        .build()
+        );
+
+        commandLineOptions.addOptionGroup(debugOptions);
     }
 }
