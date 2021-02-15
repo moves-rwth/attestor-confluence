@@ -8,6 +8,7 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
+import de.rwth.i2.attestor.io.FileUtils;
 import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.util.Pair;
@@ -165,10 +166,10 @@ public class TikzExport {
     }
 
     public void exportGrammar(Grammar grammar, String name, boolean exportCollapsedRules) throws IOException {
-        exportGrammar(new NamedGrammar(grammar, name), exportCollapsedRules);
+        exportGrammar(new ConfluenceWrapperGrammar(grammar, name), exportCollapsedRules);
     }
 
-    public void exportGrammar(NamedGrammar grammar, boolean exportCollapsedRules) throws IOException {
+    public void exportGrammar(ConfluenceWrapperGrammar grammar, boolean exportCollapsedRules) throws IOException {
         String grammarName = grammar.getGrammarName();
         writer.write(String.format("\\section{Grammar Report (%s)}", escapeString(grammarName)));
         newLine();

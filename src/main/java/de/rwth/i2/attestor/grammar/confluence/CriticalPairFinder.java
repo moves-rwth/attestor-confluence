@@ -33,13 +33,13 @@ public class CriticalPairFinder {
 
     private Joinability joinabilityResult;
     final private Collection<CriticalPair> criticalPairs;
-    final private NamedGrammar underlyingGrammar;
+    final private ConfluenceWrapperGrammar underlyingGrammar;
     private StartStopTimer timer; // Measure the time of the whole critical pair detection
     private OverlappingStatisticCollector edgeOverlappingStatistic = new OverlappingStatisticCollector();
     private OverlappingStatisticCollector nodeOverlappingStatistic = new OverlappingStatisticCollector();
     private OverlappingStatisticCollector validOverlappingStatistic = new OverlappingStatisticCollector();
 
-    public CriticalPairFinder(NamedGrammar grammar) {
+    public CriticalPairFinder(ConfluenceWrapperGrammar grammar) {
         this.underlyingGrammar = grammar;
         this.criticalPairs = new ArrayList<>();
         this.joinabilityResult = Joinability.STRONGLY_JOINABLE;

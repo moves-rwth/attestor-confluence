@@ -1,6 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.GeneratedNonterminal;
@@ -8,7 +8,6 @@ import de.rwth.i2.attestor.grammar.util.SimpleIterator;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import gnu.trove.list.array.TIntArrayList;
-import org.json.JSONObject;
 
 import java.util.Iterator;
 
@@ -28,7 +27,7 @@ public class JoinGeneratedNonterminalsHeuristic extends CompletionHeuristic {
                     @Override
                     public CompletionState computeNext() {
                         while (criticalPairIterator.hasNext()) {
-                            NamedGrammar newGrammar = fixCriticalPair(state, criticalPairIterator.next());
+                            ConfluenceWrapperGrammar newGrammar = fixCriticalPair(state, criticalPairIterator.next());
                             if (newGrammar != null) {
                                 // The current critical pair can be fixed -> Compute the following completion state
                                 return new CompletionState(newGrammar, state);
@@ -44,7 +43,7 @@ public class JoinGeneratedNonterminalsHeuristic extends CompletionHeuristic {
     /**
      * @return The grammar that fixes the criticalPair, or null if this heuristic cannot fix the criticalPair
      */
-    private NamedGrammar fixCriticalPair(CompletionState state, CriticalPair criticalPair) {
+    private ConfluenceWrapperGrammar fixCriticalPair(CompletionState state, CriticalPair criticalPair) {
         HeapConfiguration hc1 = criticalPair.getCanonical1();
         HeapConfiguration hc2 = criticalPair.getCanonical2();
         GeneratedNonterminal nt1 = getSingleUncollapsedGeneratedNonterminal(hc1);

@@ -16,10 +16,11 @@ import java.util.function.Function;
 
 /**
  * A grammar with a name, where each rule is numbered.
- * TODO: How to integrate with attestor? Maybe extend Grammar class and behave like the concretization grammar
+ * TODO: How to integrate with attestor? Maybe extend Grammar class and behave like the concretization grammar.
+ * For now: accessor for concreization grammar
  * TODO: Better name for this class?
  */
-public class NamedGrammar implements GrammarInterface {
+public class ConfluenceWrapperGrammar implements GrammarInterface {
     final private String grammarName;
     final private Grammar abstractionGrammar, concretizationGrammar;
     final private List<GrammarRuleOriginal> originalRules;  // The rules are ordered by the original rule idx
@@ -30,7 +31,7 @@ public class NamedGrammar implements GrammarInterface {
     private CanonicalizationStrategy canonicalizationStrategy;
     private EmbeddingCheckerProvider embeddingCheckerProvider;
 
-    private NamedGrammar(String grammarName, List<GrammarRuleOriginal> newOriginalRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
+    private ConfluenceWrapperGrammar(String grammarName, List<GrammarRuleOriginal> newOriginalRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
         // Check that the original rule indices are in increasing order TODO: Can we just remove this sanity check?
         int currentOriginalRuleIdx = -1;
         for (GrammarRuleOriginal originalRule : newOriginalRules) {
@@ -52,7 +53,7 @@ public class NamedGrammar implements GrammarInterface {
         createCanonicalizationStrategy();
     }
 
-    public NamedGrammar(Grammar grammar, String name) {
+    public ConfluenceWrapperGrammar(Grammar grammar, String name) {
         this.abstractionGrammar = grammar;
         this.concretizationGrammar = grammar;
         this.grammarName = name;
@@ -172,7 +173,7 @@ public class NamedGrammar implements GrammarInterface {
      * @param abstractionBlockingHeapConfigurations  All heapConfigurations that should block abstraction. If set to null the abstractionBlockingHeapConfigurations are not modified.
      * @return the resulting grammar
      */
-    public NamedGrammar getModifiedGrammar(Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
+    public ConfluenceWrapperGrammar getModifiedGrammar(Collection<GrammarRule> flipActivation, Iterable<GrammarRuleOriginal> addRules, Collection<HeapConfiguration> abstractionBlockingHeapConfigurations) {
         List<GrammarRuleOriginal> newOriginalRules = new ArrayList<>();
 
         // Activate / Deactivate rules
@@ -194,7 +195,7 @@ public class NamedGrammar implements GrammarInterface {
             newAbstractionBlockingHeapConfigurations = abstractionBlockingHeapConfigurations;
         }
 
-        return new NamedGrammar(grammarName, newOriginalRules, newAbstractionBlockingHeapConfigurations);
+        return new ConfluenceWrapperGrammar(grammarName, newOriginalRules, newAbstractionBlockingHeapConfigurations);
     }
 
     public int getMaxOriginalRuleIdx() {
@@ -225,7 +226,7 @@ public class NamedGrammar implements GrammarInterface {
      * @param nt2 All occurences of this nonterminal in the rules will be changed to nt1
      * @return A new named grammar with nt1 and nt2 merged
      */
-    public NamedGrammar joinGeneratedNonterminals(GeneratedNonterminal nt1, GeneratedNonterminal nt2) {
+    public ConfluenceWrapperGrammar joinGeneratedNonterminals(GeneratedNonterminal nt1, GeneratedNonterminal nt2) {
         List<GrammarRuleOriginal> newOriginalRules = new ArrayList<>();
         for (GrammarRuleOriginal rule : originalRules) {
             if (rule.getRuleStatus() == GrammarRule.RuleStatus.CONFLUENCE_GENERATED) {
@@ -245,7 +246,7 @@ public class NamedGrammar implements GrammarInterface {
             newAbstractionBlockingHeapConfigurations.add(replaceNonterminal(hc, nt1, nt2));
         }
 
-        return new NamedGrammar(grammarName, newOriginalRules, newAbstractionBlockingHeapConfigurations);
+        return new ConfluenceWrapperGrammar(grammarName, newOriginalRules, newAbstractionBlockingHeapConfigurations);
     }
 
     /**

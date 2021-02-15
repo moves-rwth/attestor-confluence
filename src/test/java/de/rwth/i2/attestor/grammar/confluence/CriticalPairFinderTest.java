@@ -3,14 +3,13 @@ package de.rwth.i2.attestor.grammar.confluence;
 import de.rwth.i2.attestor.MockupSceneObject;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.Nonterminal;
 import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.ExampleHcImplFactory;
-import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.programState.indexedState.BalancedTreeGrammar;
 import de.rwth.i2.attestor.types.Type;
@@ -18,7 +17,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +34,7 @@ public class CriticalPairFinderTest {
     private ExampleHcImplFactory hcImplFactory;
     private SceneObject sceneObject;
 
-    private NamedGrammar getSimpleDLLGrammar() {
+    private ConfluenceWrapperGrammar getSimpleDLLGrammar() {
         Nonterminal list = hcImplFactory.scene().createNonterminal("L", 2, new boolean[]{false, false});
         SelectorLabel nextPointer = hcImplFactory.scene().getSelectorLabel("n");
         SelectorLabel previousPointer = hcImplFactory.scene().getSelectorLabel("p");
@@ -64,12 +62,12 @@ public class CriticalPairFinderTest {
                 .addRule(list, hc2)
                 .updateCollapsedRules()
                 .build();
-        return new NamedGrammar(unnamedGrammar, "Simple DLL");
+        return new ConfluenceWrapperGrammar(unnamedGrammar, "Simple DLL");
     }
 
     @Test
     public void testSimpleDLLGrammar() {
-        NamedGrammar grammar = getSimpleDLLGrammar();
+        ConfluenceWrapperGrammar grammar = getSimpleDLLGrammar();
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
         assertEquals(-404838014, criticalPairSet.hashCode());
@@ -78,7 +76,7 @@ public class CriticalPairFinderTest {
 
     @Test
     public void testPossibleCriticalPairs() {
-        NamedGrammar balancedTreeGrammar = new NamedGrammar(new BalancedTreeGrammar(sceneObject).getGrammar(), "Balanced Tree");
+        ConfluenceWrapperGrammar balancedTreeGrammar = new ConfluenceWrapperGrammar(new BalancedTreeGrammar(sceneObject).getGrammar(), "Balanced Tree");
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(balancedTreeGrammar);
         Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
         assertEquals(-952351054, criticalPairSet.hashCode());
@@ -116,7 +114,7 @@ public class CriticalPairFinderTest {
 
 
     public void testGrammar(String grammarName, int hash) {
-        NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
+        ConfluenceWrapperGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         Set<CriticalPair> criticalPairSet = new HashSet<>(criticalPairFinder.getCriticalPairs());
         assertEquals(hash, criticalPairSet.hashCode());

@@ -62,7 +62,7 @@ public class LocalConcretizability implements GrammarValidity {
         }
     }
 
-    public static boolean checkLocalConcretizability(NamedGrammar grammar, GrammarTypedness types, boolean forceCompleteCheck) {
+    public static boolean checkLocalConcretizability(ConfluenceWrapperGrammar grammar, GrammarTypedness types, boolean forceCompleteCheck) {
         Collection<GrammarRuleOriginal> newGrammarRules;
         if (forceCompleteCheck) {
             newGrammarRules = grammar.getOriginalGrammarRules();
@@ -107,7 +107,7 @@ public class LocalConcretizability implements GrammarValidity {
     }
 
 
-    private static Collection<GrammarRuleOriginal> getRulesToCheck(NamedGrammar grammar) {
+    private static Collection<GrammarRuleOriginal> getRulesToCheck(ConfluenceWrapperGrammar grammar) {
         // Compute the set of old nonterminals (don't need to check the RHS, because if a nonterminal is in the RHS it should also be a LHS)
         Set<Nonterminal> oldNonterminals = new HashSet<>();
         Collection<GrammarRuleOriginal> generatedRules = new ArrayList<>();

@@ -1,6 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
@@ -37,7 +37,7 @@ public class CriticalPairDetectionBenchmarkRunner {
 
         for (String grammarName : grammarNames) {
             try {
-                NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
+                ConfluenceWrapperGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
                 result.put(runBenchmarkForGrammar(grammar));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -45,13 +45,13 @@ public class CriticalPairDetectionBenchmarkRunner {
         }
 
         for (String grammarName : defaultGrammars) {
-            NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
+            ConfluenceWrapperGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
             result.put(runBenchmarkForGrammar(grammar));
         }
         return result;
     }
 
-    static JSONObject runBenchmarkForGrammar(NamedGrammar grammar) {
+    static JSONObject runBenchmarkForGrammar(ConfluenceWrapperGrammar grammar) {
         CriticalPairFinder criticalPairFinder = new CriticalPairFinder(grammar);
         JSONObject benchmarkResult = new JSONObject();
         benchmarkResult.put("resultData", criticalPairFinder.getJsonStatistic());

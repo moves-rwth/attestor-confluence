@@ -1,30 +1,33 @@
 package de.rwth.i2.attestor.grammar.confluence.completion;
 
 import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
-import de.rwth.i2.attestor.grammar.confluence.TikzReporter;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.*;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.NumberCriticalPairLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.GreedyCompletion;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.CheckDataStructureGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.GrammarValidity;
 import de.rwth.i2.attestor.grammar.confluence.completion.validity.LocalConcretizability;
+import de.rwth.i2.attestor.io.FileUtils;
+import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import de.rwth.i2.attestor.main.AbstractPhase;
 import de.rwth.i2.attestor.main.scene.Scene;
 import de.rwth.i2.attestor.phases.communication.InputSettings;
+import de.rwth.i2.attestor.phases.communication.OutputSettings;
 import de.rwth.i2.attestor.phases.transformers.GrammarTransformer;
 import de.rwth.i2.attestor.phases.transformers.InputSettingsTransformer;
-import de.rwth.i2.attestor.util.Pair;
+import de.rwth.i2.attestor.phases.transformers.OutputSettingsTransformer;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
-public class CompletionPhase extends AbstractPhase implements GrammarTransformer, TikzReporter {
+public class CompletionPhase extends AbstractPhase implements GrammarTransformer {
 
     private Grammar grammar = null;
     private boolean isConfluent = false;
     private boolean isActive = false;
+    private OutputSettings outputSettings;
 
     public CompletionPhase(Scene scene) {
         super(scene);
@@ -35,20 +38,27 @@ public class CompletionPhase extends AbstractPhase implements GrammarTransformer
 
     @Override
     public void executePhase() throws IOException {
-        Grammar grammar = getPhase(GrammarTransformer.class).getGrammar();
+        grammar = getPhase(GrammarTransformer.class).getGrammar();
+        outputSettings = getPhase(OutputSettingsTransformer.class).getOutputSettings();
         if(grammar == null){
             throw new IllegalArgumentException("No grammar was provided.");
         }
         this.grammar = grammar;
         InputSettings inputSettings = getPhase(InputSettingsTransformer.class).getInputSettings();
-        if(!inputSettings.getCompletionHeuristics().isEmpty()) {
+        if(!inputSettings.getCompletionHeuristics().isEmpty() || !inputSettings.getCompletionAlgorithm().isEmpty()) {
             isActive = true;
             CompletionAlgorithm completionAlgorithm = buildCompletionAlgorithm(inputSettings.getCompletionAlgorithm());
             addHeuristicsCompletionAlgorithm(completionAlgorithm, inputSettings.getCompletionHeuristics());
-            NamedGrammar namedGrammar = new NamedGrammar(this.grammar, "Inputed Grammar");
-            CompletionState result = completionAlgorithm.runCompletionAlgorithm(namedGrammar);
+            ConfluenceWrapperGrammar confluenceWrapperGrammar = new ConfluenceWrapperGrammar(this.grammar, "Inputed Grammar");
+            CompletionState result = completionAlgorithm.runCompletionAlgorithm(confluenceWrapperGrammar);
+            grammar = result.getGrammar().getConcretizationGrammar();
             if(result.getCriticalPairs().isEmpty()){
                 isConfluent = true;
+            }
+            try {
+                exportLatex(result);
+            } catch (IOException e) {
+                logger.error("Could not export latex.",e);
             }
         }
 
@@ -143,6 +153,28 @@ public class CompletionPhase extends AbstractPhase implements GrammarTransformer
         }
     }
 
+    private void exportLatex(CompletionState result) throws IOException {
+        OutputSettings outputSettings = getPhase(OutputSettingsTransformer.class).getOutputSettings();
+
+        if(outputSettings.getExportLatexPath() == null){
+            return;
+        }
+
+        logger.info("Start exporting completion latex files...");
+
+        FileUtils.createDirectories(outputSettings.getExportLatexPath());
+
+        TikzExport exportCriticalPairs = new TikzExport(outputSettings.getExportLatexPath() + File.separator + "criticalPairsAfterCompletion.tex", true);
+        exportCriticalPairs.exportCriticalPairs(result.getCriticalPairs());
+        exportCriticalPairs.finishExport();
+
+        TikzExport exportGrammar = new TikzExport(outputSettings.getExportLatexPath() + File.separator + "grammarAfterCompletion.tex", true);
+        exportGrammar.exportGrammar(result.getGrammar(), false);
+        exportGrammar.finishExport();
+
+        logger.info("Completion latex files exported!");
+    }
+
     @Override
     public boolean isVerificationPhase() {
         return false;
@@ -150,11 +182,6 @@ public class CompletionPhase extends AbstractPhase implements GrammarTransformer
 
     @Override
     public Grammar getGrammar() {
-        return null; //TODO
-    }
-
-    @Override
-    public Collection<Pair<String, TikzReporter>> getTikzExporter() {
-        return null; //TODO
+        return this.grammar;
     }
 }

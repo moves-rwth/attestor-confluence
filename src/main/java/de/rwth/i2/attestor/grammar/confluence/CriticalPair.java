@@ -1,7 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
 import de.rwth.i2.attestor.grammar.GrammarRule;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.EdgeOverlapping;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.HeapConfigurationContext;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.JointHeapConfiguration;
@@ -17,13 +17,13 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Objects;
 
 public class CriticalPair {
-    private final NamedGrammar grammar;
+    private final ConfluenceWrapperGrammar grammar;
     private final JointHeapConfiguration jointHeapConfiguration;
     private final GrammarRule r1, r2;
     private final HeapConfigurationContext context;
     private final Joinability joinability;
 
-    public CriticalPair(NodeOverlapping nodeOverlapping, EdgeOverlapping edgeOverlapping, NamedGrammar grammar, GrammarRule r1, GrammarRule r2) {
+    public CriticalPair(NodeOverlapping nodeOverlapping, EdgeOverlapping edgeOverlapping, ConfluenceWrapperGrammar grammar, GrammarRule r1, GrammarRule r2) {
         this.grammar = grammar;
         this.r1 = r1;
         this.r2 = r2;

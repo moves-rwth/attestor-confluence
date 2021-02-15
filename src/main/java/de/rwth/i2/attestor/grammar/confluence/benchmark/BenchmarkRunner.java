@@ -2,7 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.main.scene.DefaultScene;
 import de.rwth.i2.attestor.main.scene.SceneObject;
@@ -26,7 +26,7 @@ public class BenchmarkRunner {
         return grammarBuilder.build();
     }
 
-    public static NamedGrammar getSeparationLogicNamedGrammar(String grammarName) throws IOException {
-        return new NamedGrammar(getSeparationLogicGrammar(grammarName), grammarName);
+    public static ConfluenceWrapperGrammar getSeparationLogicNamedGrammar(String grammarName) throws IOException {
+        return new ConfluenceWrapperGrammar(getSeparationLogicGrammar(grammarName), grammarName);
     }
 }

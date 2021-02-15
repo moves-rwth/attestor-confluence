@@ -1,15 +1,15 @@
 package de.rwth.i2.attestor.grammar.canonicalization;
 
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 
 /**
  * A modyfied canonicalization strategy
  */
 public class ConfluentCanonicalizationStrategy extends GeneralCanonicalizationStrategy {
-    private final NamedGrammar grammar;
+    private final ConfluenceWrapperGrammar grammar;
 
-    public ConfluentCanonicalizationStrategy(NamedGrammar grammar, CanonicalizationHelper canonicalizationHelper) {
+    public ConfluentCanonicalizationStrategy(ConfluenceWrapperGrammar grammar, CanonicalizationHelper canonicalizationHelper) {
         super(grammar.getAbstractionGrammar(), canonicalizationHelper);
         this.grammar = grammar;
     }

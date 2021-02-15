@@ -1,9 +1,10 @@
 package de.rwth.i2.attestor.grammar.confluence.main;
 
+import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarExporter;
 import de.rwth.i2.attestor.io.jsonExport.cytoscapeFormat.JsonGrammarExporter;
+import de.rwth.i2.attestor.io.tikzOutput.TikzExport;
 import de.rwth.i2.attestor.main.AbstractPhase;
-import de.rwth.i2.attestor.main.PhaseRegistry;
 import de.rwth.i2.attestor.main.scene.Scene;
 import de.rwth.i2.attestor.phases.communication.OutputSettings;
 import de.rwth.i2.attestor.phases.transformers.GrammarTransformer;
@@ -14,12 +15,13 @@ import de.rwth.i2.attestor.util.ZipUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConfluenceOutputPhase extends AbstractPhase {
 
     private OutputSettings outputSettings;
-    private List<String> summaryMessages;
+    private List<String> summaryMessages = new ArrayList<>();
 
     public ConfluenceOutputPhase(Scene scene) {
         super(scene);
@@ -37,7 +39,6 @@ public class ConfluenceOutputPhase extends AbstractPhase {
 
         try {
             exportGrammar();
-            exportLatex();
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage());
         }
@@ -56,6 +57,7 @@ public class ConfluenceOutputPhase extends AbstractPhase {
     private void exportGrammar() throws IOException {
 
         String location = outputSettings.getExportGrammarPath();
+        Grammar grammar = getPhase(GrammarTransformer.class).getGrammar();
 
         if(location == null) {
             return;
@@ -63,23 +65,13 @@ public class ConfluenceOutputPhase extends AbstractPhase {
 
         logger.info("Exporting grammar...");
 
-        // Copy necessary libraries
-        InputStream zis = getClass().getClassLoader().getResourceAsStream("grammarViewer.zip");
-
-        File targetDirectory = new File(location + File.separator);
-        ZipUtils.unzip(zis, targetDirectory);
-
         // Generate JSON files
-        GrammarExporter exporter = new JsonGrammarExporter();
-        exporter.export(location + File.separator + "grammarData",
-                getPhase(GrammarTransformer.class).getGrammar());
+        GrammarExporter jsonExporter = new JsonGrammarExporter();
+        jsonExporter.export(location + File.separator + "grammarData", grammar);
 
         String summary = "Grammar exported to " + location;
+
         logger.info(summary);
         summaryMessages.add(summary);
-    }
-
-    public void exportLatex() {
-
     }
 }

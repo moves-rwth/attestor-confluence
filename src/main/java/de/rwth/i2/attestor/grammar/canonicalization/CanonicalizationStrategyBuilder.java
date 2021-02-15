@@ -3,7 +3,7 @@ package de.rwth.i2.attestor.grammar.canonicalization;
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarInterface;
 import de.rwth.i2.attestor.grammar.IndexMatcher;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.canonicalization.defaultGrammar.DefaultCanonicalizationHelper;
 import de.rwth.i2.attestor.grammar.canonicalization.indexedGrammar.EmbeddingIndexChecker;
 import de.rwth.i2.attestor.grammar.canonicalization.indexedGrammar.IndexedCanonicalizationHelper;
@@ -50,8 +50,8 @@ public class CanonicalizationStrategyBuilder {
 
         if (grammar instanceof Grammar) {
             return new GeneralCanonicalizationStrategy((Grammar) grammar, canonicalizationHelper);
-        } else if (grammar instanceof NamedGrammar) {
-            return new ConfluentCanonicalizationStrategy((NamedGrammar) grammar, canonicalizationHelper);
+        } else if (grammar instanceof ConfluenceWrapperGrammar) {
+            return new ConfluentCanonicalizationStrategy((ConfluenceWrapperGrammar) grammar, canonicalizationHelper);
         } else {
             throw new IllegalStateException("Unsupported grammar class: " + grammar.getClass().getSimpleName());
         }

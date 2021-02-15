@@ -1,6 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.completion;
 
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.heuristics.CompletionHeuristic;
 import de.rwth.i2.attestor.grammar.confluence.completion.loss.CompletionStateLoss;
 import de.rwth.i2.attestor.grammar.confluence.completion.strategies.CompletionStrategy;
@@ -85,7 +85,7 @@ public class CompletionAlgorithm {
      * @throws IllegalStateException 'setCompletionStateLoss', 'setCompletionStrategy' and 'addHeuristic'
      * must be called at least once before calling this method
      */
-    public CompletionState runCompletionAlgorithm(NamedGrammar inputGrammar) {
+    public CompletionState runCompletionAlgorithm(ConfluenceWrapperGrammar inputGrammar) {
         if (heuristics.size() == 0 || completionStateLoss == null || completionStrategy == null) {
             throw new IllegalStateException("The completion algorithm is missing a necessary parameter.");
         }

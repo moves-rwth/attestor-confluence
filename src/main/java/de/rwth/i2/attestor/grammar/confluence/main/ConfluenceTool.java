@@ -1,14 +1,12 @@
 package de.rwth.i2.attestor.grammar.confluence.main;
 
 import de.rwth.i2.attestor.grammar.Grammar;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionPhase;
 import de.rwth.i2.attestor.grammar.confluence.jointMorphism.ConfluenceCheckPhase;
 import de.rwth.i2.attestor.main.AbstractAttestor;
 import de.rwth.i2.attestor.main.Attestor;
 import de.rwth.i2.attestor.main.scene.DefaultScene;
-import de.rwth.i2.attestor.main.scene.Scene;
-import de.rwth.i2.attestor.phases.communication.InputSettings;
 import de.rwth.i2.attestor.phases.parser.ParseGrammarPhase;
 
 public class ConfluenceTool extends AbstractAttestor {
@@ -19,6 +17,7 @@ public class ConfluenceTool extends AbstractAttestor {
                 .addPhase(new ParseGrammarPhase(scene))
                 .addPhase(new ConfluenceCheckPhase(scene))
                 .addPhase(new CompletionPhase(scene))
+                .addPhase(new ConfluenceOutputPhase(scene))
                 .execute();
     }
 
@@ -29,7 +28,7 @@ public class ConfluenceTool extends AbstractAttestor {
         return parseGrammarPhase.getGrammar();
     }
 
-    public static NamedGrammar parseGrammar(String grammarName) {
-        return new NamedGrammar(parsePredefinedGrammar(grammarName), grammarName);
+    public static ConfluenceWrapperGrammar parseGrammar(String grammarName) {
+        return new ConfluenceWrapperGrammar(parsePredefinedGrammar(grammarName), grammarName);
     }
 }

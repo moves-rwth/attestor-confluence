@@ -1,6 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence;
 
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.grammar.confluence.completion.ExampleCompletionAlgorithms;
@@ -32,7 +32,7 @@ public class TestGrammars {
 
     private static void temp(String test) {
         System.out.println(test);
-        NamedGrammar grammar = ConfluenceTool.parseGrammar(test);
+        ConfluenceWrapperGrammar grammar = ConfluenceTool.parseGrammar(test);
         if (LocalConcretizability.checkLocalConcretizability(grammar, new GrammarTypedness(grammar.getConcretizationGrammar()), true)) {
             System.out.println("The grammar is local concretizable");
         } else {
@@ -48,7 +48,7 @@ public class TestGrammars {
         System.out.println(grammarName);
         try {
             new File("reports/" + grammarName ).mkdirs();
-            NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
+            ConfluenceWrapperGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
             String fileName = "reports/" + grammarName + "/{0}_" + grammarName + ".tex";
             TikzExport export;
 
@@ -83,7 +83,7 @@ public class TestGrammars {
             export.finishExport();
 
             // Get resulting grammar
-            NamedGrammar resultingGrammar = completionResult.getGrammar();
+            ConfluenceWrapperGrammar resultingGrammar = completionResult.getGrammar();
             export = new TikzExport(MessageFormat.format(fileName, "resulting_grammar"), true);
             export.exportGrammar(resultingGrammar, true);
             export.finishExport();

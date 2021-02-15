@@ -2,7 +2,7 @@ package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
 import de.rwth.i2.attestor.grammar.GrammarRule;
 import de.rwth.i2.attestor.grammar.GrammarRuleCollapsed;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import org.json.JSONObject;
@@ -63,7 +63,7 @@ public class CompletionRuleRestrictionHeuristic extends CompletionHeuristic {
 
     private void flipRuleActivation(CompletionState state, GrammarRule ruleToFlip, Set<GrammarRule> alreadyFlippedGrammarRules, List<CompletionState> result) {
         if (!preventFlip(ruleToFlip) && !alreadyFlippedGrammarRules.contains(ruleToFlip)) {
-            NamedGrammar modifiedGrammar = state.getGrammar().getModifiedGrammar(Collections.singleton(ruleToFlip), Collections.emptySet(), state.getGrammar().getAbstractionBlockingHeapConfigurations());
+            ConfluenceWrapperGrammar modifiedGrammar = state.getGrammar().getModifiedGrammar(Collections.singleton(ruleToFlip), Collections.emptySet(), state.getGrammar().getAbstractionBlockingHeapConfigurations());
             // Add the new state where all critical pairs are recomputed TODO: If the rule is activated we don't need to recompute everything
             result.add(new CompletionState(modifiedGrammar, state));
             alreadyFlippedGrammarRules.add(ruleToFlip);

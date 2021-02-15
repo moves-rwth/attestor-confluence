@@ -238,14 +238,14 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
                         .longOpt("export-grammar")
                         .hasArg()
                         .argName("path")
-                        .desc("Exports the graph grammars used within the analysis. " +
+                        .desc("Exports the graph grammars used within the analysis as a json file. " +
                                 "The exported grammar is written to a directory ROOT_PATH/<path>, where ROOT_PATH is" +
                                 " the path determined by --root-path.")
                         .build()
         );
 
         commandLineOptions.addOption(
-                Option.builder("o")
+                Option.builder()
                         .longOpt("export-latex")
                         .hasArg()
                         .argName("directory")

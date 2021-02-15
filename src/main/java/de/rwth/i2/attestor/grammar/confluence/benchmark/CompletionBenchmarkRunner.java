@@ -1,6 +1,6 @@
 package de.rwth.i2.attestor.grammar.confluence.benchmark;
 
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
@@ -55,11 +55,11 @@ public class CompletionBenchmarkRunner {
         return result;
     }
 
-    static Iterable<NamedGrammar> getBenchmarkGrammars() {
-        ArrayList<NamedGrammar> grammars = new ArrayList<>();
+    static Iterable<ConfluenceWrapperGrammar> getBenchmarkGrammars() {
+        ArrayList<ConfluenceWrapperGrammar> grammars = new ArrayList<>();
         for (String grammarName : completionGrammarNames) {
             try {
-                NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
+                ConfluenceWrapperGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar(grammarName);
                 grammars.add(grammar);
             } catch (IOException exception) {
                 exception.printStackTrace();
@@ -67,13 +67,13 @@ public class CompletionBenchmarkRunner {
         }
 
         for (String grammarName : predefinedGrammarNames) {
-            NamedGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
+            ConfluenceWrapperGrammar grammar = ConfluenceTool.parseGrammar(grammarName);
             grammars.add(grammar);
         }
         return grammars;
     }
 
-    static void runBenchmarkForGrammarAndAlgorithm(NamedGrammar grammar, CompletionAlgorithm algorithm) {
+    static void runBenchmarkForGrammarAndAlgorithm(ConfluenceWrapperGrammar grammar, CompletionAlgorithm algorithm) {
         String dateTime = getDateTime();
         CriticalPairFinder initialCriticalPairs = new CriticalPairFinder(grammar);
         int initialNumberCriticalPairs = initialCriticalPairs.getCriticalPairsMaxJoinability(Joinability.WEAKLY_JOINABLE).size();
@@ -142,7 +142,7 @@ public class CompletionBenchmarkRunner {
 
     static void runAllCompletionBenchmarks(int i) {
         ExecutorService executor = Executors.newFixedThreadPool(i);
-        for (NamedGrammar grammar :  getBenchmarkGrammars()) {
+        for (ConfluenceWrapperGrammar grammar :  getBenchmarkGrammars()) {
             for (CompletionAlgorithm algorithm : getCompletionAlgorithms()) {
                 executor.execute(() -> runBenchmarkForGrammarAndAlgorithm(grammar, algorithm));
             }

@@ -1,7 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.heuristics;
 
 import de.rwth.i2.attestor.grammar.GrammarRuleOriginal;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import de.rwth.i2.attestor.graph.Nonterminal;
@@ -40,7 +40,7 @@ public abstract class CompletionRuleAddingHeuristic extends CompletionHeuristic 
                             }
                             Collection<Pair<Nonterminal, HeapConfiguration>> newRules = newRuleIterator.next();
 
-                            NamedGrammar grammar = state.getGrammar();
+                            ConfluenceWrapperGrammar grammar = state.getGrammar();
                             Collection<GrammarRuleOriginal> newGrammarRules = new ArrayList<>();
 
                             int originialRuleIdx = grammar.getMaxOriginalRuleIdx() + 1;
@@ -58,7 +58,7 @@ public abstract class CompletionRuleAddingHeuristic extends CompletionHeuristic 
                             }
                             if (allRulesAreGrowing) {
                                 // Add state with the new rules
-                                NamedGrammar newGrammar = grammar.getModifiedGrammar(Collections.EMPTY_LIST, newGrammarRules, grammar.getAbstractionBlockingHeapConfigurations());
+                                ConfluenceWrapperGrammar newGrammar = grammar.getModifiedGrammar(Collections.EMPTY_LIST, newGrammarRules, grammar.getAbstractionBlockingHeapConfigurations());
                                 return new CompletionState(newGrammar, state);
                             }
                         }

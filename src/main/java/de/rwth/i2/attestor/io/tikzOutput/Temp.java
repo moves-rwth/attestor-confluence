@@ -2,11 +2,10 @@ package de.rwth.i2.attestor.io.tikzOutput;
 
 import de.rwth.i2.attestor.grammar.Grammar;
 import de.rwth.i2.attestor.grammar.GrammarBuilder;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPair;
 import de.rwth.i2.attestor.grammar.confluence.CriticalPairFinder;
 import de.rwth.i2.attestor.grammar.confluence.Joinability;
-import de.rwth.i2.attestor.grammar.confluence.TestGrammars;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.BenchmarkRunner;
 import de.rwth.i2.attestor.grammar.confluence.main.ConfluenceTool;
 import de.rwth.i2.attestor.graph.BasicNonterminal;
@@ -16,12 +15,10 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.graph.heap.HeapConfigurationBuilder;
 import de.rwth.i2.attestor.graph.heap.internal.InternalHeapConfiguration;
-import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.types.GeneralType;
 import de.rwth.i2.attestor.types.Type;
 import gnu.trove.list.array.TIntArrayList;
 
-import javax.naming.Name;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -37,7 +34,7 @@ public class Temp {
         //exportDefaultGrammar("DLList_simple_one_way");
         //exportDefaultGrammar("DLList_simple_two_way");
         try {
-            NamedGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar("SimpleDLL");
+            ConfluenceWrapperGrammar grammar = BenchmarkRunner.getSeparationLogicNamedGrammar("SimpleDLL");
 
             TikzExport exporter = new TikzExport("reports/simple-dll-list-grammar-report.tex", true);
             exporter.exportGrammar(grammar, true);
@@ -53,7 +50,7 @@ public class Temp {
         }
 
         try {
-            NamedGrammar grammar = new NamedGrammar(getTernaryGrammar(), "Ternary");
+            ConfluenceWrapperGrammar grammar = new ConfluenceWrapperGrammar(getTernaryGrammar(), "Ternary");
 
             TikzExport exporter = new TikzExport("reports/ternary-grammar-report.tex", true);
             exporter.exportGrammar(grammar, true);
@@ -70,7 +67,7 @@ public class Temp {
     }
 
     public static void exportDefaultGrammar(String defaultGrammarName) {
-        NamedGrammar grammar = ConfluenceTool.parseGrammar(defaultGrammarName);
+        ConfluenceWrapperGrammar grammar = ConfluenceTool.parseGrammar(defaultGrammarName);
         try {
             TikzExport exporter = new TikzExport("reports/" + defaultGrammarName + "-grammar-report.tex", true);
             exporter.exportGrammar(grammar, true);

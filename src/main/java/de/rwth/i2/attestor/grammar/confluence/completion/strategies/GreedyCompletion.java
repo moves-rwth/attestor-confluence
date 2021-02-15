@@ -1,7 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.strategies;
 
 import com.google.common.collect.ImmutableMap;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.CompletionHeuristicStatisticCollector;
 import de.rwth.i2.attestor.grammar.confluence.benchmark.StartStopTimer;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
@@ -27,7 +27,7 @@ public class GreedyCompletion implements CompletionStrategy {
     }
 
     @Override
-    public CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
+    public CompletionState executeCompletionStrategy(ConfluenceWrapperGrammar inputGrammar, CompletionAlgorithm completionSettings) {
         completeRuntime.startTimer();
         CompletionState currentState = new CompletionState(inputGrammar, null);
         CompletionStateLoss completionStateLoss = completionSettings.getCompletionStateLoss();

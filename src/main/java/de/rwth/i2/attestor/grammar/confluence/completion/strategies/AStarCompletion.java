@@ -1,7 +1,7 @@
 package de.rwth.i2.attestor.grammar.confluence.completion.strategies;
 
 import com.google.common.collect.ImmutableMap;
-import de.rwth.i2.attestor.grammar.NamedGrammar;
+import de.rwth.i2.attestor.grammar.ConfluenceWrapperGrammar;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionAlgorithm;
 import de.rwth.i2.attestor.grammar.confluence.completion.CompletionState;
 import org.json.JSONObject;
@@ -11,7 +11,7 @@ import org.json.JSONObject;
  */
 public class AStarCompletion implements CompletionStrategy {
     @Override
-    public CompletionState executeCompletionStrategy(NamedGrammar inputGrammar, CompletionAlgorithm completionSettings) {
+    public CompletionState executeCompletionStrategy(ConfluenceWrapperGrammar inputGrammar, CompletionAlgorithm completionSettings) {
         // TODO
         throw new UnsupportedOperationException();
     }
