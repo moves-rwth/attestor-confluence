@@ -4,13 +4,13 @@
 
 
     <groupId>de.rwth.i2</groupId>
-    <artifactId>attestor</artifactId>
-    <version>0.4.1-johannes-SNAPSHOT</version>
+    <artifactId>attestor-confluence</artifactId>
+    <version>0.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 
-    <name>Attestor</name>
-    <description>A verification tool for model-checking Java pointer programs based on context-free graph grammars.</description>
+    <name>Attestor Confluence Checker</name>
+    <description>The confluence checker part for the Attestor verification tool.</description>
     <url>https://moves-rwth.github.io/attestor/</url>
 
 
@@ -24,20 +24,23 @@
 
     <developers>
         <developer>
-            <name>Christoph Matheja</name>
+            <name>Dr. Christoph Matheja</name>
             <email>matheja@cs.rwth-aachen.de</email>
-            <organization>Software Modeling and Verification Group - RWTH Aachen University</organization>
-            <organizationUrl>https://moves.rwth-aachen.de/</organizationUrl>
         </developer>
         <developer>
             <name>Dr. Christina Jansen</name>
             <email>christina.jansen@cs.rwth-aachen.de</email>
-            <organization>Software Modeling and Verification Group - RWTH Aachen University</organization>
-            <organizationUrl>https://moves.rwth-aachen.de/</organizationUrl>
         </developer>
         <developer>
             <name>Hannah Arndt</name>
             <email>hannah.arndt@rwth-aachen.de</email>
+        </developer>
+        <developer>
+            <name>Johannes Schulte</name>
+        </developer>
+        <developer>
+            <name>Ira Fesefeldt</name>
+            <email>fesefeldt@cs.rwth-aachen.de</email>
             <organization>Software Modeling and Verification Group - RWTH Aachen University</organization>
             <organizationUrl>https://moves.rwth-aachen.de/</organizationUrl>
         </developer>
@@ -107,7 +110,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>de.rwth.i2.attestor.main.Main</mainClass>
+                            <mainClass>de.rwth.i2.attestor.grammar.confluence.main.Main</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>.</Class-Path>

@@ -61,9 +61,9 @@ public class ConfluenceCheckPhase extends AbstractPhase {
             logHighlight("The grammar is NOT backwards confluent.");
         }
         logSum("+-------------------------+------------------+");
-        logSum(String.format("| Strongly Joinable Nodes | %16d |", numberStronglyJoinable));
-        logSum(String.format("| Weakly Joinable Nodes   | %16d |",numberWeaklyJoinable));
-        logSum(String.format("| Not Joinable Nodes      | %16d |",numberNotJoinable));
+        logSum(String.format("| Strongly Joinable Pair  | %16d |", numberStronglyJoinable));
+        logSum(String.format("| Weakly Joinable Pair    | %16d |",numberWeaklyJoinable));
+        logSum(String.format("| Not Joinable Pair       | %16d |",numberNotJoinable));
         logSum("+-------------------------+------------------+");
     }
 
