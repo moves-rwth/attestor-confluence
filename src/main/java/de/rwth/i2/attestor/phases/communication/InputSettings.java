@@ -22,7 +22,12 @@ public class InputSettings implements HeapConfigurationRenaming {
      * Short human-readable description of the analysis
      */
     private String description;
-    
+
+    /**
+     * A name for the grammar
+     */
+    private String grammarName;
+
     /**
      * The classpath of source code files that are analyzed.
      */
@@ -196,6 +201,22 @@ public class InputSettings implements HeapConfigurationRenaming {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getGrammarName() {
+        if(hasGrammarName()) {
+            return grammarName;
+        }else{
+            return "Input Grammar";
+        }
+    }
+
+    public boolean hasGrammarName() {
+        return grammarName != null;
+    }
+
+    public void setGrammarName(String name) {
+        this.grammarName = name;
     }
 
     public void addUserDefinedInductivePredicatesFile(String userDefinedInductivePredicatesFile) {

@@ -44,7 +44,7 @@ public class ConfluenceCheckPhase extends AbstractPhase {
             throw new IllegalArgumentException("No grammar was provided.");
         }
         InputSettings inputSettings = getPhase(InputSettingsTransformer.class).getInputSettings();
-        ConfluenceWrapperGrammar confluenceWrapperGrammar = new ConfluenceWrapperGrammar(grammar, inputSettings.getDescription());
+        ConfluenceWrapperGrammar confluenceWrapperGrammar = new ConfluenceWrapperGrammar(grammar, inputSettings.getGrammarName());
         CriticalPairFinder finder = checkGrammar(confluenceWrapperGrammar);
         try {
             exportLatex(finder, confluenceWrapperGrammar);

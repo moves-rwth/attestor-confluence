@@ -43,7 +43,6 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
     @Override
     public void executePhase() throws IllegalArgumentException {
         try {
-            inputSettings.setDescription("Grammar");
             CommandLineParser parser = new DefaultParser();
             CommandLine commandLine = parser.parse(commandLineOptions, originalCommandLineArguments);
 
@@ -61,7 +60,9 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
 
     @Override
     public void logSummary() {
-        logSum("Analyzed grammar: "+inputSettings.getDescription());
+        if(inputSettings.hasGrammarName()) {
+            logSum("Analyzed grammar: " + inputSettings.getGrammarName());
+        }
     }
 
     @Override
@@ -100,7 +101,7 @@ public class ConfluenceCommandLinePhase extends AbstractPhase implements InputSe
             case "name":
                 String name = option.getValue();
                 logger.info("Name: "+name);
-                inputSettings.setDescription(name);
+                inputSettings.setGrammarName(name);
                 break;
             case "completion-heuristics":
                 String[] heuristics = option.getValues();

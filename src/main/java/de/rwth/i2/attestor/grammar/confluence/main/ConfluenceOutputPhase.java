@@ -46,7 +46,6 @@ public class ConfluenceOutputPhase extends AbstractPhase {
 
     @Override
     public void logSummary() {
-        //TODO
     }
 
     @Override

@@ -49,7 +49,7 @@ public class CompletionPhase extends AbstractPhase implements GrammarTransformer
             isActive = true;
             CompletionAlgorithm completionAlgorithm = buildCompletionAlgorithm(inputSettings.getCompletionAlgorithm());
             addHeuristicsCompletionAlgorithm(completionAlgorithm, inputSettings.getCompletionHeuristics());
-            ConfluenceWrapperGrammar confluenceWrapperGrammar = new ConfluenceWrapperGrammar(this.grammar, "Inputed Grammar");
+            ConfluenceWrapperGrammar confluenceWrapperGrammar = new ConfluenceWrapperGrammar(this.grammar, inputSettings.getGrammarName());
             CompletionState result = completionAlgorithm.runCompletionAlgorithm(confluenceWrapperGrammar);
             grammar = result.getGrammar().getConcretizationGrammar();
             if(result.getCriticalPairs().isEmpty()){
