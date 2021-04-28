@@ -222,12 +222,13 @@ Available completion algorithms are:
 Adds the completion heuristics with names in the list *LIST_OF_NAMES* to the completion algorithm. The list is structured as the list of names seperated by commans. If no completion algorithm is specified, a default algorithm with no heuristics is used. 
 
 Available completion heuristics are:
-- `AddRuleHandleWithSubgraph`
 - `AddRulesNewNonterminal`
 - `CompletionAbstractionBlocking`
 - `CompletionRuleRestriction`
 - `JoinGeneratedNonterminals`
 - `SingleNonTerminalRuleAdding`
+
+For more information, also see the [specification of the heuristics](./readme/HEURISTICS.md).
 
 ## Output Options
 
