@@ -84,10 +84,6 @@ labelled digraphs of rank 2. We define a heap configuration object by
     also specifies the order in which external nodes are mapped to these
     nodes in case of a graph transformation.
 
-!['s tikz visualization of the input grammar `./sDLL.json`, which
-generates a doubly-linked list that is only expandable in the "next"
-direction.[]{label="fig:sDLL"}](./readme/sDLL.png){#fig:sDLL}
-
 Command Line Usage
 ------------------
 
@@ -161,8 +157,11 @@ the (completed) output grammar by adding a path to the output folder:
 
 This will fill the output directory `./export` with LaTeXfiles that need
 to be compiled using the `lualatex` compiler. The compiled tikz
-representation of our input grammar `./sDLL.json` can be seen in Figure
-[1](#fig:sDLL){reference-type="ref" reference="fig:sDLL"}.
+representation of our input grammar `./sDLL.json` can be seen in the image below.
+
+![Attestor's tikz visualization of the input grammar `./sDLL.json`, which
+generates a doubly-linked list that is only expandable in the "next"
+direction.](./readme/sDLL.png)
 
 # Command Line Options
 
