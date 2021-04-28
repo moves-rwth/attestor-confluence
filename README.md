@@ -56,7 +56,7 @@ consult the documentation of all [command line options](#command-line-options).
 Grammar Syntax
 --------------
 
-To specify the grammar, there multiple ways to do so as mentioned
+To specify the grammar, there are multiple ways to do so as mentioned
 before. For this tour, we will stick to a data structure grammar in JSON
 format. A grammar consists of an *array of rules*. Each rule object
 defines the set of rules with the same nonterminal on the left-hand
