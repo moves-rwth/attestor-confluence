@@ -86,7 +86,7 @@ labelled digraphs of rank 2. We define a heap configuration object by
 
 !['s tikz visualization of the input grammar `./sDLL.json`, which
 generates a doubly-linked list that is only expandable in the "next"
-direction.[]{label="fig:sDLL"}](./readme/sDLL.pdf){#fig:sDLL}
+direction.[]{label="fig:sDLL"}](./readme/sDLL.png){#fig:sDLL}
 
 Command Line Usage
 ------------------
